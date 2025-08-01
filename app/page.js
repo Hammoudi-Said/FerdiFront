@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
+
 export default function HomePage() {
   const router = useRouter()
   const { token, isLoading, checkAuth } = useAuthStore()
@@ -21,7 +23,12 @@ export default function HomePage() {
       if (token) {
         router.push('/dashboard')
       } else {
-        router.push('/auth/login')
+        // If in mock mode, show demo page first
+        if (USE_MOCK_DATA) {
+          router.push('/demo')
+        } else {
+          router.push('/auth/login')
+        }
       }
     }
   }, [token, isLoading, router])

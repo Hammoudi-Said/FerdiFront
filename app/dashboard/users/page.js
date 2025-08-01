@@ -15,13 +15,12 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useAuthStore } from '@/lib/stores/auth-store'
-import { api } from '@/lib/api'
 import { toast } from 'sonner'
 import { Users, Search, UserPlus, Mail, Phone, Calendar } from 'lucide-react'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 export default function UsersPage() {
-  const { user } = useAuthStore()
+  const { user, getUsers } = useAuthStore()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -50,8 +49,13 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/users/')
-      setUsers(response.data.data || [])
+      const result = await getUsers()
+      
+      if (result.success) {
+        setUsers(result.users || [])
+      } else {
+        toast.error(result.error || 'Erreur lors du chargement des utilisateurs')
+      }
     } catch (error) {
       toast.error('Erreur lors du chargement des utilisateurs')
       console.error('Error fetching users:', error)

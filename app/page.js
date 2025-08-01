@@ -1,45 +1,34 @@
 'use client'
 
-import { useEffect } from "react";
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/stores/auth-store'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await fetch('/api/');
-      const data = await response.json();
-      console.log(data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+export default function HomePage() {
+  const router = useRouter()
+  const { token, isLoading, checkAuth } = useAuthStore()
 
   useEffect(() => {
-    helloWorldApi();
-  }, []);
+    const initAuth = async () => {
+      await checkAuth()
+    }
+    initAuth()
+  }, [checkAuth])
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (token) {
+        router.push('/dashboard')
+      } else {
+        router.push('/auth/login')
+      }
+    }
+  }, [token, isLoading, router])
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" alt="Emergent" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <div className="min-h-screen flex items-center justify-center">
+      <LoadingSpinner size="lg" />
     </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <Home />
-    </div>
-  );
+  )
 }
-
-export default App;

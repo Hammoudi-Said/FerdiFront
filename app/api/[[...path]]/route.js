@@ -1,104 +1,122 @@
-import { MongoClient } from 'mongodb'
-import { v4 as uuidv4 } from 'uuid'
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 
-// MongoDB connection
-let client
-let db
+const BACKEND_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'
 
-async function connectToMongo() {
-  if (!client) {
-    client = new MongoClient(process.env.MONGO_URL)
-    await client.connect()
-    db = client.db(process.env.DB_NAME)
-  }
-  return db
+export async function GET(request, { params }) {
+  return forwardRequest(request, params, 'GET')
 }
 
-// Helper function to handle CORS
-function handleCORS(response) {
-  response.headers.set('Access-Control-Allow-Origin', '*')
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  response.headers.set('Access-Control-Allow-Credentials', 'true')
-  return response
+export async function POST(request, { params }) {
+  return forwardRequest(request, params, 'POST')
 }
 
-// OPTIONS handler for CORS
-export async function OPTIONS() {
-  return handleCORS(new NextResponse(null, { status: 200 }))
+export async function PUT(request, { params }) {
+  return forwardRequest(request, params, 'PUT')
 }
 
-// Route handler function
-async function handleRoute(request, { params }) {
-  const { path = [] } = params
-  const route = `/${path.join('/')}`
-  const method = request.method
+export async function PATCH(request, { params }) {
+  return forwardRequest(request, params, 'PATCH')
+}
 
+export async function DELETE(request, { params }) {
+  return forwardRequest(request, params, 'DELETE')
+}
+
+async function forwardRequest(request, params, method) {
   try {
-    const db = await connectToMongo()
-
-    // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
-    if (route === '/root' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
+    const path = params?.path ? params.path.join('/') : ''
+    const searchParams = new URL(request.url).searchParams
+    const queryString = searchParams.toString()
+    
+    // Construct the backend URL
+    let backendUrl = `${BACKEND_URL}/api/v1/${path}`
+    if (queryString) {
+      backendUrl += `?${queryString}`
     }
-    // Root endpoint - GET /api/root (since /api/ is not accessible with catch-all)
-    if (route === '/' && method === 'GET') {
-      return handleCORS(NextResponse.json({ message: "Hello World" }))
-    }
 
-    // Status endpoints - POST /api/status
-    if (route === '/status' && method === 'POST') {
-      const body = await request.json()
-      
-      if (!body.client_name) {
-        return handleCORS(NextResponse.json(
-          { error: "client_name is required" }, 
-          { status: 400 }
-        ))
+    // Get headers from the request
+    const requestHeaders = {}
+    const headersList = headers()
+    
+    // Forward important headers
+    const importantHeaders = [
+      'authorization',
+      'content-type',
+      'accept',
+      'user-agent'
+    ]
+    
+    importantHeaders.forEach(header => {
+      const value = headersList.get(header)
+      if (value) {
+        requestHeaders[header] = value
       }
+    })
 
-      const statusObj = {
-        id: uuidv4(),
-        client_name: body.client_name,
-        timestamp: new Date()
+    // Prepare request options
+    const requestOptions = {
+      method,
+      headers: {
+        ...requestHeaders,
+        'Content-Type': 'application/json',
+      },
+    }
+
+    // Add body for POST, PUT, PATCH requests
+    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+      try {
+        const body = await request.text()
+        if (body) {
+          requestOptions.body = body
+        }
+      } catch (error) {
+        console.error('Error reading request body:', error)
       }
-
-      await db.collection('status_checks').insertOne(statusObj)
-      return handleCORS(NextResponse.json(statusObj))
     }
 
-    // Status endpoints - GET /api/status
-    if (route === '/status' && method === 'GET') {
-      const statusChecks = await db.collection('status_checks')
-        .find({})
-        .limit(1000)
-        .toArray()
-
-      // Remove MongoDB's _id field from response
-      const cleanedStatusChecks = statusChecks.map(({ _id, ...rest }) => rest)
-      
-      return handleCORS(NextResponse.json(cleanedStatusChecks))
+    // Handle form data for login endpoint
+    if (path === 'login/access-token' && method === 'POST') {
+      try {
+        const formData = await request.formData()
+        requestOptions.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+        requestOptions.body = new URLSearchParams(formData).toString()
+      } catch (error) {
+        console.error('Error processing form data:', error)
+      }
     }
 
-    // Route not found
-    return handleCORS(NextResponse.json(
-      { error: `Route ${route} not found` }, 
-      { status: 404 }
-    ))
+    console.log(`Forwarding ${method} request to: ${backendUrl}`)
+    
+    // Make the request to the backend
+    const response = await fetch(backendUrl, requestOptions)
+    
+    // Get response data
+    const contentType = response.headers.get('content-type')
+    let data
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json()
+    } else {
+      data = await response.text()
+    }
+
+    // Return the response with the same status and headers
+    return NextResponse.json(data, {
+      status: response.status,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
 
   } catch (error) {
-    console.error('API Error:', error)
-    return handleCORS(NextResponse.json(
-      { error: "Internal server error" }, 
+    console.error('API forwarding error:', error)
+    return NextResponse.json(
+      { 
+        message: 'Erreur de connexion au serveur',
+        error: error.message 
+      },
       { status: 500 }
-    ))
+    )
   }
 }
-
-// Export all HTTP methods
-export const GET = handleRoute
-export const POST = handleRoute
-export const PUT = handleRoute
-export const DELETE = handleRoute
-export const PATCH = handleRoute

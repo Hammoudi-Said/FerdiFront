@@ -101,3 +101,147 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the FERDI application backend integration and authentication system. The frontend includes authentication system with company registration, employee signup, login/logout with JWT tokens, and role-based access. Key endpoints to test include company registration, user signup, login, protected routes, and error handling."
+
+backend:
+  - task: "FastAPI Backend Server Implementation"
+    implemented: false
+    working: "NA"
+    file: "No backend server found"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: No FastAPI backend server implementation found. The Next.js API proxy at /app/api/[[...path]]/route.js forwards requests to ${NEXT_PUBLIC_BASE_URL}/api/v1/ but no backend server is running at that location. All API endpoints return 502 Bad Gateway errors."
+
+  - task: "Company Registration API (POST /api/companies/register)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects this endpoint to create company and manager, return company_code."
+
+  - task: "User Signup API (POST /api/users/signup)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects this endpoint to validate company_code and create employee users."
+
+  - task: "Login API (POST /api/login/access-token)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects form data (username/password) and returns JWT access_token."
+
+  - task: "Get Current User API (GET /api/users/me)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects user data with JWT authentication."
+
+  - task: "Get Company Data API (GET /api/companies/me)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects company data for authenticated user."
+
+  - task: "List Users API (GET /api/users/)"
+    implemented: false
+    working: false
+    file: "Missing backend implementation"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "API endpoint not implemented. Returns 502 Bad Gateway. Frontend expects admin-only endpoint for user management."
+
+  - task: "API Proxy Configuration"
+    implemented: true
+    working: true
+    file: "/app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "Next.js API proxy is correctly implemented and forwards requests to backend. Handles form data for login endpoint. Issue is that target backend server doesn't exist."
+
+frontend:
+  - task: "Authentication Store Implementation"
+    implemented: true
+    working: "NA"
+    file: "/app/lib/stores/auth-store.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Zustand auth store is well implemented with login, logout, registerCompany, registerUser methods. JWT token handling with cookies. Role-based access methods. Cannot test without backend."
+
+  - task: "API Client Configuration"
+    implemented: true
+    working: "NA"
+    file: "/app/lib/api.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Axios client properly configured with /api base URL, JWT interceptors, and auth error handling. Cannot test without backend."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "FastAPI Backend Server Implementation"
+    - "Company Registration API (POST /api/companies/register)"
+    - "User Signup API (POST /api/users/signup)"
+    - "Login API (POST /api/login/access-token)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "CRITICAL FINDING: No FastAPI backend server implementation exists. Only Next.js frontend with API proxy found. All backend API endpoints return 502 Bad Gateway. The frontend authentication system is well-implemented and ready, but requires a complete FastAPI backend with MongoDB integration to function. Main agent needs to implement the entire backend API server with all authentication endpoints before any functionality can work."

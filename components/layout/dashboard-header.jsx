@@ -10,10 +10,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { useRouter } from 'next/navigation'
-import { LogOut, Settings, User, Building2 } from 'lucide-react'
+import { LogOut, Settings, User, Building2, TestTube } from 'lucide-react'
 import { toast } from 'sonner'
+
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 
 export function DashboardHeader() {
   const router = useRouter()
@@ -37,9 +40,17 @@ export function DashboardHeader() {
           <h1 className="text-lg font-semibold text-foreground">
             Bienvenue, {user?.first_name}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {getRoleName()} • {company?.name}
-          </p>
+          <div className="flex items-center space-x-2">
+            <p className="text-sm text-muted-foreground">
+              {getRoleName()} • {company?.name}
+            </p>
+            {USE_MOCK_DATA && (
+              <Badge variant="outline" className="text-xs">
+                <TestTube className="mr-1 h-3 w-3" />
+                Mode Démo
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 
@@ -72,6 +83,11 @@ export function DashboardHeader() {
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
+                {USE_MOCK_DATA && (
+                  <Badge variant="outline" className="text-xs w-fit">
+                    Mode Démo
+                  </Badge>
+                )}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

@@ -116,15 +116,22 @@ class AuthenticationTester:
                 timeout=10
             )
             
-            # Expected 502 since no backend server exists
-            if response.status_code == 502:
-                self.log_test(test_name, True,
-                    "Endpoint correctly routed through proxy (502 expected - no backend)",
-                    {
-                        'endpoint': '/companies/register',
-                        'method': 'POST',
-                        'status_code': response.status_code
-                    })
+            # Expected 500 since no backend server exists
+            if response.status_code == 500:
+                response_data = response.json()
+                if "Erreur de connexion au serveur" in response_data.get('message', ''):
+                    self.log_test(test_name, True,
+                        "Endpoint correctly routed through proxy (500 expected - no backend)",
+                        {
+                            'endpoint': '/companies/register',
+                            'method': 'POST',
+                            'status_code': response.status_code,
+                            'error_message': response_data.get('message')
+                        })
+                else:
+                    self.log_test(test_name, False,
+                        f"Proxy working but unexpected error: {response_data}",
+                        {'response_data': response_data})
             else:
                 self.log_test(test_name, False,
                     f"Unexpected response: {response.status_code}",

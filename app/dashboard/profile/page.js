@@ -41,7 +41,7 @@ export default function ProfilePage() {
     loadProfile()
   }, []) // Removed updateActivity from dependencies to prevent infinite loop
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true)
       console.log('Loading profile... USE_MOCK_DATA:', USE_MOCK_DATA)
@@ -57,7 +57,6 @@ export default function ProfilePage() {
         console.log('Profile API response:', response)
         setProfile(response.data)
       }
-      setLoading(false)
     } catch (error) {
       console.error('Failed to load profile:', error)
       console.error('Error details:', error.response || error)
@@ -73,10 +72,10 @@ export default function ProfilePage() {
         console.log('Falling back to store data:', user)
         setProfile(user)
       }
-      
+    } finally {
       setLoading(false)
     }
-  }
+  }, [user]) // Only depend on user data
 
   const handleProfileUpdate = async (data) => {
     try {

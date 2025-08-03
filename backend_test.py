@@ -20,7 +20,7 @@ import os
 from urllib.parse import urljoin
 
 # Test configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://10c3484a-6f35-46bc-bb9c-9360b2ecc600.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://3cad5434-8c77-4333-af08-804ae01eb7e2.preview.emergentagent.com')
 API_BASE = f"{BASE_URL}/api"
 
 # Test data

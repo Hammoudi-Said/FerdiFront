@@ -154,7 +154,7 @@ class AuthenticationTester:
             # Expected 502 since no backend server exists
             if response.status_code == 500:
                 self.log_test(test_name, True,
-                    "Endpoint correctly routed through proxy (502 expected - no backend)",
+                    "Endpoint correctly routed through proxy (500 expected - no backend)",
                     {
                         'endpoint': '/users/signup',
                         'method': 'POST',
@@ -193,7 +193,7 @@ class AuthenticationTester:
             # Expected 502 since no backend server exists
             if response.status_code == 500:
                 self.log_test(test_name, True,
-                    "OAuth2 form data correctly processed by proxy (502 expected - no backend)",
+                    "OAuth2 form data correctly processed by proxy (500 expected - no backend)",
                     {
                         'endpoint': '/login/access-token',
                         'method': 'POST',

@@ -204,6 +204,9 @@ export function PasswordResetModal({ open, onOpenChange }) {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-800">
                   📧 Vérifiez votre boîte mail et cliquez sur le lien pour réinitialiser votre mot de passe.
+                  Le lien vous mènera à une page dédiée pour saisir votre nouveau mot de passe.
+                </p>
+                <p className="text-xs text-blue-700 mt-2">
                   N'oubliez pas de regarder dans vos spams !
                 </p>
               </div>

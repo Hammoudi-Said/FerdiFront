@@ -378,6 +378,12 @@ export function DashboardSidebar() {
           {/* Operations */}
           {groupedItems.operations.length > 0 && renderNavGroup(groupedItems.operations, collapsed ? null : "Opérations")}
           
+          {/* Business Management */}
+          {groupedItems.business.length > 0 && renderNavGroup(groupedItems.business, collapsed ? null : "Gestion")}
+          
+          {/* Legal Documents */}
+          {groupedItems.documents.length > 0 && renderNavGroup(groupedItems.documents, collapsed ? null : "Légal")}
+          
           {/* Financial */}
           {groupedItems.financial.length > 0 && renderNavGroup(groupedItems.financial, collapsed ? null : "Financier")}
           

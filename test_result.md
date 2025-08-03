@@ -244,11 +244,14 @@ frontend:
     file: "/app/lib/stores/auth-store.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: true
           agent: "main"
           comment: "Added validation during login and checkAuth to verify user and company are active. If inactive, shows French error message: 'Votre compte/entreprise est en cours de validation par les super administrateurs. Veuillez attendre la validation pour utiliser FERDI.' Users with inactive accounts are automatically logged out."
+        - working: true
+          agent: "testing"
+          comment: "✅ VERIFIED: Inactive user/company validation logic is properly implemented in auth-store.js. Both login() and checkAuth() methods include validation for user.is_active and company.is_active. French error message correctly implemented. Auto-logout functionality for inactive users/companies is working. Ready for backend integration."
 
   - task: "User Profile GET /users/me Fix" 
     implemented: true

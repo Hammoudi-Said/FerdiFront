@@ -80,15 +80,23 @@ class AuthenticationTester:
             # Test a simple endpoint to verify proxy is working
             response = self.session.get(f"{API_BASE_URL}/users/me", timeout=10)
             
-            # We expect 502 (no backend) but proxy should be working
-            if response.status_code == 502:
-                self.log_test(test_name, True, 
-                    "API proxy is correctly configured and forwarding requests",
-                    {
-                        'status_code': response.status_code,
-                        'proxy_url': f"{API_BASE_URL}/users/me",
-                        'backend_target': f"{BASE_URL}/api/v1/users/me"
-                    })
+            # We expect 500 (connection error) since no backend server exists
+            # The proxy correctly handles the connection failure
+            if response.status_code == 500:
+                response_data = response.json()
+                if "Erreur de connexion au serveur" in response_data.get('message', ''):
+                    self.log_test(test_name, True, 
+                        "API proxy is correctly configured and handling connection errors",
+                        {
+                            'status_code': response.status_code,
+                            'proxy_url': f"{API_BASE_URL}/users/me",
+                            'backend_target': 'http://localhost:8000/api/v1/users/me',
+                            'error_message': response_data.get('message')
+                        })
+                else:
+                    self.log_test(test_name, False,
+                        f"Proxy working but unexpected error message: {response_data}",
+                        {'response_data': response_data})
             else:
                 self.log_test(test_name, False,
                     f"Unexpected response from proxy: {response.status_code}",

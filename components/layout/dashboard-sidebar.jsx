@@ -33,192 +33,86 @@ import {
   UserPlus
 } from 'lucide-react'
 
-// Navigation with role-specific access control
+// Simplified navigation - cleaner sidebar
 const navigationItems = [
   {
     title: 'Tableau de bord',
     href: '/dashboard',
     icon: BarChart3,
     roles: ['1', '2', '3', '4', '5', '6'], // All roles
-    description: 'Vue d\'ensemble'
   },
   
-  // SUPER ADMIN ONLY - Multi-company management
-  {
-    title: 'Toutes les entreprises',
-    href: '/dashboard/all-companies',
-    icon: Database,
-    roles: ['1'], // Only super_admin
-    description: 'Gestion multi-entreprises'
-  },
-  {
-    title: 'Support global',
-    href: '/dashboard/global-support',
-    icon: Shield,
-    roles: ['1'], // Only super_admin
-    description: 'Support tous clients'
-  },
-
-  // ADMIN & CLIENT ADMIN - Company management
-  {
-    title: 'Ma société',
-    href: '/dashboard/company',
-    icon: Building2,
-    roles: ['1', '2'], // super_admin, admin
-    description: 'Gestion entreprise'
-  },
+  // ADMIN SECTION
   {
     title: 'Utilisateurs',
     href: '/dashboard/users',
     icon: Users,
     roles: ['1', '2'], // super_admin, admin
-    description: 'Gestion équipe'
   },
-  {
-    title: 'Paramètres',
-    href: '/dashboard/settings',
-    icon: Settings,
-    roles: ['1', '2'], // super_admin, admin
-    description: 'Configuration'
-  },
-
-  // FLEET MANAGEMENT - Admin & Dispatch
-  {
-    title: 'Flotte',
-    href: '/dashboard/fleet',
-    icon: Bus,
-    roles: ['1', '2'], // super_admin, admin (full management)
-    description: 'Gestion véhicules'
-  },
-  {
-    title: 'Véhicules (consultation)',
-    href: '/dashboard/fleet-view',
-    icon: Bus,
-    roles: ['3', '5'], // dispatch, internal_support (view only)
-    description: 'Consultation flotte'
-  },
-
-  // ROUTES & SCHEDULING - Admin, Dispatch
-  {
-    title: 'Trajets',
-    href: '/dashboard/routes',
-    icon: MapPin,
-    roles: ['1', '2', '3'], // super_admin, admin, dispatch
-    description: 'Gestion trajets'
-  },
-  {
-    title: 'Planning',
-    href: '/dashboard/schedule',
-    icon: Calendar,
-    roles: ['1', '2', '3'], // super_admin, admin, dispatch
-    description: 'Planification'
-  },
-  {
-    title: 'Mes trajets',
-    href: '/dashboard/my-routes',
-    icon: MapPin,
-    roles: ['4'], // driver only - their assigned routes
-    description: 'Trajets assignés'
-  },
-  {
-    title: 'Mon planning',
-    href: '/dashboard/my-schedule',
-    icon: Calendar,
-    roles: ['4'], // driver only - their schedule
-    description: 'Mon emploi du temps'
-  },
-
-  // DRIVERS MANAGEMENT - Admin, Dispatch, Support
   {
     title: 'Chauffeurs',
     href: '/dashboard/drivers',
     icon: UserCheck,
     roles: ['1', '2', '3'], // super_admin, admin, dispatch
-    description: 'Gestion chauffeurs'
   },
   {
-    title: 'Équipe (consultation)',
-    href: '/dashboard/drivers-view',
-    icon: UserCheck,
-    roles: ['5'], // internal_support (view only)
-    description: 'Consultation équipe'
+    title: 'Véhicules',
+    href: '/dashboard/fleet',
+    icon: Bus,
+    roles: ['1', '2'], // super_admin, admin
   },
-
-  // FINANCIAL - Admin, Accountant
+  
+  // OPERATIONS SECTION
+  {
+    title: 'Planning',
+    href: '/dashboard/planning',
+    icon: Calendar,
+    roles: ['1', '2', '3', '4'], // super_admin, admin, dispatch, driver
+  },
+  {
+    title: 'Mes trajets',
+    href: '/dashboard/my-routes',
+    icon: MapPin,
+    roles: ['4'], // driver only
+  },
+  
+  // BUSINESS SECTION
   {
     title: 'Devis',
     href: '/dashboard/quotes',
     icon: FileText,
-    roles: ['1', '2'], // super_admin, admin (can create/manage)
-    description: 'Gestion devis'
+    roles: ['1', '2'], // super_admin, admin
   },
   {
-    title: 'Devis (consultation)',
-    href: '/dashboard/quotes-view',
-    icon: FileText,
-    roles: ['6'], // accountant (view only)
-    description: 'Consultation devis'
-  },
-  {
-    title: 'Factures',
+    title: 'Facturation',
     href: '/dashboard/invoices',
-    icon: Receipt,
+    icon: DollarSign,
     roles: ['1', '2', '6'], // super_admin, admin, accountant
-    description: 'Facturation'
   },
-  {
-    title: 'Rapports',
-    href: '/dashboard/reports',
-    icon: TrendingUp,
-    roles: ['1', '2', '6'], // super_admin, admin, accountant
-    description: 'Analyses & exports'
-  },
-
-  // NEW SECTIONS - Requested by client
   {
     title: 'Automatisations',
     href: '/dashboard/automatisations',
     icon: Zap,
     roles: ['1', '2'], // super_admin, admin
-    description: 'Processus automatisés'
   },
   {
-    title: 'Sous traitants',
+    title: 'Sous-traitants',
     href: '/dashboard/subcontractors',
     icon: HandHeart,
     roles: ['1', '2', '3'], // super_admin, admin, dispatch
-    description: 'Partenaires externes'
   },
   {
     title: 'Documents légaux',
     href: '/dashboard/legal-documents',
     icon: FileCheck,
     roles: ['1', '2', '6'], // super_admin, admin, accountant
-    description: 'Conformité légale'
-  },
-  {
-    title: 'Planning',
-    href: '/dashboard/planning',
-    icon: Calendar,
-    roles: ['1', '2', '3', '4'], // super_admin, admin, dispatch, driver
-    description: 'Planification générale'
   },
   {
     title: 'Clients',
     href: '/dashboard/clients',
     icon: UserPlus,
     roles: ['1', '2', '5'], // super_admin, admin, internal_support
-    description: 'Gestion clientèle'
-  },
-
-  // SUPPORT - All roles (different access levels)
-  {
-    title: 'Support',
-    href: '/dashboard/support',
-    icon: Phone,
-    roles: ['1', '2', '3', '4', '5', '6'], // All roles
-    description: 'Assistance'
-  },
+  }
 ]
 
 export function DashboardSidebar() {

@@ -23,84 +23,160 @@ import {
   ChevronLeft,
   ChevronRight,
   DollarSign,
-  HelpCircle,
-  Truck,
-  Navigation
+  Shield,
+  Database,
+  LifeBuoy,
+  TrendingUp
 } from 'lucide-react'
 
-// Enhanced navigation with permission-based access
+// Navigation with role-specific access control
 const navigationItems = [
   {
     title: 'Tableau de bord',
     href: '/dashboard',
     icon: BarChart3,
-    permissions: [], // Available to all authenticated users
+    roles: ['1', '2', '3', '4', '5', '6'], // All roles
+    description: 'Vue d\'ensemble'
   },
+  
+  // SUPER ADMIN ONLY - Multi-company management
+  {
+    title: 'Toutes les entreprises',
+    href: '/dashboard/all-companies',
+    icon: Database,
+    roles: ['1'], // Only super_admin
+    description: 'Gestion multi-entreprises'
+  },
+  {
+    title: 'Support global',
+    href: '/dashboard/global-support',
+    icon: Shield,
+    roles: ['1'], // Only super_admin
+    description: 'Support tous clients'
+  },
+
+  // ADMIN & CLIENT ADMIN - Company management
   {
     title: 'Ma société',
     href: '/dashboard/company',
     icon: Building2,
-    permissions: ['company_manage', 'users_view'],
+    roles: ['1', '2'], // super_admin, admin
+    description: 'Gestion entreprise'
   },
   {
     title: 'Utilisateurs',
     href: '/dashboard/users',
     icon: Users,
-    permissions: ['users_manage', 'users_view'],
-  },
-  {
-    title: 'Flotte',
-    href: '/dashboard/fleet',
-    icon: Bus,
-    permissions: ['fleet_manage', 'fleet_view'],
-  },
-  {
-    title: 'Chauffeurs',
-    href: '/dashboard/drivers',
-    icon: UserCheck,
-    permissions: ['drivers_assign', 'users_view'],
-  },
-  {
-    title: 'Trajets',
-    href: '/dashboard/routes',
-    icon: MapPin,
-    permissions: ['routes_manage', 'routes_view', 'routes_view_assigned'],
-  },
-  {
-    title: 'Planning',
-    href: '/dashboard/schedule',
-    icon: Calendar,
-    permissions: ['schedule_manage', 'schedule_view_assigned'],
-  },
-  {
-    title: 'Devis',
-    href: '/dashboard/quotes',
-    icon: FileText,
-    permissions: ['billing_manage'],
-  },
-  {
-    title: 'Factures',
-    href: '/dashboard/invoices',
-    icon: Receipt,
-    permissions: ['billing_manage', 'invoices_manage'],
-  },
-  {
-    title: 'Rapports',
-    href: '/dashboard/reports',
-    icon: DollarSign,
-    permissions: ['reports_access'],
-  },
-  {
-    title: 'Support',
-    href: '/dashboard/support',
-    icon: Phone,
-    permissions: ['support_access'],
+    roles: ['1', '2'], // super_admin, admin
+    description: 'Gestion équipe'
   },
   {
     title: 'Paramètres',
     href: '/dashboard/settings',
     icon: Settings,
-    permissions: ['users_manage', '*'],
+    roles: ['1', '2'], // super_admin, admin
+    description: 'Configuration'
+  },
+
+  // FLEET MANAGEMENT - Admin & Dispatch
+  {
+    title: 'Flotte',
+    href: '/dashboard/fleet',
+    icon: Bus,
+    roles: ['1', '2'], // super_admin, admin (full management)
+    description: 'Gestion véhicules'
+  },
+  {
+    title: 'Véhicules (consultation)',
+    href: '/dashboard/fleet-view',
+    icon: Bus,
+    roles: ['3', '5'], // dispatch, internal_support (view only)
+    description: 'Consultation flotte'
+  },
+
+  // ROUTES & SCHEDULING - Admin, Dispatch
+  {
+    title: 'Trajets',
+    href: '/dashboard/routes',
+    icon: MapPin,
+    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    description: 'Gestion trajets'
+  },
+  {
+    title: 'Planning',
+    href: '/dashboard/schedule',
+    icon: Calendar,
+    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    description: 'Planification'
+  },
+  {
+    title: 'Mes trajets',
+    href: '/dashboard/my-routes',
+    icon: MapPin,
+    roles: ['4'], // driver only - their assigned routes
+    description: 'Trajets assignés'
+  },
+  {
+    title: 'Mon planning',
+    href: '/dashboard/my-schedule',
+    icon: Calendar,
+    roles: ['4'], // driver only - their schedule
+    description: 'Mon emploi du temps'
+  },
+
+  // DRIVERS MANAGEMENT - Admin, Dispatch, Support
+  {
+    title: 'Chauffeurs',
+    href: '/dashboard/drivers',
+    icon: UserCheck,
+    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    description: 'Gestion chauffeurs'
+  },
+  {
+    title: 'Équipe (consultation)',
+    href: '/dashboard/drivers-view',
+    icon: UserCheck,
+    roles: ['5'], // internal_support (view only)
+    description: 'Consultation équipe'
+  },
+
+  // FINANCIAL - Admin, Accountant
+  {
+    title: 'Devis',
+    href: '/dashboard/quotes',
+    icon: FileText,
+    roles: ['1', '2'], // super_admin, admin (can create/manage)
+    description: 'Gestion devis'
+  },
+  {
+    title: 'Devis (consultation)',
+    href: '/dashboard/quotes-view',
+    icon: FileText,
+    roles: ['6'], // accountant (view only)
+    description: 'Consultation devis'
+  },
+  {
+    title: 'Factures',
+    href: '/dashboard/invoices',
+    icon: Receipt,
+    roles: ['1', '2', '6'], // super_admin, admin, accountant
+    description: 'Facturation'
+  },
+  {
+    title: 'Rapports',
+    href: '/dashboard/reports',
+    icon: TrendingUp,
+    roles: ['1', '2', '6'], // super_admin, admin, accountant
+    description: 'Analyses & exports'
+  },
+
+  // SUPPORT - All roles (different access levels)
+  {
+    title: 'Support',
+    href: '/dashboard/support',
+    icon: Phone,
+    roles: ['1', '2', '3', '4', '5', '6'], // All roles
+    description: 'Assistance'
   },
 ]
 
@@ -115,7 +191,7 @@ export function DashboardSidebar() {
   })
   
   const pathname = usePathname()
-  const { user, hasPermission, getRoleData, updateActivity } = useAuthStore()
+  const { user, updateActivity } = useAuthStore()
 
   // Update activity on navigation
   useEffect(() => {
@@ -129,25 +205,73 @@ export function DashboardSidebar() {
     }
   }, [collapsed])
 
-  const filteredItems = navigationItems.filter(item => {
-    // If no permissions required, show to all users
-    if (item.permissions.length === 0) return true
-    
-    // Check if user has any of the required permissions
-    return item.permissions.some(permission => hasPermission(permission))
-  })
+  // Filter navigation items based on user role
+  const filteredItems = navigationItems.filter(item =>
+    item.roles.includes(user?.role)
+  )
 
-  const roleData = getRoleData()
+  const roleData = user?.role ? ROLE_DEFINITIONS[user.role] : null
 
   const handleToggleCollapse = () => {
     setCollapsed(!collapsed)
     updateActivity()
   }
 
+  // Group items by category for better organization
+  const groupedItems = {
+    main: filteredItems.filter(item => ['dashboard'].some(path => item.href.includes(path))),
+    admin: filteredItems.filter(item => ['companies', 'users', 'settings'].some(path => item.href.includes(path))),
+    operations: filteredItems.filter(item => ['fleet', 'routes', 'schedule', 'drivers', 'my-'].some(path => item.href.includes(path))),
+    financial: filteredItems.filter(item => ['quotes', 'invoices', 'reports'].some(path => item.href.includes(path))),
+    support: filteredItems.filter(item => ['support'].some(path => item.href.includes(path))),
+  }
+
+  const renderNavGroup = (items, title = null) => (
+    <div className="space-y-1">
+      {title && !collapsed && (
+        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+          {title}
+        </div>
+      )}
+      {items.map((item) => {
+        const Icon = item.icon
+        const isActive = pathname === item.href
+
+        return (
+          <Link key={item.href} href={item.href} onClick={updateActivity}>
+            <Button
+              variant="ghost"
+              className={cn(
+                'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
+                isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600 font-medium',
+                collapsed && 'px-2'
+              )}
+              title={collapsed ? item.title : undefined}
+            >
+              <Icon className={cn(
+                'h-4 w-4',
+                !collapsed && 'mr-3',
+                isActive ? 'text-blue-600' : 'text-gray-500'
+              )} />
+              {!collapsed && (
+                <div>
+                  <div className="font-medium">{item.title}</div>
+                  {item.description && (
+                    <div className="text-xs text-gray-500">{item.description}</div>
+                  )}
+                </div>
+              )}
+            </Button>
+          </Link>
+        )
+      })}
+    </div>
+  )
+
   return (
     <div className={cn(
       'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm',
-      collapsed ? 'w-16' : 'w-64'
+      collapsed ? 'w-16' : 'w-72'
     )}>
       {/* Header */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
@@ -201,35 +325,21 @@ export function DashboardSidebar() {
       )}
 
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-1 px-2">
-          {filteredItems.map((item) => {
-            const Icon = item.icon
-            const isActive = pathname === item.href
-
-            return (
-              <Link key={item.href} href={item.href} onClick={updateActivity}>
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
-                    isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600',
-                    collapsed && 'px-2'
-                  )}
-                >
-                  <Icon className={cn(
-                    'h-4 w-4',
-                    !collapsed && 'mr-3',
-                    isActive ? 'text-blue-600' : 'text-gray-500'
-                  )} />
-                  {!collapsed && (
-                    <span className="font-medium">
-                      {item.title}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-            )
-          })}
+        <nav className="space-y-6 px-2">
+          {/* Main Dashboard */}
+          {groupedItems.main.length > 0 && renderNavGroup(groupedItems.main)}
+          
+          {/* Admin Functions */}
+          {groupedItems.admin.length > 0 && renderNavGroup(groupedItems.admin, collapsed ? null : "Administration")}
+          
+          {/* Operations */}
+          {groupedItems.operations.length > 0 && renderNavGroup(groupedItems.operations, collapsed ? null : "Opérations")}
+          
+          {/* Financial */}
+          {groupedItems.financial.length > 0 && renderNavGroup(groupedItems.financial, collapsed ? null : "Financier")}
+          
+          {/* Support */}
+          {groupedItems.support.length > 0 && renderNavGroup(groupedItems.support, collapsed ? null : "Support")}
         </nav>
       </ScrollArea>
 

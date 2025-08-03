@@ -24,7 +24,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  MoreHorizontal
+  MoreHorizontal,
+  Lock
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -36,7 +37,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 export default function UsersPage() {
-  const { user, hasPermission, getUsers, updateActivity } = useAuthStore()
+  const { 
+    user, 
+    hasPermission, 
+    getUsers, 
+    updateActivity,
+    canAccessMultiCompany,
+    canManageOwnCompany
+  } = useAuthStore()
+  
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -70,17 +79,35 @@ export default function UsersPage() {
     setLoading(false)
   }
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch = 
-      u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.last_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesRole = filterRole === 'all' || u.role === filterRole
-    
-    return matchesSearch && matchesRole
-  })
+  // Filter users based on role permissions
+  const getFilteredUsers = () => {
+    let filtered = users
+
+    // Super admin sees all users across all companies
+    if (!canAccessMultiCompany()) {
+      // Other roles only see users from their own company
+      filtered = users.filter(u => u.company_id === user?.company_id)
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(u => 
+        u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.last_name?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Apply role filter
+    if (filterRole !== 'all') {
+      filtered = filtered.filter(u => u.role === filterRole)
+    }
+
+    return filtered
+  }
+
+  const filteredUsers = getFilteredUsers()
 
   const getStatusBadge = (userStatus, isActive) => {
     if (!isActive) {
@@ -114,15 +141,15 @@ export default function UsersPage() {
 
   const getUserStats = () => {
     const stats = {
-      total: users.length,
-      active: users.filter(u => u.is_active && u.status === '1').length,
-      inactive: users.filter(u => !u.is_active || u.status !== '1').length,
+      total: filteredUsers.length,
+      active: filteredUsers.filter(u => u.is_active && u.status === '1').length,
+      inactive: filteredUsers.filter(u => !u.is_active || u.status !== '1').length,
       byRole: {}
     }
 
     // Count by role
     Object.keys(ROLE_DEFINITIONS).forEach(roleId => {
-      stats.byRole[roleId] = users.filter(u => u.role === roleId).length
+      stats.byRole[roleId] = filteredUsers.filter(u => u.role === roleId).length
     })
 
     return stats
@@ -130,13 +157,24 @@ export default function UsersPage() {
 
   const stats = getUserStats()
 
+  // Check access permissions
   if (!hasPermission('users_view') && !hasPermission('users_manage')) {
     return (
       <DashboardLayout>
         <div className="text-center py-12">
           <Shield className="h-16 w-16 mx-auto text-gray-400 mb-4" />
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">Accès restreint</h2>
-          <p className="text-gray-600">Vous n'avez pas les permissions pour accéder à cette section.</p>
+          <p className="text-gray-600">
+            Vous n'avez pas les permissions pour accéder à cette section.
+          </p>
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg max-w-md mx-auto">
+            <p className="text-sm text-amber-800">
+              <strong>Votre rôle :</strong> {ROLE_DEFINITIONS[user?.role]?.label}
+            </p>
+            <p className="text-xs text-amber-600 mt-1">
+              Contactez votre administrateur pour obtenir l'accès.
+            </p>
+          </div>
         </div>
       </DashboardLayout>
     )
@@ -148,13 +186,23 @@ export default function UsersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-            <p className="text-gray-600">Gérez les membres de votre équipe</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Gestion des utilisateurs
+              {canAccessMultiCompany() && (
+                <Badge className="ml-3 bg-red-100 text-red-800">Multi-entreprises</Badge>
+              )}
+            </h1>
+            <p className="text-gray-600">
+              {canAccessMultiCompany() 
+                ? 'Gérez tous les utilisateurs de toutes les entreprises'
+                : 'Gérez les membres de votre équipe'
+              }
+            </p>
           </div>
           
           {hasPermission('users_manage') && (
             <Button 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => updateActivity()}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -162,6 +210,24 @@ export default function UsersPage() {
             </Button>
           )}
         </div>
+
+        {/* Permission Info */}
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <Shield className="h-5 w-5 text-blue-600 mr-2" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  Permissions actuelles
+                </p>
+                <p className="text-xs text-blue-700">
+                  {hasPermission('users_manage') ? '✓ Gestion complète' : '👁️ Consultation uniquement'} • 
+                  {canAccessMultiCompany() ? ' Multi-entreprises' : ' Votre entreprise uniquement'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -216,6 +282,29 @@ export default function UsersPage() {
           </Card>
         </div>
 
+        {/* Role Distribution */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Répartition par rôle</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => {
+                const count = stats.byRole[roleId] || 0
+                return (
+                  <div key={roleId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className={cn('w-3 h-3 rounded-full mr-2', roleData.color)}></div>
+                      <span className="text-sm font-medium">{roleData.label}</span>
+                    </div>
+                    <Badge variant="secondary">{count}</Badge>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
@@ -250,7 +339,10 @@ export default function UsersPage() {
           <CardHeader>
             <CardTitle>Utilisateurs ({filteredUsers.length})</CardTitle>
             <CardDescription>
-              Liste des membres de votre équipe
+              {canAccessMultiCompany() 
+                ? 'Liste de tous les utilisateurs de toutes les entreprises'
+                : 'Liste des membres de votre équipe'
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -297,6 +389,11 @@ export default function UsersPage() {
                                   {roleData.label}
                                 </Badge>
                               )}
+                              {canAccessMultiCompany() && u.company_name && (
+                                <Badge variant="outline" className="text-xs">
+                                  {u.company_name}
+                                </Badge>
+                              )}
                             </div>
                             
                             <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
@@ -333,13 +430,18 @@ export default function UsersPage() {
                               <DropdownMenuItem onClick={() => updateActivity()}>
                                 {u.is_active ? 'Désactiver' : 'Activer'}
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-600" 
-                                onClick={() => updateActivity()}
-                              >
-                                Supprimer
-                              </DropdownMenuItem>
+                              {/* Super admin can delete users from any company */}
+                              {(canAccessMultiCompany() || u.company_id === user?.company_id) && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    className="text-red-600" 
+                                    onClick={() => updateActivity()}
+                                  >
+                                    Supprimer
+                                  </DropdownMenuItem>
+                                </>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}

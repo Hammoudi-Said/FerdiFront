@@ -83,25 +83,12 @@ export default function HomePage() {
   useEffect(() => {
     if (!initialLoad && !isLoading) {
       if (token && isSessionValid()) {
-        // Redirect based on user role to appropriate dashboard
-        if (user?.role) {
-          const roleDashboard = getRoleDashboardPath(user.role)
-          
-          // Check if user was trying to access a specific page before login
-          const intendedPath = sessionStorage.getItem('ferdi_intended_path')
-          const lastPath = sessionStorage.getItem('ferdi_last_path')
-          
-          if (intendedPath && intendedPath !== '/' && intendedPath !== '/auth/login') {
-            sessionStorage.removeItem('ferdi_intended_path')
-            router.push(intendedPath)
-          } else if (lastPath && lastPath !== '/' && lastPath !== '/auth/login') {
-            router.push(lastPath)
-          } else {
-            // Route to role-specific dashboard
-            router.push(roleDashboard)
-          }
+        // Simple redirect to dashboard - no role-specific routing for now
+        const lastPath = sessionStorage.getItem('ferdi_last_path')
+        if (lastPath && lastPath !== '/' && lastPath !== '/auth/login') {
+          router.push(lastPath)
         } else {
-          // Fallback to generic dashboard
+          // Always redirect to main dashboard
           router.push('/dashboard')
         }
       } else {

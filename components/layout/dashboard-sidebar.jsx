@@ -262,7 +262,9 @@ export function DashboardSidebar() {
   const groupedItems = {
     main: filteredItems.filter(item => ['dashboard'].some(path => item.href.includes(path))),
     admin: filteredItems.filter(item => ['companies', 'users', 'settings'].some(path => item.href.includes(path))),
-    operations: filteredItems.filter(item => ['fleet', 'routes', 'schedule', 'drivers', 'my-'].some(path => item.href.includes(path))),
+    operations: filteredItems.filter(item => ['fleet', 'routes', 'schedule', 'drivers', 'my-', 'planning'].some(path => item.href.includes(path))),
+    business: filteredItems.filter(item => ['automatisations', 'subcontractors', 'clients'].some(path => item.href.includes(path))),
+    documents: filteredItems.filter(item => ['legal-documents'].some(path => item.href.includes(path))),
     financial: filteredItems.filter(item => ['quotes', 'invoices', 'reports'].some(path => item.href.includes(path))),
     support: filteredItems.filter(item => ['support'].some(path => item.href.includes(path))),
   }

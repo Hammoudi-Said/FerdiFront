@@ -280,6 +280,10 @@ metadata:
 test_plan:
   current_focus:
     - "FastAPI Backend Server Implementation"
+    - "Authentication Token Cookie Fix"
+    - "User/Company Inactive Validation During Login"
+    - "User Profile GET /users/me Fix"
+    - "Login Flow GET /users/me Only"
   stuck_tasks:
     - "FastAPI Backend Server Implementation"
     - "Company Registration API (POST /api/companies/register)"

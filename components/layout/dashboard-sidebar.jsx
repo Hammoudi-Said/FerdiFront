@@ -97,13 +97,13 @@ export function DashboardSidebar() {
   const pathname = usePathname()
   const { user, hasRole } = useAuthStore()
 
-  const filteredItems = navigationItems.filter(item => 
+  const filteredItems = navigationItems.filter(item =>
     item.roles.includes(user?.role)
   )
 
   return (
     <div className={cn(
-      'bg-sidebar border-r border-sidebar-border transition-all duration-300',
+      'bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col h-full',
       collapsed ? 'w-16' : 'w-64'
     )}>
       <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border">
@@ -137,7 +137,7 @@ export function DashboardSidebar() {
           {filteredItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
-            
+
             return (
               <Link key={item.href} href={item.href}>
                 <Button
@@ -158,7 +158,7 @@ export function DashboardSidebar() {
       </ScrollArea>
 
       {!collapsed && (
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border mt-auto">
           <div className="bg-sidebar-accent rounded-lg p-3">
             <p className="text-sm font-medium text-sidebar-accent-foreground">
               {user?.full_name || `${user?.first_name} ${user?.last_name}`}

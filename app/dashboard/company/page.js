@@ -80,10 +80,10 @@ export default function CompanyPage() {
 
   const getSubscriptionPlanName = (plan) => {
     const plans = {
-      '1': 'Starter - Jusqu\'à 5 véhicules',
-      '2': 'Business - Jusqu\'à 20 véhicules',
-      '3': 'Professional - Jusqu\'à 50 véhicules',
-      '4': 'Enterprise - Illimité',
+      'FREETRIAL': 'FREETRIAL - Accès complet pendant 14 jours',
+      'ESSENTIAL': 'ESSENTIAL - Jusqu\'à 20 véhicules',
+      'STANDARD': 'STANDARD - Jusqu\'à 50 véhicules',
+      'PREMIUM': 'PREMIUM - Illimité',
     }
     return plans[plan] || 'Plan inconnu'
   }
@@ -239,9 +239,9 @@ export default function CompanyPage() {
                 ) : (
                   <p className="text-sm bg-muted p-2 rounded">
                     {company.website ? (
-                      <a 
-                        href={company.website} 
-                        target="_blank" 
+                      <a
+                        href={company.website}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                       >

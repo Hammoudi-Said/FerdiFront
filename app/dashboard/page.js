@@ -35,7 +35,7 @@ export default function DashboardPage() {
       try {
         // For now, we'll use mock data since fleet endpoints aren't available
         // In the future, these would be real API calls
-        
+
         // Fetch users count (available)
         if (user?.role === '1' || user?.role === '2') {
           try {
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           activeRoutes: Math.floor(Math.random() * 20) + 5,
           monthlyRevenue: Math.floor(Math.random() * 100000) + 50000,
         }))
-        
+
       } catch (error) {
         console.error('Error fetching dashboard stats:', error)
       } finally {
@@ -157,10 +157,10 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm font-medium">Plan d'abonnement</p>
                 <p className="text-sm text-muted-foreground">
-                  {company?.subscription_plan === '1' && 'Starter'}
-                  {company?.subscription_plan === '2' && 'Business'}
-                  {company?.subscription_plan === '3' && 'Professional'}
-                  {company?.subscription_plan === '4' && 'Enterprise'}
+                  {company?.subscription_plan === 'FREETRIAL' && 'FREETRIAL'}
+                  {company?.subscription_plan === 'ESSENTIAL' && 'ESSENTIAL'}
+                  {company?.subscription_plan === 'STANDARD' && 'STANDARD'}
+                  {company?.subscription_plan === 'PREMIUM' && 'PREMIUM'}
                 </p>
               </div>
               <div>
@@ -181,7 +181,14 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 <div className="flex items-center text-sm">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                  <span className="text-muted-foreground">Dernière connexion: Aujourd'hui</span>
+                  <span className="text-muted-foreground">Dernière connexion: {new Date(user?.last_login_at).toLocaleString('fr-FR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</span>
+
                 </div>
                 <div className="flex items-center text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
@@ -213,13 +220,13 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground">Véhicules et maintenance</p>
                 </div>
               )}
-              
+
               <div className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                 <FileText className="h-8 w-8 mb-2 text-primary" />
                 <h3 className="font-medium">Planning</h3>
                 <p className="text-sm text-muted-foreground">Voir les trajets</p>
               </div>
-              
+
               {(user?.role === '1' || user?.role === '2') && (
                 <div className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <Users className="h-8 w-8 mb-2 text-primary" />
@@ -227,7 +234,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-muted-foreground">Gérer les utilisateurs</p>
                 </div>
               )}
-              
+
               {user?.role !== '4' && (
                 <div className="p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <Receipt className="h-8 w-8 mb-2 text-primary" />

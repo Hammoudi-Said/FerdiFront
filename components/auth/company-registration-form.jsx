@@ -12,11 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { toast } from 'sonner'
+import pl from 'zod/v4/locales/pl.cjs'
 
 const companySchema = z.object({
   // Company info
   name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères').max(255),
-  siret: z.string().length(14, 'Le SIRET doit contenir exactement 14 chiffres'),
+  siret: z.string().regex(/^\d{14}$/, 'Le SIRET doit contenir exactement 14 chiffres'),
   address: z.string().min(5, 'L\'adresse doit contenir au moins 5 caractères').max(500),
   city: z.string().min(2, 'La ville doit contenir au moins 2 caractères').max(100),
   postal_code: z.string().min(4, 'Le code postal doit contenir au moins 4 caractères').max(10),
@@ -24,8 +25,8 @@ const companySchema = z.object({
   phone: z.string().min(10, 'Le téléphone doit contenir au moins 10 caractères').max(20),
   email: z.string().email('Email invalide').optional().or(z.literal('')),
   website: z.string().url('URL invalide').optional().or(z.literal('')),
-  subscription_plan: z.enum(['1', '2', '3', '4']),
-  
+  subscription_plan: z.enum(['FREETRIAL', 'ESSENTIAL', 'STANDARD', 'PREMIUM']),
+
   // Manager info
   manager_firstName: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères').max(100),
   manager_lastName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(100),
@@ -42,41 +43,40 @@ export function CompanyRegistrationForm({ onSuccess }) {
   const [step, setStep] = useState(1)
   const [companyCode, setCompanyCode] = useState('')
   const { registerCompany, isLoading } = useAuthStore()
-  
+
   const form = useForm({
     resolver: zodResolver(companySchema),
     defaultValues: {
       country: 'France',
-      subscription_plan: '2',
+      subscription_plan: 'ESSENTIAL',
       email: '',
       website: '',
     },
   })
 
   const onSubmit = async (data) => {
-    const companyData = {
-      name: data.name,
-      siret: data.siret,
-      address: data.address,
-      city: data.city,
-      postal_code: data.postal_code,
-      country: data.country,
-      phone: data.phone,
-      email: data.email || null,
-      website: data.website || null,
-      subscription_plan: data.subscription_plan,
+    const payload = {
+      company: {
+        name: data.name,
+        siret: data.siret,
+        address: data.address,
+        city: data.city,
+        postal_code: data.postal_code,
+        country: data.country,
+        phone: data.phone,
+        email: data.email || null,
+        website: data.website || null,
+        subscription_plan: data.subscription_plan,
+      },
+      manager_email: data.manager_email,
+      manager_password: data.manager_password,
+      manager_first_name: data.manager_firstName,
+      manager_last_name: data.manager_lastName,
+      manager_phone: data.manager_phone,
     }
 
-    const managerData = {
-      firstName: data.manager_firstName,
-      lastName: data.manager_lastName,
-      email: data.manager_email,
-      phone: data.manager_phone,
-      password: data.manager_password,
-    }
+    const result = await registerCompany(payload)
 
-    const result = await registerCompany(companyData, managerData)
-    
     if (result.success) {
       setCompanyCode(result.companyCode)
       setStep(2)
@@ -105,7 +105,7 @@ export function CompanyRegistrationForm({ onSuccess }) {
               Communiquez ce code à vos collaborateurs pour qu'ils puissent s'inscrire
             </p>
           </div>
-          
+
           <div className="space-y-2">
             <h4 className="font-semibold">Prochaines étapes:</h4>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -115,8 +115,8 @@ export function CompanyRegistrationForm({ onSuccess }) {
               <li>Connectez-vous maintenant avec vos identifiants</li>
             </ul>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={() => onSuccess?.()}
             className="w-full"
           >
@@ -140,7 +140,7 @@ export function CompanyRegistrationForm({ onSuccess }) {
           {/* Company Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations de l'entreprise</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom de l'entreprise *</Label>
@@ -266,10 +266,10 @@ export function CompanyRegistrationForm({ onSuccess }) {
                     <SelectValue placeholder="Choisir un plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Starter - Jusqu'à 5 véhicules</SelectItem>
-                    <SelectItem value="2">Business - Jusqu'à 20 véhicules</SelectItem>
-                    <SelectItem value="3">Professional - Jusqu'à 50 véhicules</SelectItem>
-                    <SelectItem value="4">Enterprise - Illimité</SelectItem>
+                    <SelectItem value="FREETRIAL">FREETRIAL - Jusqu'à 5 véhicules</SelectItem>
+                    <SelectItem value="ESSENTIAL">ESSENTIAL - Jusqu'à 20 véhicules</SelectItem>
+                    <SelectItem value="STANDARD">STANDARD - Jusqu'à 50 véhicules</SelectItem>
+                    <SelectItem value="PREMIUM">PREMIUM - Illimité</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -279,7 +279,7 @@ export function CompanyRegistrationForm({ onSuccess }) {
           {/* Manager Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Informations du gestionnaire</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="manager_firstName">Prénom *</Label>
@@ -362,9 +362,9 @@ export function CompanyRegistrationForm({ onSuccess }) {
             </div>
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full" 
+          <Button
+            type="submit"
+            className="w-full"
             disabled={isLoading}
           >
             {isLoading ? (

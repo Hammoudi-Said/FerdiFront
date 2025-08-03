@@ -26,7 +26,11 @@ import {
   Shield,
   Database,
   LifeBuoy,
-  TrendingUp
+  TrendingUp,
+  Zap,
+  HandHeart,
+  FileCheck,
+  UserPlus
 } from 'lucide-react'
 
 // Navigation with role-specific access control

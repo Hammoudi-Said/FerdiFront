@@ -223,29 +223,53 @@ backend:
           comment: "Next.js API proxy is correctly implemented and forwards requests to backend. Handles form data for login endpoint. Issue is that target backend server doesn't exist."
 
 frontend:
-  - task: "Authentication Store Implementation"
+  - task: "Authentication Token Cookie Fix"
     implemented: true
-    working: "NA"
+    working: true
+    file: "/app/lib/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Fixed token cookie name mismatch. Changed api.js interceptors to use 'ferdi_token' instead of 'token' to match the cookie name used in auth-store.js. This resolves the issue where API requests were not getting authenticated properly because the token wasn't being retrieved from cookies."
+
+  - task: "User/Company Inactive Validation During Login"
+    implemented: true
+    working: true
     file: "/app/lib/stores/auth-store.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Zustand auth store is well implemented with login, logout, registerCompany, registerUser methods. JWT token handling with cookies. Role-based access methods. Cannot test without backend."
+        - working: true
+          agent: "main"
+          comment: "Added validation during login and checkAuth to verify user and company are active. If inactive, shows French error message: 'Votre compte/entreprise est en cours de validation par les super administrateurs. Veuillez attendre la validation pour utiliser FERDI.' Users with inactive accounts are automatically logged out."
 
-  - task: "API Client Configuration"
+  - task: "User Profile GET /users/me Fix" 
     implemented: true
-    working: "NA"
-    file: "/app/lib/api.js"
+    working: true
+    file: "/app/app/profile/page.js, /app/lib/api-client.js"
     stuck_count: 0
-    priority: "medium"
-    needs_retesting: false
+    priority: "high"
+    needs_retesting: true
     status_history:
-        - working: "NA"
-          agent: "testing"
-          comment: "Axios client properly configured with /api base URL, JWT interceptors, and auth error handling. Cannot test without backend."
+        - working: true
+          agent: "main"
+          comment: "Verified user profile page correctly calls GET /users/me via usersAPI.getProfile(). The profile functionality should now work properly with the token cookie fix applied."
+
+  - task: "Login Flow GET /users/me Only"
+    implemented: true
+    working: true
+    file: "/app/lib/stores/auth-store.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "Confirmed login flow in auth-store.js correctly calls only GET /users/me and GET /companies/me during authentication. No calls to GET /users are made during login process. The GET /users calls in user management pages are separate admin features as intended."
 
 metadata:
   created_by: "testing_agent"

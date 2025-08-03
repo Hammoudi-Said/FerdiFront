@@ -174,6 +174,43 @@ const navigationItems = [
     description: 'Analyses & exports'
   },
 
+  // NEW SECTIONS - Requested by client
+  {
+    title: 'Automatisations',
+    href: '/dashboard/automatisations',
+    icon: Zap,
+    roles: ['1', '2'], // super_admin, admin
+    description: 'Processus automatisés'
+  },
+  {
+    title: 'Sous traitants',
+    href: '/dashboard/subcontractors',
+    icon: HandHeart,
+    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    description: 'Partenaires externes'
+  },
+  {
+    title: 'Documents légaux',
+    href: '/dashboard/legal-documents',
+    icon: FileCheck,
+    roles: ['1', '2', '6'], // super_admin, admin, accountant
+    description: 'Conformité légale'
+  },
+  {
+    title: 'Planning',
+    href: '/dashboard/planning',
+    icon: Calendar,
+    roles: ['1', '2', '3', '4'], // super_admin, admin, dispatch, driver
+    description: 'Planification générale'
+  },
+  {
+    title: 'Clients',
+    href: '/dashboard/clients',
+    icon: UserPlus,
+    roles: ['1', '2', '5'], // super_admin, admin, internal_support
+    description: 'Gestion clientèle'
+  },
+
   // SUPPORT - All roles (different access levels)
   {
     title: 'Support',

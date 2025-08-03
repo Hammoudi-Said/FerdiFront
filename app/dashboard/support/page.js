@@ -2,13 +2,13 @@
 
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { DashboardRouter } from '@/lib/components/dashboard-router'
+import { SupportDashboard } from '@/components/dashboards/support-dashboard'
 
-export default function DashboardPage() {
+export default function SupportDashboardPage() {
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '4', '5', '6']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={['5']} showUnauthorized={true}>
       <DashboardLayout>
-        <DashboardRouter />
+        <SupportDashboard />
       </DashboardLayout>
     </RoleGuard>
   )

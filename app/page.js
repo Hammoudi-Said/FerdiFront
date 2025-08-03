@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/auth-store'
+import { getRoleDashboardPath } from '@/lib/utils/role-redirect'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bus, Zap, Shield, Users } from 'lucide-react'
@@ -62,7 +63,7 @@ const LoadingScreen = () => (
 
 export default function HomePage() {
   const router = useRouter()
-  const { token, isLoading, checkAuth, isSessionValid, updateActivity } = useAuthStore()
+  const { token, user, isLoading, checkAuth, isSessionValid, updateActivity } = useAuthStore()
   const [initialLoad, setInitialLoad] = useState(true)
 
   useEffect(() => {
@@ -82,17 +83,32 @@ export default function HomePage() {
   useEffect(() => {
     if (!initialLoad && !isLoading) {
       if (token && isSessionValid()) {
-        // Redirect to last visited page or dashboard
-        const lastPath = sessionStorage.getItem('ferdi_last_path')
-        if (lastPath && lastPath !== '/' && lastPath !== '/auth/login') {
-          router.push(lastPath)
+        // Redirect based on user role to appropriate dashboard
+        if (user?.role) {
+          const roleDashboard = getRoleDashboardPath(user.role)
+          
+          // Check if user was trying to access a specific page before login
+          const intendedPath = sessionStorage.getItem('ferdi_intended_path')
+          const lastPath = sessionStorage.getItem('ferdi_last_path')
+          
+          if (intendedPath && intendedPath !== '/' && intendedPath !== '/auth/login') {
+            sessionStorage.removeItem('ferdi_intended_path')
+            router.push(intendedPath)
+          } else if (lastPath && lastPath !== '/' && lastPath !== '/auth/login') {
+            router.push(lastPath)
+          } else {
+            // Route to role-specific dashboard
+            router.push(roleDashboard)
+          }
         } else {
+          // Fallback to generic dashboard
           router.push('/dashboard')
         }
       } else {
         // Clear any invalid session data
         if (!isSessionValid()) {
           sessionStorage.removeItem('ferdi_last_path')
+          sessionStorage.removeItem('ferdi_intended_path')
         }
         
         // If in mock mode, show demo page first
@@ -103,7 +119,7 @@ export default function HomePage() {
         }
       }
     }
-  }, [token, isLoading, router, initialLoad, isSessionValid])
+  }, [token, user, isLoading, router, initialLoad, isSessionValid])
 
   // Show enhanced loading screen during initial auth check
   return <LoadingScreen />

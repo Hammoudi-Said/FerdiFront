@@ -2,13 +2,13 @@
 
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { DashboardRouter } from '@/lib/components/dashboard-router'
+import { DriverDashboard } from '@/components/dashboards/driver-dashboard'
 
-export default function DashboardPage() {
+export default function DriverDashboardPage() {
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '4', '5', '6']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={['4']} showUnauthorized={true}>
       <DashboardLayout>
-        <DashboardRouter />
+        <DriverDashboard />
       </DashboardLayout>
     </RoleGuard>
   )

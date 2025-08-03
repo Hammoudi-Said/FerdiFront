@@ -476,7 +476,7 @@ class AuthenticationTester:
             
         print()
         print("NOTES:")
-        print("- All 502 responses are EXPECTED since no FastAPI backend server exists")
+        print("- All 500 responses are EXPECTED since no FastAPI backend server exists")
         print("- The proxy is correctly forwarding requests to the backend URL")
         print("- Authentication fixes in frontend are properly implemented")
         print("- System is ready for backend server implementation")

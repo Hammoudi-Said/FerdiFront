@@ -11,7 +11,8 @@ import sys
 from urllib.parse import urljoin
 
 # Test configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'http://localhost:8000')
+# Use the actual Next.js server port (3000) instead of the configured backend port (8000)
+BASE_URL = 'http://localhost:3000'
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Test data

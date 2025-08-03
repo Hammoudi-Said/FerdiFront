@@ -152,15 +152,12 @@ export function DashboardSidebar() {
     updateActivity()
   }
 
-  // Group items by category for better organization
+  // Group items by category for better organization - simplified
   const groupedItems = {
-    main: filteredItems.filter(item => ['dashboard'].some(path => item.href.includes(path))),
-    admin: filteredItems.filter(item => ['companies', 'users', 'settings'].some(path => item.href.includes(path))),
-    operations: filteredItems.filter(item => ['fleet', 'routes', 'schedule', 'drivers', 'my-', 'planning'].some(path => item.href.includes(path))),
-    business: filteredItems.filter(item => ['automatisations', 'subcontractors', 'clients'].some(path => item.href.includes(path))),
-    documents: filteredItems.filter(item => ['legal-documents'].some(path => item.href.includes(path))),
-    financial: filteredItems.filter(item => ['quotes', 'invoices', 'reports'].some(path => item.href.includes(path))),
-    support: filteredItems.filter(item => ['support'].some(path => item.href.includes(path))),
+    main: filteredItems.filter(item => item.href === '/dashboard'),
+    management: filteredItems.filter(item => ['users', 'drivers', 'fleet'].some(path => item.href.includes(path))),
+    operations: filteredItems.filter(item => ['planning', 'my-routes'].some(path => item.href.includes(path))),
+    business: filteredItems.filter(item => ['quotes', 'invoices', 'automatisations', 'subcontractors', 'legal-documents', 'clients'].some(path => item.href.includes(path))),
   }
 
   const renderNavGroup = (items, title = null) => (
@@ -181,22 +178,17 @@ export function DashboardSidebar() {
               className={cn(
                 'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
                 isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600 font-medium',
-                collapsed && 'px-2'
+                collapsed ? 'px-2' : 'px-3'
               )}
               title={collapsed ? item.title : undefined}
             >
               <Icon className={cn(
-                'h-4 w-4',
+                'h-5 w-5',
                 !collapsed && 'mr-3',
                 isActive ? 'text-blue-600' : 'text-gray-500'
               )} />
               {!collapsed && (
-                <div>
-                  <div className="font-medium">{item.title}</div>
-                  {item.description && (
-                    <div className="text-xs text-gray-500">{item.description}</div>
-                  )}
-                </div>
+                <span className="font-medium">{item.title}</span>
               )}
             </Button>
           </Link>

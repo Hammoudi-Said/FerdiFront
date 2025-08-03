@@ -11,10 +11,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { useAuthStore, ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { useAuthStore } from '@/lib/stores/auth-store'
 import { toast } from 'sonner'
-import { Bus, Shield, LogIn, Eye, EyeOff, Zap, Users, Building2 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Bus, LogIn, Eye, EyeOff, Building2, Users } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -113,19 +112,6 @@ export default function LoginPage() {
             FERDI
           </h1>
           <p className="text-gray-600 mt-2 font-medium">Gestion de flotte d'autocars</p>
-          
-          {/* Role preview badges */}
-          <div className="flex justify-center space-x-1 mt-4">
-            {Object.values(ROLE_DEFINITIONS).slice(0, 4).map((role) => (
-              <Badge 
-                key={role.id} 
-                variant="secondary" 
-                className={`text-xs ${role.bgColor} ${role.textColor} border-0`}
-              >
-                {role.label}
-              </Badge>
-            ))}
-          </div>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
@@ -247,30 +233,6 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Demo credentials for mock mode */}
-        {USE_MOCK_DATA && (
-          <Card className="bg-amber-50 border-amber-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-amber-800 flex items-center">
-                <Zap className="mr-2 h-4 w-4" />
-                Comptes de démonstration
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 space-y-2 text-xs">
-              <div className="grid grid-cols-1 gap-2">
-                <div className="flex justify-between">
-                  <span className="font-medium text-amber-700">Admin :</span>
-                  <span className="text-amber-600">manager@transport-bretagne.fr / SecurePass123!</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-medium text-amber-700">Dispatch :</span>
-                  <span className="text-amber-600">marie.martin@transport-bretagne.fr / DispatcherPass123!</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <p className="text-center text-sm text-gray-600">
           Besoin d'aide ? Contactez notre{' '}

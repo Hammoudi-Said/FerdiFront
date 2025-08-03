@@ -35,84 +35,72 @@ const navigationItems = [
     href: '/dashboard',
     icon: BarChart3,
     permissions: [], // Available to all authenticated users
-    color: 'text-blue-600 dark:text-blue-400',
   },
   {
     title: 'Ma société',
     href: '/dashboard/company',
     icon: Building2,
     permissions: ['company_manage', 'users_view'],
-    color: 'text-purple-600 dark:text-purple-400',
   },
   {
     title: 'Utilisateurs',
     href: '/dashboard/users',
     icon: Users,
     permissions: ['users_manage', 'users_view'],
-    color: 'text-green-600 dark:text-green-400',
   },
   {
     title: 'Flotte',
     href: '/dashboard/fleet',
     icon: Bus,
     permissions: ['fleet_manage', 'fleet_view'],
-    color: 'text-orange-600 dark:text-orange-400',
   },
   {
     title: 'Chauffeurs',
     href: '/dashboard/drivers',
     icon: UserCheck,
     permissions: ['drivers_assign', 'users_view'],
-    color: 'text-teal-600 dark:text-teal-400',
   },
   {
     title: 'Trajets',
     href: '/dashboard/routes',
     icon: MapPin,
     permissions: ['routes_manage', 'routes_view', 'routes_view_assigned'],
-    color: 'text-red-600 dark:text-red-400',
   },
   {
     title: 'Planning',
     href: '/dashboard/schedule',
     icon: Calendar,
     permissions: ['schedule_manage', 'schedule_view_assigned'],
-    color: 'text-indigo-600 dark:text-indigo-400',
   },
   {
     title: 'Devis',
     href: '/dashboard/quotes',
     icon: FileText,
     permissions: ['billing_manage'],
-    color: 'text-yellow-600 dark:text-yellow-400',
   },
   {
     title: 'Factures',
     href: '/dashboard/invoices',
     icon: Receipt,
     permissions: ['billing_manage', 'invoices_manage'],
-    color: 'text-pink-600 dark:text-pink-400',
   },
   {
     title: 'Rapports',
     href: '/dashboard/reports',
     icon: DollarSign,
     permissions: ['reports_access'],
-    color: 'text-emerald-600 dark:text-emerald-400',
   },
   {
     title: 'Support',
     href: '/dashboard/support',
     icon: Phone,
     permissions: ['support_access'],
-    color: 'text-cyan-600 dark:text-cyan-400',
   },
   {
     title: 'Paramètres',
     href: '/dashboard/settings',
     icon: Settings,
     permissions: ['users_manage', '*'],
-    color: 'text-gray-600 dark:text-gray-400',
   },
 ]
 
@@ -158,19 +146,19 @@ export function DashboardSidebar() {
 
   return (
     <div className={cn(
-      'bg-gradient-to-b from-sidebar-background to-sidebar-background/95 border-r border-sidebar-border transition-all duration-300 flex flex-col h-full shadow-lg',
+      'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm',
       collapsed ? 'w-16' : 'w-64'
     )}>
       {/* Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-sidebar-border/50 bg-gradient-to-r from-blue-500 to-purple-600">
+      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="bg-white/20 p-2 rounded-lg mr-3 backdrop-blur-sm">
+            <div className="bg-blue-600 p-2 rounded-lg mr-3">
               <Bus className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">FERDI</h2>
-              <p className="text-xs text-white/80">Gestion de flotte</p>
+              <h2 className="text-lg font-bold text-gray-900">FERDI</h2>
+              <p className="text-xs text-gray-500">Gestion de flotte</p>
             </div>
           </div>
         )}
@@ -178,7 +166,7 @@ export function DashboardSidebar() {
           variant="ghost"
           size="sm"
           onClick={handleToggleCollapse}
-          className="text-white hover:bg-white/20 hover:text-white"
+          className="text-gray-600 hover:bg-gray-100"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -190,22 +178,21 @@ export function DashboardSidebar() {
 
       {/* User Role Badge */}
       {!collapsed && roleData && (
-        <div className="p-4 border-b border-sidebar-border/50">
+        <div className="p-4 border-b border-gray-200">
           <div className={cn(
-            'rounded-lg p-3 border-l-4',
-            roleData.bgColor,
+            'rounded-lg p-3 border-l-4 bg-gray-50',
             roleData.color.replace('bg-', 'border-')
           )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className={cn('text-sm font-medium', roleData.textColor)}>
+                <p className="text-sm font-medium text-gray-900">
                   {roleData.label}
                 </p>
-                <p className={cn('text-xs opacity-80', roleData.textColor)}>
+                <p className="text-xs text-gray-600">
                   {roleData.description}
                 </p>
               </div>
-              <Badge variant="secondary" className={cn('text-xs', roleData.textColor)}>
+              <Badge variant="secondary" className="text-xs bg-white text-gray-700 border">
                 {user?.role}
               </Badge>
             </div>
@@ -222,17 +209,17 @@ export function DashboardSidebar() {
             return (
               <Link key={item.href} href={item.href} onClick={updateActivity}>
                 <Button
-                  variant={isActive ? 'secondary' : 'ghost'}
+                  variant="ghost"
                   className={cn(
-                    'w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-all duration-200',
-                    isActive && 'bg-gradient-to-r from-sidebar-accent to-sidebar-accent/80 text-sidebar-accent-foreground shadow-sm border-l-4 border-blue-500',
+                    'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
+                    isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600',
                     collapsed && 'px-2'
                   )}
                 >
                   <Icon className={cn(
                     'h-4 w-4',
                     !collapsed && 'mr-3',
-                    isActive ? item.color.replace('text-', 'text-') : item.color
+                    isActive ? 'text-blue-600' : 'text-gray-500'
                   )} />
                   {!collapsed && (
                     <span className="font-medium">
@@ -248,8 +235,8 @@ export function DashboardSidebar() {
 
       {/* User Profile Section */}
       {!collapsed && user && (
-        <div className="p-4 border-t border-sidebar-border/50 mt-auto">
-          <div className="bg-gradient-to-r from-sidebar-accent to-sidebar-accent/80 rounded-lg p-3 border border-sidebar-border/30">
+        <div className="p-4 border-t border-gray-200 mt-auto">
+          <div className="bg-gray-50 rounded-lg p-3 border">
             <div className="flex items-center">
               <div className={cn(
                 'w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3',
@@ -258,10 +245,10 @@ export function DashboardSidebar() {
                 {`${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`.toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.full_name || `${user?.first_name} ${user?.last_name}`}
                 </p>
-                <p className="text-xs text-sidebar-accent-foreground/70 truncate">
+                <p className="text-xs text-gray-500 truncate">
                   {roleData?.label || 'Utilisateur'}
                 </p>
               </div>

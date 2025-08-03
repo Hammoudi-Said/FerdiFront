@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/auth-store'
-import { getRoleDashboardPath } from '@/lib/utils/role-redirect'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bus, Zap, Shield, Users } from 'lucide-react'

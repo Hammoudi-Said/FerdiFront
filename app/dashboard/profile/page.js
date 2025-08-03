@@ -36,11 +36,6 @@ export default function ProfilePage() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [passwordModalOpen, setPasswordModalOpen] = useState(false)
 
-  useEffect(() => {
-    updateActivity()
-    loadProfile()
-  }, [loadProfile]) // Now it's safe to depend on memoized loadProfile
-
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true)
@@ -76,6 +71,11 @@ export default function ProfilePage() {
       setLoading(false)
     }
   }, [user]) // Only depend on user data
+
+  useEffect(() => {
+    updateActivity()
+    loadProfile()
+  }, [loadProfile]) // Now it's safe to depend on memoized loadProfile
 
   const handleProfileUpdate = async (data) => {
     try {

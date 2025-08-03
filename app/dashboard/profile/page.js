@@ -39,7 +39,7 @@ export default function ProfilePage() {
   useEffect(() => {
     updateActivity()
     loadProfile()
-  }, []) // Removed updateActivity from dependencies to prevent infinite loop
+  }, [loadProfile]) // Now it's safe to depend on memoized loadProfile
 
   const loadProfile = useCallback(async () => {
     try {

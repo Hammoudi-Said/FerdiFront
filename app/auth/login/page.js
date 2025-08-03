@@ -11,9 +11,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PasswordResetModal } from '@/components/auth/password-reset-modal'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { toast } from 'sonner'
-import { Bus, LogIn, Eye, EyeOff, Building2, Users } from 'lucide-react'
+import { Bus, LogIn, Eye, EyeOff, Building2, Users, Lock } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -27,6 +28,7 @@ export default function LoginPage() {
   const { login, isLoading, token, updateActivity } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
+  const [passwordResetOpen, setPasswordResetOpen] = useState(false)
   
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -172,18 +174,28 @@ export default function LoginPage() {
                 )}
               </div>
 
-              {/* Remember me checkbox */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <Label htmlFor="remember" className="text-sm text-gray-600">
-                  Se souvenir de moi
-                </Label>
+              {/* Remember me and forgot password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="remember" className="text-sm text-gray-600">
+                    Se souvenir de moi
+                  </Label>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setPasswordResetOpen(true)}
+                  className="text-sm text-blue-600 hover:text-blue-500 hover:underline transition-colors"
+                >
+                  Mot de passe oublié ?
+                </button>
               </div>
 
               <Button 
@@ -241,6 +253,12 @@ export default function LoginPage() {
           </a>
         </p>
       </div>
+
+      {/* Password Reset Modal */}
+      <PasswordResetModal
+        open={passwordResetOpen}
+        onOpenChange={setPasswordResetOpen}
+      />
     </div>
   )
 }

@@ -254,27 +254,18 @@ export function DashboardSidebar() {
       )}
 
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-6 px-2">
+        <nav className="space-y-2 px-2">
           {/* Main Dashboard */}
           {groupedItems.main.length > 0 && renderNavGroup(groupedItems.main)}
           
-          {/* Admin Functions */}
-          {groupedItems.admin.length > 0 && renderNavGroup(groupedItems.admin, collapsed ? null : "Administration")}
+          {/* Management Section */}
+          {groupedItems.management.length > 0 && renderNavGroup(groupedItems.management, collapsed ? null : "Gestion")}
           
-          {/* Operations */}
+          {/* Operations Section */}
           {groupedItems.operations.length > 0 && renderNavGroup(groupedItems.operations, collapsed ? null : "Opérations")}
           
-          {/* Business Management */}
-          {groupedItems.business.length > 0 && renderNavGroup(groupedItems.business, collapsed ? null : "Gestion")}
-          
-          {/* Legal Documents */}
-          {groupedItems.documents.length > 0 && renderNavGroup(groupedItems.documents, collapsed ? null : "Légal")}
-          
-          {/* Financial */}
-          {groupedItems.financial.length > 0 && renderNavGroup(groupedItems.financial, collapsed ? null : "Financier")}
-          
-          {/* Support */}
-          {groupedItems.support.length > 0 && renderNavGroup(groupedItems.support, collapsed ? null : "Support")}
+          {/* Business Section */}
+          {groupedItems.business.length > 0 && renderNavGroup(groupedItems.business, collapsed ? null : "Business")}
         </nav>
       </ScrollArea>
 

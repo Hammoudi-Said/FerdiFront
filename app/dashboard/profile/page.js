@@ -39,7 +39,7 @@ export default function ProfilePage() {
   useEffect(() => {
     updateActivity()
     loadProfile()
-  }, [updateActivity])
+  }, []) // Removed updateActivity from dependencies to prevent infinite loop
 
   const loadProfile = async () => {
     try {

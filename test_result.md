@@ -256,10 +256,14 @@ metadata:
 test_plan:
   current_focus:
     - "FastAPI Backend Server Implementation"
+  stuck_tasks:
+    - "FastAPI Backend Server Implementation"
     - "Company Registration API (POST /api/companies/register)"
     - "User Signup API (POST /api/users/signup)"
     - "Login API (POST /api/login/access-token)"
-  stuck_tasks: []
+    - "Get Current User API (GET /api/users/me)"
+    - "Get Company Data API (GET /api/companies/me)"
+    - "List Users API (GET /api/users/)"
   test_all: false
   test_priority: "high_first"
 

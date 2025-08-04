@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -35,27 +35,28 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: profile?.first_name || '',
-      last_name: profile?.last_name || '',
-      mobile: profile?.mobile || '',
+      first_name: '',
+      last_name: '',
+      mobile: '',
     },
   })
 
-  // Update form when profile changes
-  if (profile && form.formState.defaultValues !== profile) {
-    form.reset({
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      mobile: profile.mobile || '',
-    })
-  }
+  // Update form when profile changes - use useEffect to avoid infinite loops
+  useEffect(() => {
+    if (profile && open) {
+      form.reset({
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        mobile: profile.mobile || '',
+      })
+    }
+  }, [profile, open, form])
 
   const onSubmit = async (data) => {
     setIsLoading(true)
     try {
       await onSave(data)
       onOpenChange(false)
-      form.reset()
     } catch (error) {
       console.error('Error updating profile:', error)
     } finally {

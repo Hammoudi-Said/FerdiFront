@@ -64,7 +64,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
 
   const onEmailSubmit = async (data) => {
     setIsLoading(true)
-    
+
     try {
       const response = await fetch(`/api/password-recovery/${encodeURIComponent(data.email)}`, {
         method: 'POST',
@@ -97,7 +97,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
 
   const onResetSubmit = async (data) => {
     setIsLoading(true)
-    
+
     try {
       const response = await fetch('/api/reset-password/', {
         method: 'POST',
@@ -119,7 +119,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
       toast.success('Mot de passe réinitialisé !', {
         description: 'Vous pouvez maintenant vous connecter avec votre nouveau mot de passe'
       })
-      
+
       handleClose()
 
     } catch (error) {
@@ -146,7 +146,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
                 Saisissez votre adresse email pour recevoir un lien de réinitialisation
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="reset-email">Adresse email</Label>
@@ -199,7 +199,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
                 <span className="font-medium">{userEmail}</span>
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="space-y-4">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-800">
@@ -209,19 +209,6 @@ export function PasswordResetModal({ open, onOpenChange }) {
                 <p className="text-xs text-blue-700 mt-2">
                   N'oubliez pas de regarder dans vos spams !
                 </p>
-              </div>
-
-              <div className="border-t pt-4">
-                <p className="text-sm text-gray-600 mb-3">
-                  Vous avez déjà reçu un email avec un token ? Saisissez-le ci-dessous :
-                </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setStep('reset')}
-                >
-                  J'ai un token de réinitialisation
-                </Button>
               </div>
 
               <div className="flex justify-end">
@@ -253,7 +240,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
                 </div>
               </div>
             </DialogHeader>
-            
+
             <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="token">Token de réinitialisation</Label>

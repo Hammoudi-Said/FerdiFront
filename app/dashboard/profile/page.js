@@ -93,7 +93,7 @@ export default function ProfilePage() {
     try {
       if (USE_MOCK_DATA) {
         // Simulate update in mock mode
-        setProfile({ ...profile, ...data })
+        setProfile(prevProfile => ({ ...prevProfile, ...data }))
         toast.success('Profil mis à jour avec succès')
         return
       }

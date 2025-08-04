@@ -36,46 +36,58 @@ export default function ProfilePage() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [passwordModalOpen, setPasswordModalOpen] = useState(false)
 
-  const loadProfile = useCallback(async () => {
-    try {
-      setLoading(true)
-      console.log('Loading profile... USE_MOCK_DATA:', USE_MOCK_DATA)
-      
-      if (USE_MOCK_DATA) {
-        // Use store data in mock mode
-        console.log('Using store data for profile:', user)
-        setProfile(user)
-      } else {
-        // Call the backend API /users/me
-        console.log('Calling backend API /users/me...')
-        const response = await usersAPI.getProfile()
-        console.log('Profile API response:', response)
-        setProfile(response.data)
-      }
-    } catch (error) {
-      console.error('Failed to load profile:', error)
-      console.error('Error details:', error.response || error)
-      
-      // Show more detailed error message
-      const errorMessage = error.response?.data?.detail || error.message || 'Erreur lors du chargement du profil'
-      toast.error('Erreur lors du chargement du profil', {
-        description: errorMessage
-      })
-      
-      // Fallback to store data if API fails
-      if (user) {
-        console.log('Falling back to store data:', user)
-        setProfile(user)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [user]) // Only depend on user data
-
   useEffect(() => {
+    let isMounted = true
+    
+    const loadProfile = async () => {
+      try {
+        setLoading(true)
+        console.log('Loading profile... USE_MOCK_DATA:', USE_MOCK_DATA)
+        
+        if (USE_MOCK_DATA) {
+          // Use store data in mock mode
+          console.log('Using store data for profile:', user)
+          if (isMounted) {
+            setProfile(user)
+          }
+        } else {
+          // Call the backend API /users/me
+          console.log('Calling backend API /users/me...')
+          const response = await usersAPI.getProfile()
+          console.log('Profile API response:', response)
+          if (isMounted) {
+            setProfile(response.data)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error)
+        console.error('Error details:', error.response || error)
+        
+        // Show more detailed error message
+        const errorMessage = error.response?.data?.detail || error.message || 'Erreur lors du chargement du profil'
+        toast.error('Erreur lors du chargement du profil', {
+          description: errorMessage
+        })
+        
+        // Fallback to store data if API fails
+        if (user && isMounted) {
+          console.log('Falling back to store data:', user)
+          setProfile(user)
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
     updateActivity()
     loadProfile()
-  }, [loadProfile]) // Now it's safe to depend on memoized loadProfile
+    
+    return () => {
+      isMounted = false
+    }
+  }, []) // Run only once on mount
 
   const handleProfileUpdate = async (data) => {
     try {

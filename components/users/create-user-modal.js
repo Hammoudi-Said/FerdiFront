@@ -178,7 +178,7 @@ export function CreateUserModal({ open, onOpenChange, onSave }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
+                      {getAvailableRoles().map(([roleId, roleData]) => (
                         <SelectItem key={roleId} value={roleId}>
                           <div className="flex items-center space-x-2">
                             <div className={`w-3 h-3 rounded-full ${roleData.color}`}></div>

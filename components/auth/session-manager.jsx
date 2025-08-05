@@ -125,7 +125,6 @@ export function SessionManager() {
       
       // Auto logout when time is up
       if (timeLeft <= 0) {
-        console.log('⏰ Session timeout reached')
         logout('session_timeout')
         toast.error('Session expirée', {
           description: 'Vous avez été déconnecté pour inactivité'

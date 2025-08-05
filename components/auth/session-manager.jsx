@@ -222,10 +222,10 @@ export function SessionManager() {
           </DialogHeader>
           
           <div className="space-y-4">
-            {/* Time remaining display */}
+            {/* Session expiring indicator */}
             <div className="text-center">
-              <div className="text-2xl font-bold text-amber-600 mb-2">
-                {formatTime(remainingTime)}
+              <div className="text-lg font-medium text-amber-600 mb-2">
+                Votre session va bientôt expirer
               </div>
               <Progress value={getProgressPercentage()} className="w-full" />
             </div>

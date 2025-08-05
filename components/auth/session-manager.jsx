@@ -280,24 +280,7 @@ export function SessionManager() {
         </DialogContent>
       </Dialog>
       
-      {/* Session Status Indicator (optional, for development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 left-4 z-50">
-          <div className="bg-black bg-opacity-75 text-white text-xs px-3 py-2 rounded flex items-center space-x-2">
-            {isOnline ? (
-              <Wifi className="h-3 w-3 text-green-400" />
-            ) : (
-              <WifiOff className="h-3 w-3 text-red-400" />
-            )}
-            <span>
-              Session: {formatTime(remainingTime)}
-            </span>
-            {showWarning && (
-              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-            )}
-          </div>
-        </div>
-      )}
+
     </>
   )
 }

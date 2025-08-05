@@ -45,6 +45,12 @@ const formSchema = z.object({
 
 export function CreateUserModal({ open, onOpenChange, onSave }) {
   const [isLoading, setIsLoading] = useState(false)
+  const { user, hasPermission } = useAuthStore()
+
+  // Only admins and super admins can create users
+  if (!hasPermission('users_manage')) {
+    return null
+  }
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -57,6 +63,24 @@ export function CreateUserModal({ open, onOpenChange, onSave }) {
       password: '',
     },
   })
+
+  // Filter roles based on current user's permissions
+  const getAvailableRoles = () => {
+    const allRoles = Object.entries(ROLE_DEFINITIONS)
+    
+    // Super admin (role 1) can create any role
+    if (user?.role === '1') {
+      return allRoles
+    }
+    
+    // Admin (role 2) can create roles 2-6 (cannot create super admin)
+    if (user?.role === '2') {
+      return allRoles.filter(([roleId]) => roleId !== '1')
+    }
+    
+    // No other role can create users
+    return []
+  }
 
   const onSubmit = async (data) => {
     setIsLoading(true)

@@ -74,7 +74,6 @@ export function SessionManager() {
       if (showWarning) {
         setShowWarning(false)
         warningShown.current = false
-        console.log('🔄 Session extended due to user activity')
         toast.success('Session prolongée automatiquement')
       }
     }

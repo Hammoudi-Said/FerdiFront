@@ -147,6 +147,23 @@ export default function CompanyPage() {
           )}
         </div>
 
+        {/* Permission-based read-only notice */}
+        {!canEdit && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Building2 className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Mode lecture seule :</strong> Vous pouvez consulter les informations de l'entreprise mais vous n'avez pas les droits pour les modifier. 
+                  Contactez votre administrateur pour toute modification.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-6 md:grid-cols-2">
           {/* Company Information */}
           <Card>

@@ -147,8 +147,6 @@ export function SessionManager() {
   // Handle session extension
   const handleExtendSession = async () => {
     try {
-      console.log('🔄 Extending session...')
-      
       if (isOnline) {
         // Refresh auth data from server
         const result = await checkAuth(true) // Skip cache
@@ -157,7 +155,6 @@ export function SessionManager() {
           setShowWarning(false)
           warningShown.current = false
           toast.success('Session prolongée avec succès')
-          console.log('✅ Session extended successfully')
         } else {
           throw new Error('Failed to extend session')
         }
@@ -167,7 +164,6 @@ export function SessionManager() {
         setShowWarning(false)
         warningShown.current = false
         toast.info('Session prolongée en mode hors ligne')
-        console.log('📱 Session extended offline')
       }
     } catch (error) {
       console.error('❌ Failed to extend session:', error)

@@ -175,7 +175,6 @@ export function SessionManager() {
   
   // Handle manual logout
   const handleLogout = () => {
-    console.log('👋 Manual logout requested')
     logout('user_requested')
     toast.info('Déconnexion en cours...')
   }

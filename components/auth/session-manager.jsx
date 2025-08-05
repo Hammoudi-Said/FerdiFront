@@ -121,12 +121,6 @@ export function SessionManager() {
       if (timeLeft <= 300000 && timeLeft > 0 && !warningShown.current) {
         setShowWarning(true)
         warningShown.current = true
-        console.log('⚠️ Session expiring soon, showing warning')
-        
-        toast.warning('Session expire bientôt', {
-          description: `Votre session expire dans ${Math.ceil(timeLeft / 60000)} minutes`,
-          duration: 10000
-        })
       }
       
       // Auto logout when time is up

@@ -162,7 +162,7 @@ export function DashboardSidebar() {
   // Group items by category for better organization - simplified
   const groupedItems = {
     main: filteredItems.filter(item => item.href === '/dashboard'),
-    management: filteredItems.filter(item => ['users', 'drivers', 'fleet'].some(path => item.href.includes(path))),
+    management: filteredItems.filter(item => ['users', 'drivers', 'fleet', 'invitations'].some(path => item.href.includes(path))),
     operations: filteredItems.filter(item => ['planning', 'my-routes'].some(path => item.href.includes(path))),
     business: filteredItems.filter(item => ['quotes', 'invoices', 'automatisations', 'subcontractors', 'legal-documents', 'clients'].some(path => item.href.includes(path))),
   }

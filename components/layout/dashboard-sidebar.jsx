@@ -30,7 +30,8 @@ import {
   Zap,
   HandHeart,
   FileCheck,
-  UserPlus
+  UserPlus,
+  Mail
 } from 'lucide-react'
 
 // Simplified navigation - cleaner sidebar

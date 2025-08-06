@@ -1,0 +1,126 @@
+{
+  "summary": {
+    "passed": 8,
+    "total": 8,
+    "success_rate": 100.0,
+    "timestamp": "2025-08-06T18:13:27.936258"
+  },
+  "tests": [
+    {
+      "test": "Invitation Pages Exist",
+      "success": true,
+      "message": "All invitation pages exist",
+      "timestamp": "2025-08-06T18:13:27.935663",
+      "details": {
+        "pages": [
+          "/app/app/invitations/page.js",
+          "/app/app/invitations/accept/page.js"
+        ]
+      }
+    },
+    {
+      "test": "Invitation Components Exist",
+      "success": true,
+      "message": "All invitation components exist",
+      "timestamp": "2025-08-06T18:13:27.935701",
+      "details": {
+        "components": [
+          "/app/components/invitations/invitations-table.jsx",
+          "/app/components/invitations/invitation-accept-form.jsx",
+          "/app/components/invitations/create-invitation-modal.jsx"
+        ]
+      }
+    },
+    {
+      "test": "Invitation Page Implementation",
+      "success": true,
+      "message": "All required features implemented in invitation page",
+      "timestamp": "2025-08-06T18:13:27.935787",
+      "details": {
+        "invitationsAPI import": true,
+        "Mock data support": true,
+        "Role-based access": true,
+        "Stats cards": true,
+        "Search functionality": true,
+        "Create invitation modal": true,
+        "Invitations table": true,
+        "Resend functionality": true,
+        "Cancel functionality": true
+      }
+    },
+    {
+      "test": "Invitation Accept Page Implementation",
+      "success": true,
+      "message": "All required features implemented in acceptance page",
+      "timestamp": "2025-08-06T18:13:27.935868",
+      "details": {
+        "Token parameter handling": true,
+        "Accept form component": true,
+        "Error handling": true,
+        "Success handling": true,
+        "Public access": true
+      }
+    },
+    {
+      "test": "Invitations Table Component",
+      "success": true,
+      "message": "All required features implemented in table component",
+      "timestamp": "2025-08-06T18:13:27.935937",
+      "details": {
+        "Status badges": true,
+        "Role information": true,
+        "Expiry handling": true,
+        "Action buttons": true,
+        "Permission checks": true,
+        "Loading states": true,
+        "Empty state": true
+      }
+    },
+    {
+      "test": "Create Invitation Modal",
+      "success": true,
+      "message": "All required features implemented in create modal",
+      "timestamp": "2025-08-06T18:13:27.936010",
+      "details": {
+        "Form validation": true,
+        "Role filtering": true,
+        "Mock data support": true,
+        "API integration": true,
+        "Required fields": true,
+        "Optional fields": true,
+        "Error handling": true,
+        "Success callback": true
+      }
+    },
+    {
+      "test": "Invitation Accept Form",
+      "success": true,
+      "message": "All required features implemented in accept form",
+      "timestamp": "2025-08-06T18:13:27.936083",
+      "details": {
+        "Form validation": true,
+        "Required fields": true,
+        "Password confirmation": true,
+        "Mock data support": true,
+        "API integration": true,
+        "Token handling": true,
+        "Success handling": true,
+        "Error handling": true,
+        "Password visibility toggle": true
+      }
+    },
+    {
+      "test": "Role-Based Access Control",
+      "success": true,
+      "message": "Role-based access control properly implemented - only super_admin and admin can access",
+      "timestamp": "2025-08-06T18:13:27.936141",
+      "details": {
+        "allowed_roles": [
+          "1 (super_admin)",
+          "2 (admin)"
+        ],
+        "access_control": "RoleGuard component used"
+      }
+    }
+  ]
+}

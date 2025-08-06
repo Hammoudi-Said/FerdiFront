@@ -227,10 +227,20 @@ export default function UsersPage() {
                 Exporter CSV
               </Button>
               {hasPermission('users_manage') && (
-                <Button onClick={() => setCreateModalOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvel utilisateur
-                </Button>
+                <>
+                  <Button 
+                    variant="outline"
+                    onClick={() => window.location.href = '/invitations'}
+                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Invitations
+                  </Button>
+                  <Button onClick={() => setCreateModalOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nouvel utilisateur
+                  </Button>
+                </>
               )}
             </div>
           </div>

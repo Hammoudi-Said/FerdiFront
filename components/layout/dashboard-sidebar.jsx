@@ -45,8 +45,14 @@ const navigationItems = [
   // ADMIN SECTION
   {
     title: 'Utilisateurs',
-    href: '/dashboard/users',
+    href: '/users',
     icon: Users,
+    roles: ['1', '2'], // super_admin, admin
+  },
+  {
+    title: 'Invitations',
+    href: '/invitations',
+    icon: Mail,
     roles: ['1', '2'], // super_admin, admin
   },
   {

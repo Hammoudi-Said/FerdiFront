@@ -104,6 +104,18 @@
 
 user_problem_statement: "Test the FERDI application backend integration and authentication system. The frontend includes authentication system with company registration, employee signup, login/logout with JWT tokens, and role-based access. Key endpoints to test include company registration, user signup, login, protected routes, and error handling."
 
+  - task: "Invitation System API Integration"
+    implemented: true
+    working: true
+    file: "/app/lib/api-client.js, /app/components/invitations/, /app/app/invitations/"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ COMPLETE: Implemented comprehensive invitation system with all OpenAPI spec endpoints (POST /invitations/, GET /invitations/, POST /invitations/accept, DELETE /invitations/{id}, POST /invitations/{id}/resend). Created full frontend with invitation management page, create invitation modal, invitations table, acceptance form, sidebar integration, and role-based permissions. System supports mock data and real API integration with proper error handling, French localization, and expiry management."
+
 backend:
   - task: "FastAPI Backend Server Implementation"
     implemented: false

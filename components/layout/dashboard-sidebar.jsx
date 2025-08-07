@@ -36,13 +36,13 @@ import {
   Mail
 } from 'lucide-react'
 
-// Simplified navigation - cleaner sidebar
+// Navigation simplifiée - sidebar propre avec nouveaux rôles
 const navigationItems = [
   {
     title: 'Tableau de bord',
     href: '/dashboard',
     icon: BarChart3,
-    roles: ['1', '2', '3', '4', '5', '6'], // All roles
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER, UserRole.INTERNAL_SUPPORT, UserRole.ACCOUNTANT],
   },
   
   // ADMIN SECTION
@@ -50,25 +50,25 @@ const navigationItems = [
     title: 'Utilisateurs',
     href: '/users',
     icon: Users,
-    roles: ['1', '2'], // super_admin, admin
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
   },
   {
     title: 'Invitations',
     href: '/invitations',
     icon: Mail,
-    roles: ['1', '2'], // super_admin, admin
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
   },
   {
     title: 'Chauffeurs',
     href: '/dashboard/drivers',
     icon: UserCheck,
-    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH],
   },
   {
     title: 'Véhicules',
     href: '/dashboard/fleet',
     icon: Bus,
-    roles: ['1', '2'], // super_admin, admin
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
   },
   
   // OPERATIONS SECTION
@@ -76,13 +76,13 @@ const navigationItems = [
     title: 'Planning',
     href: '/dashboard/planning',
     icon: Calendar,
-    roles: ['1', '2', '3', '4'], // super_admin, admin, dispatch, driver
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER],
   },
   {
     title: 'Mes trajets',
     href: '/dashboard/my-routes',
     icon: MapPin,
-    roles: ['4'], // driver only
+    roles: [UserRole.DRIVER],
   },
   
   // BUSINESS SECTION
@@ -90,37 +90,37 @@ const navigationItems = [
     title: 'Devis',
     href: '/dashboard/quotes',
     icon: FileText,
-    roles: ['1', '2'], // super_admin, admin
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
   },
   {
     title: 'Facturation',
     href: '/dashboard/invoices',
     icon: DollarSign,
-    roles: ['1', '2', '6'], // super_admin, admin, accountant
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.ACCOUNTANT],
   },
   {
     title: 'Automatisations',
     href: '/dashboard/automatisations',
     icon: Zap,
-    roles: ['1', '2'], // super_admin, admin
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN],
   },
   {
     title: 'Sous-traitants',
     href: '/dashboard/subcontractors',
     icon: HandHeart,
-    roles: ['1', '2', '3'], // super_admin, admin, dispatch
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH],
   },
   {
     title: 'Documents légaux',
     href: '/dashboard/legal-documents',
     icon: FileCheck,
-    roles: ['1', '2', '6'], // super_admin, admin, accountant
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.ACCOUNTANT],
   },
   {
     title: 'Clients',
     href: '/dashboard/clients',
     icon: UserPlus,
-    roles: ['1', '2', '5'], // super_admin, admin, internal_support
+    roles: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INTERNAL_SUPPORT],
   }
 ]
 

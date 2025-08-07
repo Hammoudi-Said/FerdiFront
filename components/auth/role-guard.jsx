@@ -11,12 +11,12 @@ import { Button } from '@/components/ui/button'
 /**
  * Role Guard Component - Protects pages based on user roles and permissions
  */
-export function RoleGuard({ 
-  children, 
-  allowedRoles = [], 
+export function RoleGuard({
+  children,
+  allowedRoles = [],
   requiredPermissions = [],
   fallbackPath = '/dashboard',
-  showUnauthorized = true 
+  showUnauthorized = true
 }) {
   const router = useRouter()
   const { user, token, isLoading, checkAuth, hasRole, hasPermission, getRoleData } = useAuthStore()
@@ -31,17 +31,19 @@ export function RoleGuard({
         return
       }
 
-      // If no user data, try to fetch it
+      // Ensure user data is fetched before proceeding
       if (!user) {
         await checkAuth()
-        return
       }
+
+      // Re-check user after fetching
+      const updatedUser = useAuthStore.getState().user
 
       // Check role authorization
       const roleAuthorized = allowedRoles.length === 0 || allowedRoles.some(role => hasRole(role))
-      
+
       // Check permission authorization
-      const permissionAuthorized = requiredPermissions.length === 0 || 
+      const permissionAuthorized = requiredPermissions.length === 0 ||
         requiredPermissions.some(permission => hasPermission(permission))
 
       const authorized = roleAuthorized && permissionAuthorized
@@ -78,7 +80,7 @@ export function RoleGuard({
   // Show unauthorized page if not authorized and showUnauthorized is true
   if (!isAuthorized && showUnauthorized) {
     const roleData = getRoleData()
-    
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 p-4">
         <Card className="w-full max-w-md">
@@ -107,7 +109,7 @@ export function RoleGuard({
                 </div>
               </div>
             )}
-            
+
             <div className="space-y-2">
               <p className="text-sm text-gray-600">
                 Cette page nécessite :
@@ -125,15 +127,15 @@ export function RoleGuard({
             </div>
 
             <div className="flex space-x-2">
-              <Button 
-                onClick={() => router.back()} 
-                variant="outline" 
+              <Button
+                onClick={() => router.back()}
+                variant="outline"
                 className="flex-1"
               >
                 Retour
               </Button>
-              <Button 
-                onClick={() => router.push(fallbackPath)} 
+              <Button
+                onClick={() => router.push(fallbackPath)}
                 className="flex-1"
               >
                 <Home className="mr-2 h-4 w-4" />

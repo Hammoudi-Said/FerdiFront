@@ -10,25 +10,15 @@ import { Bus, Zap, Shield, Users } from 'lucide-react'
 
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 
-// Enhanced loading screen with company branding
+// Écran de chargement amélioré avec le logo Ferdi
 const LoadingScreen = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div className="text-center space-y-6">
       <div className="relative">
-        {/* Animated logo */}
-        <div className="relative w-20 h-20 mx-auto mb-4">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
-          <div className="relative w-full h-full bg-gradient-to-r from-blue-600 to-purple-700 rounded-full flex items-center justify-center">
-            <Bus className="h-10 w-10 text-white" />
-          </div>
-        </div>
+        {/* Logo Ferdi animé */}
+        <FerdiLogoLoading size="xl" className="mb-6" />
         
-        {/* Company name with gradient */}
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          FERDI
-        </h1>
-        
-        <p className="text-gray-600 mt-2 font-medium">Gestion de flotte d'autocars</p>
+        <p className="text-gray-600 mt-4 font-medium">Gestion de flotte d'autocars</p>
       </div>
       
       <div className="space-y-3">

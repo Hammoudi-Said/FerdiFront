@@ -170,23 +170,16 @@ export function AuthGuard({ children }) {
     return children
   }
 
-  // Checking authentication - show loading
+  // Checking authentication - show loading with Ferdi logo
   if (authState === 'checking' || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="text-center space-y-6">
           <div className="relative">
-            <div className="w-20 h-20 mx-auto mb-4">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
-              <div className="relative w-full h-full bg-gradient-to-r from-blue-600 to-purple-700 rounded-full flex items-center justify-center">
-                <Shield className="h-10 w-10 text-white" />
-              </div>
-            </div>
+            {/* Logo Ferdi avec animation d'authentification */}
+            <FerdiLogoLoading size="xl" className="mb-6" />
             
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              FERDI
-            </h1>
-            <p className="text-gray-600 mt-2 font-medium">Vérification de l'authentification</p>
+            <p className="text-gray-600 mt-4 font-medium">Vérification de l'authentification</p>
           </div>
           
           <div className="space-y-3">

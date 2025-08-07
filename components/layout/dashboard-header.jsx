@@ -244,7 +244,7 @@ export function DashboardHeader() {
               <span>Ma société</span>
             </DropdownMenuItem>
             
-            {(user?.role === '1' || user?.role === '2') && (
+            {(user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN) && (
               <DropdownMenuItem onClick={() => {
                 updateActivity()
                 router.push('/dashboard/settings')

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { FerdiLogoLoading } from '@/components/ui/ferdi-logo'
 import { Shield, RefreshCw, AlertTriangle, Wifi, WifiOff } from 'lucide-react'
 import { toast } from 'sonner'
 

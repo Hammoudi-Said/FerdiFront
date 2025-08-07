@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timedelta
 
 # Configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://d057352f-aefe-4444-8bc0-0f249c38bf65.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://1203e6e9-e02a-436a-a857-1c91e1f5577f.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Test data

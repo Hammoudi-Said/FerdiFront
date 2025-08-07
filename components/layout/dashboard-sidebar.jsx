@@ -6,8 +6,10 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { useAuthStore, ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { useAuthStore } from '@/lib/stores/auth-store'
+import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
 import { Badge } from '@/components/ui/badge'
+import { FerdiLogoSidebar } from '@/components/ui/ferdi-logo'
 import {
   Bus,
   Users,

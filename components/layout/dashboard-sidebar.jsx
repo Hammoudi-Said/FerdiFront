@@ -211,24 +211,28 @@ export function DashboardSidebar() {
       'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm',
       collapsed ? 'w-16' : 'w-72'
     )}>
-      {/* Header */}
+      {/* Header avec logo Ferdi */}
       <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
         {!collapsed && (
           <div className="flex items-center">
-            <div className="bg-blue-600 p-2 rounded-lg mr-3">
-              <Bus className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">FERDI</h2>
+            <FerdiLogoSidebar collapsed={collapsed} className="mr-2" />
+            <div className="ml-2">
               <p className="text-xs text-gray-500">Gestion de flotte</p>
             </div>
           </div>
         )}
+        
+        {collapsed && (
+          <div className="flex justify-center w-full">
+            <FerdiLogoSidebar collapsed={collapsed} />
+          </div>
+        )}
+        
         <Button
           variant="ghost"
           size="sm"
           onClick={handleToggleCollapse}
-          className="text-gray-600 hover:bg-gray-100"
+          className="text-gray-600 hover:bg-gray-100 flex-shrink-0"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />

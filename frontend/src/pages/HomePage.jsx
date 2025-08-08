@@ -83,7 +83,7 @@ const HomePage = () => {
           </div>
 
           {/* Elegant list with icons and dashes */}
-          <Card className="p-6 md:p-8 bg-white/70 backdrop-blur-sm border-amber-200/50 shadow-lg">
+          <Card className="p-4 sm:p-6 md:p-8 bg-white/70 backdrop-blur-sm border-amber-200/50 shadow-lg divide-y divide-amber-100">
             <ul className="space-y-4">
               {programDetails.map((item, idx) => (
                 <li key={idx} className="flex items-center gap-4 text-stone-800">

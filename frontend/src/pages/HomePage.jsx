@@ -41,7 +41,7 @@ const HomePage = () => {
     <div className="min-h-screen">
       {/* Hero Section with provided image */}
       <section
-        className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative"
+        className="min-h-[80vh] sm:min-h-[85vh] md:min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 text-center relative"
         style={{
           backgroundImage: `url(${HERO_IMAGE})`,
           backgroundSize: 'cover',

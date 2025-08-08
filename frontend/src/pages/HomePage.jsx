@@ -58,7 +58,7 @@ const HomePage = () => {
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
               Amel &amp; Tarek
             </h1>
-            <div className="text-xl md:text-2xl font-serif text-stone-700">
+            <div className="text-lg sm:text-xl md:text-2xl font-serif text-stone-700">
               11 Octobre 2025
             </div>
           </div>

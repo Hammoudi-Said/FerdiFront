@@ -5,7 +5,7 @@ import { ArrowDown, Clock, MapPin, Music, Utensils } from "lucide-react";
 import { Link } from "react-router-dom";
 import ImageCarousel from "../components/ImageCarousel";
 
-const HERO_IMAGE = "/hero.jpg";
+const HERO_IMAGE = "/hero_full.png";
 
 const HomePage = () => {
   const programDetails = [

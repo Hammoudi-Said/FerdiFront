@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "../components/ui/card";
-import { MapPin, Car, Train, Clock, Navigation } from "lucide-react";
+import { MapPin, Car, Train, Clock, Navigation, Users, Camera, AlertTriangle } from "lucide-react";
 
 const DetailsPage = () => {
   return (
@@ -32,9 +32,39 @@ const DetailsPage = () => {
 
           {/* Section transport */}
           <div className="space-y-6">
-            <h2 className="text-3xl font-serif text-amber-900 text-center mb-8">
+            <h2 className="text-3xl font-serif text-amber-900 text-center mb-6">
               Voici tout ce que vous devez savoir pour vous y rendre
             </h2>
+
+            {/* Infos pratiques supplémentaires */}
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border-amber-200/50 shadow-lg">
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mt-0.5">
+                    <Users className="h-5 w-5 text-amber-700" />
+                  </div>
+                  <p className="text-stone-700">
+                    <span className="font-medium">Enfants bienvenus.</span> Une kids zone sera prévue sur place avec une baby-sitter pour la garde et l'animation. Une pièce calme à l'étage permettra aux enfants de se reposer ou de dormir (s'ils y arrivent!).
+                  </p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center mt-0.5">
+                    <AlertTriangle className="h-5 w-5 text-rose-700" />
+                  </div>
+                  <p className="text-stone-700">
+                    <span className="font-medium">Allergies et régimes particuliers.</span> Lors de votre confirmation, merci de nous signaler toute allergie ou restriction alimentaire afin que nous puissions adapter le menu du dîner.
+                  </p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mt-0.5">
+                    <Camera className="h-5 w-5 text-green-700" />
+                  </div>
+                  <p className="text-stone-700">
+                    <span className="font-medium">Photos.</span> Immortalisons ces instants magiques ! N'hésitez pas à prendre vos clichés ; nous partagerons également les photos officielles avec vous après l'événement.
+                  </p>
+                </li>
+              </ul>
+            </Card>
 
             {/* En voiture */}
             <Card className="p-8 bg-white/80 backdrop-blur-sm border-amber-200/50 shadow-lg">

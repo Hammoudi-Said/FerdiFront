@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Great+Vibes&display=swap');
 
 .App {
   min-height: 100vh;
@@ -8,6 +8,11 @@
 /* Custom font classes */
 .font-serif {
   font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+}
+
+.font-calligraphic {
+  font-family: 'Great Vibes', cursive;
   font-weight: 400;
 }
 
@@ -207,7 +212,7 @@ html {
 /* Text selection */
 ::selection {
   background: linear-gradient(45deg, #f3e8d3, #fde68a);
-  color: #8b5a2b;
+  color: #0a0a0a;
 }
 
 /* Focus styles with fresh colors */

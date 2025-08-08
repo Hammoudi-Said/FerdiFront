@@ -5,16 +5,18 @@ import { ArrowDown, Clock, MapPin, Music, Utensils } from "lucide-react";
 import { Link } from "react-router-dom";
 import ImageCarousel from "../components/ImageCarousel";
 
+const HERO_IMAGE = "https://customer-assets.emergentagent.com/job_281c33af-8a1d-4521-bcec-137da3c8950f/artifacts/dg0lpi0j_1754605409302blob.jpg";
+
 const HomePage = () => {
   const programDetails = [
     {
       time: "11h",
-      event: "Cérémonie à la Mairie de Saint Cyr l'école",
+      event: "Mairie de St Cyr",
       icon: <MapPin className="h-5 w-5 text-amber-600" />,
     },
     {
       time: "17h",
-      event: "Cocktail de Bienvenue",
+      event: "Cocktail",
       icon: <Clock className="h-5 w-5 text-amber-600" />,
     },
     {
@@ -37,24 +39,27 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif text-amber-900 mb-8 leading-tight">
-            Marhaba
-          </h1>
-          <div className="space-y-4 mb-12">
-            <h2 className="text-2xl md:text-4xl font-serif text-stone-700 mb-2">
-              au mariage de
-            </h2>
-            <div className="text-4xl md:text-6xl font-serif text-amber-800 mb-4">
-              Amel & Tarek
-            </div>
-            <div className="text-xl md:text-2xl font-serif text-stone-600 border-t border-b border-amber-200 py-4 inline-block px-8">
-              11.10.2025
+      {/* Hero Section with provided image */}
+      <section
+        className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative"
+        style={{
+          backgroundImage: `url(${HERO_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* subtle overlay for readability */}
+        <div className="absolute inset-0 bg-white/70" />
+        <div className="relative max-w-4xl mx-auto">
+          <div className="space-y-6 mb-8">
+            <div className="tracking-[0.2em] uppercase text-stone-700 font-serif">Marhaba au mariage de</div>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
+              Amel &amp; Tarek
+            </h1>
+            <div className="text-xl md:text-2xl font-serif text-stone-700">
+              11 Octobre 2025
             </div>
           </div>
-          
           <Button
             onClick={scrollToProgram}
             variant="outline"
@@ -69,37 +74,31 @@ const HomePage = () => {
 
       {/* Program Section */}
       <section id="program-section" className="py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-serif text-amber-900 mb-4">
-              Rejoignez-nous
-            </h2>
-            <p className="text-xl font-serif text-stone-600">
-              Samedi 11 Octobre 2025
-            </p>
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl md:text-5xl font-serif text-amber-900 mb-2">Programme</h2>
+            <p className="text-stone-600 font-serif">Samedi 11 Octobre 2025</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 mb-12">
-            {programDetails.map((item, index) => (
-              <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-amber-200/50 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0 w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+          {/* Elegant list with icons and dashes */}
+          <Card className="p-6 md:p-8 bg-white/70 backdrop-blur-sm border-amber-200/50 shadow-lg">
+            <ul className="space-y-4">
+              {programDetails.map((item, idx) => (
+                <li key={idx} className="flex items-center gap-4 text-stone-800">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
                     {item.icon}
                   </div>
-                  <div>
-                    <div className="text-2xl font-serif text-amber-800 mb-1">
-                      {item.time}
-                    </div>
-                    <div className="text-stone-700 font-medium">
-                      {item.event}
-                    </div>
+                  <div className="text-lg md:text-xl font-serif">
+                    <span className="text-amber-800 font-medium">{item.time}</span>
+                    <span className="mx-2">-</span>
+                    <span>{item.event}</span>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </li>
+              ))}
+            </ul>
+          </Card>
 
-          <div className="text-center">
+          <div className="text-center mt-10">
             <Link to="/details">
               <Button className="bg-amber-700 hover:bg-amber-800 text-white font-serif text-lg px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
                 Retrouvez tous les détails

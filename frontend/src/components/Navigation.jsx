@@ -10,9 +10,7 @@ const Navigation = () => {
   const menuItems = [
     { path: "/", label: "Accueil" },
     { path: "/details", label: "Détails" },
-    { path: "/infos-utiles", label: "Infos utiles" },
     { path: "/confirmation", label: "Confirmation" },
-    { path: "/contact", label: "Contact" },
   ];
 
   return (

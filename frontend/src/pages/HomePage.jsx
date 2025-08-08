@@ -53,7 +53,7 @@ const HomePage = () => {
         <div className="pt-12 sm:pt-0" />
         <div className="absolute inset-0 bg-transparent pointer-events-none" />
         <h1 className="sr-only">Marhaba au mariage de Amel et Tarek — 11 Octobre 2025</h1>
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2">
+        <div className="absolute inset-x-0 bottom-14 sm:bottom-16 md:bottom-20 lg:bottom-24 flex justify-center px-4">
           <Button
             onClick={scrollToProgram}
             variant="outline"

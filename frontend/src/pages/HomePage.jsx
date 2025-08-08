@@ -86,7 +86,7 @@ const HomePage = () => {
           <Card className="p-4 sm:p-6 md:p-8 bg-white/70 backdrop-blur-sm border-amber-200/50 shadow-lg divide-y divide-amber-100">
             <ul className="space-y-4">
               {programDetails.map((item, idx) => (
-                <li key={idx} className="flex items-center gap-4 text-stone-800">
+                <li key={idx} className="flex items-center gap-4 text-stone-800 py-3 sm:py-4">
                   <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
                     {item.icon}
                   </div>

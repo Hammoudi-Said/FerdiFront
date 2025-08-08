@@ -52,22 +52,13 @@ const HomePage = () => {
         {/* mobile-safe padding top to avoid notch overlap */}
         <div className="pt-12 sm:pt-0" />
         <div className="absolute inset-0 bg-transparent pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-2">
-          <div className="space-y-3 sm:space-y-5 md:space-y-6 mb-6 md:mb-8">
-            <div className="tracking-[0.2em] uppercase text-stone-700 font-serif">Marhaba au mariage de</div>
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
-            <div className="w-12 sm:w-16 h-px bg-amber-400/70 mx-auto my-2 sm:my-3 animate-underline-intro"></div>
-              Amel &amp; Tarek
-            </h1>
-            <div className="text-lg sm:text-xl md:text-2xl font-serif text-stone-700">
-              11 Octobre 2025
-            </div>
-          </div>
+        <h1 className="sr-only">Marhaba au mariage de Amel et Tarek — 11 Octobre 2025</h1>
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2">
           <Button
             onClick={scrollToProgram}
             variant="outline"
             size="lg"
-            className="bg-white/80 border-amber-300 text-amber-900 hover:bg-amber-50 font-serif text-lg px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-white/85 border-amber-300 text-amber-900 hover:bg-amber-50 font-serif text-lg px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <ArrowDown className="h-5 w-5 mr-2 animate-bounce" />
             Découvrir le programme

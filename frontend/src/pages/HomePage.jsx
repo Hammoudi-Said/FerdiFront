@@ -55,7 +55,7 @@ const HomePage = () => {
         <div className="relative max-w-4xl mx-auto px-2">
           <div className="space-y-3 sm:space-y-5 md:space-y-6 mb-6 md:mb-8">
             <div className="tracking-[0.2em] uppercase text-stone-700 font-serif">Marhaba au mariage de</div>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
               Amel &amp; Tarek
             </h1>
             <div className="text-xl md:text-2xl font-serif text-stone-700">

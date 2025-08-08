@@ -75,7 +75,7 @@ const HomePage = () => {
       </section>
 
       {/* Program Section */}
-      <section id="program-section" className="py-16 px-6">
+      <section id="program-section" className="py-12 sm:py-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-4xl md:text-5xl font-serif text-amber-900 mb-2">Programme</h2>

@@ -45,7 +45,7 @@ const HomePage = () => {
         style={{
           backgroundImage: `url(${HERO_IMAGE})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: 'top center',
         }}
       >
         {/* subtle overlay for readability */}

@@ -56,7 +56,7 @@ const HomePage = () => {
           <div className="space-y-3 sm:space-y-5 md:space-y-6 mb-6 md:mb-8">
             <div className="tracking-[0.2em] uppercase text-stone-700 font-serif">Marhaba au mariage de</div>
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-calligraphic text-black leading-tight">
-            <div className="w-12 sm:w-16 h-px bg-amber-400/70 mx-auto my-2 sm:my-3"></div>
+            <div className="w-12 sm:w-16 h-px bg-amber-400/70 mx-auto my-2 sm:my-3 animate-underline-intro"></div>
               Amel &amp; Tarek
             </h1>
             <div className="text-lg sm:text-xl md:text-2xl font-serif text-stone-700">

@@ -90,7 +90,7 @@ const HomePage = () => {
                   <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center">
                     {item.icon}
                   </div>
-                  <div className="text-lg md:text-xl font-serif">
+                  <div className="text-base sm:text-lg md:text-xl font-serif">
                     <span className="text-amber-800 font-medium">{item.time}</span>
                     <span className="mx-2">-</span>
                     <span>{item.event}</span>

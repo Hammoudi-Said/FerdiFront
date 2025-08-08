@@ -87,7 +87,7 @@ const HomePage = () => {
             <ul className="space-y-4">
               {programDetails.map((item, idx) => (
                 <li key={idx} className="flex items-center gap-4 text-stone-800 py-3 sm:py-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-100 flex items-center justify-center">
                     {item.icon}
                   </div>
                   <div className="text-lg md:text-xl font-serif">

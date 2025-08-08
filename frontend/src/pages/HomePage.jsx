@@ -49,6 +49,8 @@ const HomePage = () => {
         }}
       >
         {/* subtle overlay for readability */}
+        {/* mobile-safe padding top to avoid notch overlap */}
+        <div className="pt-12 sm:pt-0" />
         <div className="absolute inset-0 bg-white/70" />
         <div className="relative max-w-4xl mx-auto">
           <div className="space-y-6 mb-8">

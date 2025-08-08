@@ -51,7 +51,7 @@ const HomePage = () => {
         {/* subtle overlay for readability */}
         {/* mobile-safe padding top to avoid notch overlap */}
         <div className="pt-12 sm:pt-0" />
-        <div className="absolute inset-0 bg-white/70" />
+        <div className="absolute inset-0 bg-transparent pointer-events-none" />
         <div className="relative max-w-4xl mx-auto px-2">
           <div className="space-y-3 sm:space-y-5 md:space-y-6 mb-6 md:mb-8">
             <div className="tracking-[0.2em] uppercase text-stone-700 font-serif">Marhaba au mariage de</div>

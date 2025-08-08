@@ -92,7 +92,7 @@ const HomePage = () => {
                   </div>
                   <div className="text-base sm:text-lg md:text-xl font-serif">
                     <span className="text-amber-800 font-medium">{item.time}</span>
-                    <span className="mx-2">-</span>
+                    <span className="mx-2 text-stone-400">–</span>
                     <span>{item.event}</span>
                   </div>
                 </li>

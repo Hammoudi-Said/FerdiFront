@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -25,10 +25,11 @@ const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, isLoading, token, updateActivity } = useAuthStore()
+  const { login, isLoading, token, updateActivity, isSessionValid } = useAuthStore()
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [passwordResetOpen, setPasswordResetOpen] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   
   const form = useForm({
     resolver: zodResolver(loginSchema),
@@ -38,58 +39,96 @@ export default function LoginPage() {
     },
   })
 
-  useEffect(() => {
-    updateActivity()
+  // 🔧 FIX: Single redirect handler to prevent race conditions
+  const handleRedirect = useCallback(() => {
+    if (isRedirecting) return // Prevent multiple redirects
     
-    if (token) {
-      // Redirect to intended page or dashboard
+    if (token && isSessionValid()) {
+      setIsRedirecting(true)
+      
+      // Get intended path or default to dashboard
       const intendedPath = sessionStorage.getItem('ferdi_intended_path')
+      const redirectPath = intendedPath || '/dashboard'
+      
+      // Clean up intended path
       if (intendedPath) {
         sessionStorage.removeItem('ferdi_intended_path')
-        router.push(intendedPath)
-      } else {
-        router.push('/dashboard')
       }
+      
+      console.log('🔄 Redirecting authenticated user to:', redirectPath)
+      router.push(redirectPath)
     }
-  }, [token, router, updateActivity])
+  }, [token, isSessionValid, router, isRedirecting])
 
+  // 🔧 FIX: Only check for existing auth session once on mount
+  useEffect(() => {
+    updateActivity()
+    handleRedirect()
+  }, [updateActivity, handleRedirect])
+
+  // 🔧 FIX: Enhanced submit handler with proper state management
   const onSubmit = async (data) => {
-    const result = await login(data.email, data.password)
+    if (isLoading || isRedirecting) return // Prevent double submission
     
-    if (result.success) {
-      toast.success('Connexion réussie !', {
-        description: 'Redirection vers votre tableau de bord...'
-      })
+    try {
+      const result = await login(data.email, data.password)
       
-      // Store last successful login
-      if (rememberMe) {
-        localStorage.setItem('ferdi_last_email', data.email)
-      }
-      
-      // Redirect with animation delay
-      setTimeout(() => {
-        const intendedPath = sessionStorage.getItem('ferdi_intended_path')
-        if (intendedPath) {
-          sessionStorage.removeItem('ferdi_intended_path')
-          router.push(intendedPath)
-        } else {
-          router.push('/dashboard')
+      if (result.success) {
+        toast.success('Connexion réussie !', {
+          description: 'Redirection vers votre tableau de bord...'
+        })
+        
+        // Store last successful login
+        if (rememberMe) {
+          try {
+            localStorage.setItem('ferdi_last_email', data.email)
+          } catch (error) {
+            console.warn('Could not save email to localStorage:', error)
+          }
         }
-      }, 500)
-    } else {
+        
+        // 🔧 FIX: Use the single redirect handler
+        setTimeout(() => {
+          handleRedirect()
+        }, 500)
+      } else {
+        toast.error('Erreur de connexion', {
+          description: result.error || 'Vérifiez vos identifiants'
+        })
+      }
+    } catch (error) {
+      console.error('Login submission error:', error)
       toast.error('Erreur de connexion', {
-        description: result.error || 'Vérifiez vos identifiants'
+        description: 'Une erreur inattendue s\'est produite'
       })
     }
   }
 
   // Load remembered email
   useEffect(() => {
-    const lastEmail = localStorage.getItem('ferdi_last_email')
-    if (lastEmail && rememberMe) {
-      form.setValue('email', lastEmail)
+    if (rememberMe) {
+      try {
+        const lastEmail = localStorage.getItem('ferdi_last_email')
+        if (lastEmail) {
+          form.setValue('email', lastEmail)
+        }
+      } catch (error) {
+        console.warn('Could not load email from localStorage:', error)
+      }
     }
   }, [form, rememberMe])
+
+  // 🔧 FIX: Show loading state during redirect to prevent user interaction
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="text-center space-y-4">
+          <LoadingSpinner size="lg" />
+          <p className="text-gray-600">Redirection en cours...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 relative overflow-hidden">
@@ -201,7 +240,7 @@ export default function LoginPage() {
               <Button 
                 type="submit" 
                 className="w-full h-11 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium shadow-lg transition-all duration-200" 
-                disabled={isLoading}
+                disabled={isLoading || isRedirecting}
               >
                 {isLoading ? (
                   <>

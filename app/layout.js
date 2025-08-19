@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner'
 import AuthGuard from '@/components/auth/auth-guard'
 import SessionManager from '@/components/auth/session-manager'
 import NavigationWrapper from '@/components/navigation/navigation-wrapper'
+import ErrorBoundary from '@/components/common/error-boundary'
 
 export const metadata = {
   title: 'FERDI - Gestion de Flotte d\'Autocars',

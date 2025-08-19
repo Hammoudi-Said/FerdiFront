@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { invitationsAPI } from '@/lib/api-client'
@@ -42,8 +42,8 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
 
   const watchedRole = watch('role')
 
-  // Filter available roles based on current user's role
-  const getAvailableRoles = () => {
+  // 🔧 FIX: Memoize role filtering to prevent recalculation
+  const getAvailableRoles = useCallback(() => {
     if (user?.role === '1') {
       // Super admin can invite anyone
       return Object.entries(ROLE_DEFINITIONS)
@@ -52,9 +52,57 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
       return Object.entries(ROLE_DEFINITIONS).filter(([roleId]) => roleId !== '1')
     }
     return []
+  }, [user?.role])
+
+  // 🔧 FIX: Enhanced form validation
+  const validateForm = (data) => {
+    const newErrors = {}
+    
+    // Email validation
+    if (!data.email) {
+      newErrors.email = 'L\'adresse email est requise'
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(data.email)) {
+      newErrors.email = 'Adresse email invalide'
+    }
+    
+    // Role validation
+    if (!data.role) {
+      newErrors.role = 'Le rôle est requis'
+    }
+    
+    // Phone validation (if provided)
+    if (data.mobile && data.mobile.trim()) {
+      const phoneRegex = /^(?:(?:\+33|0)[1-9](?:[\s.-]?\d{2}){4})$/
+      if (!phoneRegex.test(data.mobile.replace(/[\s.-]/g, ''))) {
+        newErrors.mobile = 'Format de téléphone invalide (ex: 06 12 34 56 78)'
+      }
+    }
+    
+    // Name length validation
+    if (data.first_name && data.first_name.length > 100) {
+      newErrors.first_name = 'Maximum 100 caractères'
+    }
+    if (data.last_name && data.last_name.length > 100) {
+      newErrors.last_name = 'Maximum 100 caractères'
+    }
+    
+    // Message length validation
+    if (data.personal_message && data.personal_message.length > 500) {
+      newErrors.personal_message = 'Maximum 500 caractères'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const onSubmit = async (data) => {
+    if (loading) return // Prevent double submission
+    
+    // Validate form
+    if (!validateForm(data)) {
+      return
+    }
+    
     setLoading(true)
     setErrors({})
 
@@ -76,7 +124,7 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
           invited_by: {
             id: user.id,
-            full_name: user.full_name,
+            full_name: user.full_name || `${user.first_name} ${user.last_name}`,
             email: user.email
           }
         }
@@ -112,14 +160,24 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
     }
   }
 
-  const handleCancel = () => {
+  // 🔧 FIX: Enhanced cancel handler with proper cleanup
+  const handleCancel = useCallback(() => {
+    if (loading) return // Don't cancel while sending
+    
     reset()
     setErrors({})
     onOpenChange(false)
-  }
+  }, [loading, reset, onOpenChange])
+
+  // 🔧 FIX: Handle dialog close properly
+  const handleDialogChange = useCallback((open) => {
+    if (!open && !loading) {
+      handleCancel()
+    }
+  }, [loading, handleCancel])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -141,26 +199,15 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
             <Input
               id="email"
               type="email"
-              {...register('email', {
-                required: 'L\'adresse email est requise',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Adresse email invalide'
-                }
-              })}
+              {...register('email')}
               disabled={loading}
               placeholder="utilisateur@exemple.com"
+              className={errors.email || formErrors.email ? 'border-red-500' : ''}
             />
-            {formErrors.email && (
+            {(formErrors.email || errors.email) && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
-                {formErrors.email.message}
-              </p>
-            )}
-            {errors.email && (
-              <p className="text-sm text-red-600 flex items-center gap-1">
-                <AlertCircle className="h-4 w-4" />
-                {errors.email}
+                {formErrors.email?.message || errors.email}
               </p>
             )}
           </div>
@@ -168,8 +215,12 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
           {/* Role */}
           <div className="space-y-2">
             <Label>Rôle *</Label>
-            <Select value={watchedRole} onValueChange={(value) => setValue('role', value)}>
-              <SelectTrigger>
+            <Select 
+              value={watchedRole} 
+              onValueChange={(value) => setValue('role', value)}
+              disabled={loading}
+            >
+              <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Sélectionnez un rôle" />
               </SelectTrigger>
               <SelectContent>
@@ -183,10 +234,10 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
                 ))}
               </SelectContent>
             </Select>
-            {formErrors.role && (
+            {errors.role && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
-                {formErrors.role.message}
+                {errors.role}
               </p>
             )}
           </div>
@@ -197,16 +248,16 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
               <Label htmlFor="first_name">Prénom</Label>
               <Input
                 id="first_name"
-                {...register('first_name', {
-                  maxLength: { value: 100, message: 'Maximum 100 caractères' }
-                })}
+                {...register('first_name')}
                 disabled={loading}
                 placeholder="Jean"
+                maxLength={100}
+                className={errors.first_name ? 'border-red-500' : ''}
               />
-              {formErrors.first_name && (
+              {errors.first_name && (
                 <p className="text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="h-4 w-4" />
-                  {formErrors.first_name.message}
+                  {errors.first_name}
                 </p>
               )}
             </div>
@@ -216,16 +267,16 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
               <Label htmlFor="last_name">Nom</Label>
               <Input
                 id="last_name"
-                {...register('last_name', {
-                  maxLength: { value: 100, message: 'Maximum 100 caractères' }
-                })}
+                {...register('last_name')}
                 disabled={loading}
                 placeholder="Dupont"
+                maxLength={100}
+                className={errors.last_name ? 'border-red-500' : ''}
               />
-              {formErrors.last_name && (
+              {errors.last_name && (
                 <p className="text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="h-4 w-4" />
-                  {formErrors.last_name.message}
+                  {errors.last_name}
                 </p>
               )}
             </div>
@@ -237,18 +288,21 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
             <Input
               id="mobile"
               type="tel"
-              {...register('mobile', {
-                maxLength: { value: 20, message: 'Maximum 20 caractères' }
-              })}
+              {...register('mobile')}
               disabled={loading}
               placeholder="06 12 34 56 78"
+              maxLength={20}
+              className={errors.mobile ? 'border-red-500' : ''}
             />
-            {formErrors.mobile && (
+            {errors.mobile && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
-                {formErrors.mobile.message}
+                {errors.mobile}
               </p>
             )}
+            <p className="text-xs text-gray-500">
+              Format accepté: 06 12 34 56 78 ou +33 6 12 34 56 78
+            </p>
           </div>
 
           {/* Personal Message */}
@@ -256,19 +310,22 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
             <Label htmlFor="personal_message">Message personnel (optionnel)</Label>
             <Textarea
               id="personal_message"
-              {...register('personal_message', {
-                maxLength: { value: 500, message: 'Maximum 500 caractères' }
-              })}
+              {...register('personal_message')}
               disabled={loading}
               placeholder="Message d'accueil personnalisé pour cet utilisateur..."
               rows={3}
+              maxLength={500}
+              className={errors.personal_message ? 'border-red-500' : ''}
             />
-            {formErrors.personal_message && (
+            {errors.personal_message && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-4 w-4" />
-                {formErrors.personal_message.message}
+                {errors.personal_message}
               </p>
             )}
+            <p className="text-xs text-gray-500">
+              {watch('personal_message')?.length || 0}/500 caractères
+            </p>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

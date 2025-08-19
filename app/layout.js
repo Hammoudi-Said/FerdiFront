@@ -22,17 +22,20 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          {/* Authentication Guard - Protects entire app */}
-          <AuthGuard>
-            {/* Navigation Wrapper - Enhanced navigation controls */}
-            <NavigationWrapper>
-              {/* Session Manager - Handles session timeouts and warnings */}
-              <SessionManager />
-              
-              {/* Main Content */}
-              {children}
-            </NavigationWrapper>
-          </AuthGuard>
+          {/* 🔧 FIX: Wrap entire app with Error Boundary */}
+          <ErrorBoundary fallbackMessage="Une erreur s'est produite dans l'application FERDI. L'équipe technique a été notifiée.">
+            {/* Authentication Guard - Protects entire app */}
+            <AuthGuard>
+              {/* Navigation Wrapper - Enhanced navigation controls */}
+              <NavigationWrapper>
+                {/* Session Manager - Handles session timeouts and warnings */}
+                <SessionManager />
+                
+                {/* Main Content */}
+                {children}
+              </NavigationWrapper>
+            </AuthGuard>
+          </ErrorBoundary>
           
           {/* Global Toast Notifications */}
           <Toaster 

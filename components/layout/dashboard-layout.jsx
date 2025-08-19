@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -22,75 +22,128 @@ export function DashboardLayout({ children }) {
   } = useAuthStore()
   
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  // 🔧 FIX: Add mounted ref to prevent state updates on unmounted component
+  const mountedRef = useRef(true)
+  const activityTimeoutRef = useRef(null)
+
+  // 🔧 FIX: Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      if (activityTimeoutRef.current) {
+        clearTimeout(activityTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Store current path for persistence
   useEffect(() => {
-    if (pathname && token) {
-      sessionStorage.setItem('ferdi_last_path', pathname)
+    if (pathname && token && mountedRef.current) {
+      try {
+        sessionStorage.setItem('ferdi_last_path', pathname)
+      } catch (error) {
+        console.warn('Failed to save current path:', error)
+      }
     }
   }, [pathname, token])
 
-  // Check authentication and session validity
+  // 🔧 FIX: Enhanced authentication check with better error handling
   useEffect(() => {
     const initAuth = async () => {
-      if (!token) {
-        // Store intended path for redirect after login
-        if (pathname !== '/') {
-          sessionStorage.setItem('ferdi_intended_path', pathname)
+      if (!mountedRef.current) return
+
+      try {
+        if (!token) {
+          // Store intended path for redirect after login
+          if (pathname !== '/') {
+            try {
+              sessionStorage.setItem('ferdi_intended_path', pathname)
+            } catch (error) {
+              console.warn('Failed to save intended path:', error)
+            }
+          }
+          router.push('/auth/login')
+          return
         }
-        router.push('/auth/login')
-        return
-      }
 
-      // Check if session is still valid
-      if (!isSessionValid()) {
-        toast.error('Session expirée', {
-          description: 'Veuillez vous reconnecter'
-        })
-        logout()
-        router.push('/auth/login')
-        return
-      }
+        // Check if session is still valid
+        if (!isSessionValid()) {
+          toast.error('Session expirée', {
+            description: 'Veuillez vous reconnecter'
+          })
+          logout()
+          router.push('/auth/login')
+          return
+        }
 
-      // Update activity and check auth if no user data
-      updateActivity()
-      
-      if (!user) {
-        await checkAuth()
+        // Update activity and check auth if no user data
+        updateActivity()
+        
+        if (!user) {
+          await checkAuth()
+        }
+        
+        if (mountedRef.current) {
+          setIsCheckingAuth(false)
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error)
+        if (mountedRef.current) {
+          setIsCheckingAuth(false)
+          toast.error('Erreur d\'authentification', {
+            description: 'Veuillez vous reconnecter'
+          })
+          router.push('/auth/login')
+        }
       }
-      
-      setIsCheckingAuth(false)
     }
 
     initAuth()
   }, [token, user, isSessionValid, checkAuth, updateActivity, logout, router, pathname])
 
-  // Activity tracking on user interactions
-  useEffect(() => {
-    const trackActivity = () => {
-      if (token && isSessionValid()) {
+  // 🔧 FIX: Enhanced activity tracking with throttling and proper cleanup
+  const throttledUpdateActivity = useCallback(() => {
+    if (activityTimeoutRef.current) {
+      clearTimeout(activityTimeoutRef.current)
+    }
+    
+    // Throttle activity updates to prevent excessive calls
+    activityTimeoutRef.current = setTimeout(() => {
+      if (mountedRef.current && token && isSessionValid()) {
         updateActivity()
       }
-    }
+    }, 1000) // 1-second throttle
+  }, [token, isSessionValid, updateActivity])
 
-    // Track various user activities
+  useEffect(() => {
+    if (!token || !isSessionValid()) return
+
+    // Track various user activities with throttling
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
     
     events.forEach(event => {
-      document.addEventListener(event, trackActivity, { passive: true })
+      document.addEventListener(event, throttledUpdateActivity, { passive: true })
     })
 
-    // Clean up event listeners
+    // 🔧 FIX: Enhanced cleanup to prevent memory leaks
     return () => {
       events.forEach(event => {
-        document.removeEventListener(event, trackActivity)
+        document.removeEventListener(event, throttledUpdateActivity)
       })
+      if (activityTimeoutRef.current) {
+        clearTimeout(activityTimeoutRef.current)
+      }
     }
-  }, [token, isSessionValid, updateActivity])
+  }, [token, isSessionValid, throttledUpdateActivity])
 
-  // Session timeout check
+  // 🔧 FIX: Enhanced session timeout check with race condition prevention
   useEffect(() => {
+    if (!token) return
+
     const checkSessionTimeout = () => {
+      if (!mountedRef.current) return
+      
       if (token && !isSessionValid()) {
         toast.error('Session expirée', {
           description: 'Vous avez été déconnecté pour inactivité'
@@ -103,7 +156,9 @@ export function DashboardLayout({ children }) {
     // Check session every minute
     const intervalId = setInterval(checkSessionTimeout, 60 * 1000)
 
-    return () => clearInterval(intervalId)
+    return () => {
+      clearInterval(intervalId)
+    }
   }, [token, isSessionValid, logout, router])
 
   // Enhanced loading screen

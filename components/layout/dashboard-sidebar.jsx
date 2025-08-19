@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -125,51 +125,70 @@ const navigationItems = [
 ]
 
 export function DashboardSidebar() {
-  const [collapsed, setCollapsed] = useState(() => {
-    // Get initial state from localStorage
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('ferdi_sidebar_collapsed')
-      return stored ? JSON.parse(stored) : false
-    }
-    return false
-  })
+  // 🔧 FIX: Prevent hydration mismatch by initializing with false and loading from localStorage after mount
+  const [collapsed, setCollapsed] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   
   const pathname = usePathname()
   const { user, updateActivity } = useAuthStore()
+
+  // 🔧 FIX: Load saved state after component mounts to prevent hydration issues
+  useEffect(() => {
+    setIsClient(true)
+    
+    // Load saved collapsed state from localStorage
+    try {
+      const stored = localStorage.getItem('ferdi_sidebar_collapsed')
+      if (stored) {
+        setCollapsed(JSON.parse(stored))
+      }
+    } catch (error) {
+      console.warn('Failed to load sidebar state:', error)
+      setCollapsed(false) // Safe fallback
+    }
+  }, [])
 
   // Update activity on navigation
   useEffect(() => {
     updateActivity()
   }, [pathname, updateActivity])
 
-  // Persist sidebar state
+  // 🔧 FIX: Persist sidebar state safely with error handling
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (!isClient) return // Don't save during SSR
+    
+    try {
       localStorage.setItem('ferdi_sidebar_collapsed', JSON.stringify(collapsed))
+    } catch (error) {
+      console.warn('Failed to save sidebar state:', error)
     }
-  }, [collapsed])
+  }, [collapsed, isClient])
 
-  // Filter navigation items based on user role
-  const filteredItems = navigationItems.filter(item =>
-    item.roles.includes(user?.role)
-  )
+  // 🔧 FIX: Memoize filtered items to prevent unnecessary recalculations
+  const filteredItems = useCallback(() => {
+    if (!user?.role) return []
+    return navigationItems.filter(item => item.roles.includes(user.role))
+  }, [user?.role])
 
   const roleData = user?.role ? ROLE_DEFINITIONS[user.role] : null
 
-  const handleToggleCollapse = () => {
-    setCollapsed(!collapsed)
+  const handleToggleCollapse = useCallback(() => {
+    setCollapsed(prev => !prev)
     updateActivity()
-  }
+  }, [updateActivity])
 
-  // Group items by category for better organization - simplified
-  const groupedItems = {
-    main: filteredItems.filter(item => item.href === '/dashboard'),
-    management: filteredItems.filter(item => ['users', 'drivers', 'fleet', 'invitations'].some(path => item.href.includes(path))),
-    operations: filteredItems.filter(item => ['planning', 'my-routes'].some(path => item.href.includes(path))),
-    business: filteredItems.filter(item => ['quotes', 'invoices', 'automatisations', 'subcontractors', 'legal-documents', 'clients'].some(path => item.href.includes(path))),
-  }
+  // 🔧 FIX: Memoize grouped items to prevent recalculation on every render
+  const groupedItems = useCallback(() => {
+    const items = filteredItems()
+    return {
+      main: items.filter(item => item.href === '/dashboard'),
+      management: items.filter(item => ['users', 'drivers', 'fleet', 'invitations'].some(path => item.href.includes(path))),
+      operations: items.filter(item => ['planning', 'my-routes'].some(path => item.href.includes(path))),
+      business: items.filter(item => ['quotes', 'invoices', 'automatisations', 'subcontractors', 'legal-documents', 'clients'].some(path => item.href.includes(path))),
+    }
+  }, [filteredItems])
 
-  const renderNavGroup = (items, title = null) => (
+  const renderNavGroup = useCallback((items, title = null) => (
     <div className="space-y-1">
       {title && !collapsed && (
         <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -204,7 +223,31 @@ export function DashboardSidebar() {
         )
       })}
     </div>
-  )
+  ), [collapsed, pathname, updateActivity])
+
+  // 🔧 FIX: Helper function to get user display name safely
+  const getUserDisplayName = useCallback(() => {
+    if (!user) return ''
+    
+    // Try full_name first, then construct from parts, then fallback to email
+    return user.full_name || 
+           `${user.first_name || ''} ${user.last_name || ''}`.trim() ||
+           user.email ||
+           'Utilisateur'
+  }, [user])
+
+  const getUserInitials = useCallback(() => {
+    if (!user) return 'U'
+    
+    if (user.first_name || user.last_name) {
+      return `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase()
+    }
+    
+    // Fallback to email first letter
+    return (user.email?.[0] || 'U').toUpperCase()
+  }, [user])
+
+  const groups = groupedItems()
 
   return (
     <div className={cn(
@@ -269,20 +312,20 @@ export function DashboardSidebar() {
       <ScrollArea className="flex-1 py-4">
         <nav className="space-y-2 px-2">
           {/* Main Dashboard */}
-          {groupedItems.main.length > 0 && renderNavGroup(groupedItems.main)}
+          {groups.main.length > 0 && renderNavGroup(groups.main)}
           
           {/* Management Section */}
-          {groupedItems.management.length > 0 && renderNavGroup(groupedItems.management, collapsed ? null : "Gestion")}
+          {groups.management.length > 0 && renderNavGroup(groups.management, collapsed ? null : "Gestion")}
           
           {/* Operations Section */}
-          {groupedItems.operations.length > 0 && renderNavGroup(groupedItems.operations, collapsed ? null : "Opérations")}
+          {groups.operations.length > 0 && renderNavGroup(groups.operations, collapsed ? null : "Opérations")}
           
           {/* Business Section */}
-          {groupedItems.business.length > 0 && renderNavGroup(groupedItems.business, collapsed ? null : "Business")}
+          {groups.business.length > 0 && renderNavGroup(groups.business, collapsed ? null : "Business")}
         </nav>
       </ScrollArea>
 
-      {/* User Profile Section */}
+      {/* 🔧 FIX: Enhanced User Profile Section with better error handling */}
       {!collapsed && user && (
         <div className="p-4 border-t border-gray-200 mt-auto">
           <div className="bg-gray-50 rounded-lg p-3 border">
@@ -291,11 +334,11 @@ export function DashboardSidebar() {
                 'w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3',
                 roleData?.color || 'bg-gray-500'
               )}>
-                {`${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`.toUpperCase()}
+                {getUserInitials()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.full_name || `${user?.first_name} ${user?.last_name}`}
+                  {getUserDisplayName()}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {roleData?.label || 'Utilisateur'}

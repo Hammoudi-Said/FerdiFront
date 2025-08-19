@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
@@ -22,7 +22,8 @@ import {
   Filter,
   UserCheck,
   UserX,
-  Download
+  Download,
+  Mail
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -76,7 +77,7 @@ export default function UsersPage() {
     }
   }
 
-  const calculateStats = (usersList) => {
+  const calculateStats = useCallback((usersList) => {
     const total = usersList.length
     const active = usersList.filter(u => u.is_active).length
     const inactive = total - active
@@ -88,7 +89,27 @@ export default function UsersPage() {
     })
 
     setStats({ total, active, inactive, byRole })
-  }
+  }, [])
+
+  // 🔧 FIX: Memoize filtered users to prevent recalculation and fix CSV export reference
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      // 🔧 FIX: Safe name comparison with fallback
+      const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()
+      
+      const matchesSearch = !searchTerm || 
+        fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      
+      const matchesRole = filterRole === 'all' || user.role === filterRole
+      
+      const matchesStatus = filterStatus === 'all' || 
+        (filterStatus === 'active' && user.is_active) ||
+        (filterStatus === 'inactive' && !user.is_active)
+      
+      return matchesSearch && matchesRole && matchesStatus
+    })
+  }, [users, searchTerm, filterRole, filterStatus])
 
   const handleCreateUser = async (userData) => {
     try {
@@ -169,43 +190,49 @@ export default function UsersPage() {
     setDeleteDialogOpen(true)
   }
 
-  const exportUsers = () => {
-    const csvContent = [
-      ['Nom', 'Prénom', 'Email', 'Téléphone', 'Rôle', 'Statut', 'Date de création'].join(','),
-      ...filteredUsers.map(user => [
-        user.last_name,
-        user.first_name,
-        user.email,
-        user.mobile || '',
-        ROLE_DEFINITIONS[user.role]?.label || 'Inconnu',
-        user.is_active ? 'Actif' : 'Inactif',
-        new Date(user.created_at).toLocaleDateString('fr-FR')
-      ].join(','))
-    ].join('\n')
+  // 🔧 FIX: Enhanced CSV export with better error handling and safer data access
+  const exportUsers = useCallback(() => {
+    try {
+      if (filteredUsers.length === 0) {
+        toast.warning('Aucune donnée à exporter')
+        return
+      }
 
-    const blob = new Blob([csvContent], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `utilisateurs_${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
-  }
+      const csvContent = [
+        ['Nom', 'Prénom', 'Email', 'Téléphone', 'Rôle', 'Statut', 'Date de création'].join(','),
+        ...filteredUsers.map(user => [
+          (user.last_name || '').replace(/,/g, ';'), // Escape commas
+          (user.first_name || '').replace(/,/g, ';'),
+          (user.email || '').replace(/,/g, ';'),
+          (user.mobile || '').replace(/,/g, ';'),
+          (ROLE_DEFINITIONS[user.role]?.label || 'Inconnu').replace(/,/g, ';'),
+          user.is_active ? 'Actif' : 'Inactif',
+          user.created_at ? new Date(user.created_at).toLocaleDateString('fr-FR') : 'N/A'
+        ].join(','))
+      ].join('\n')
 
-  // Filter users based on search term, role, and status
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchTerm || 
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesRole = filterRole === 'all' || user.role === filterRole
-    
-    const matchesStatus = filterStatus === 'all' || 
-      (filterStatus === 'active' && user.is_active) ||
-      (filterStatus === 'inactive' && !user.is_active)
-    
-    return matchesSearch && matchesRole && matchesStatus
-  })
+      // Add BOM for proper UTF-8 handling in Excel
+      const BOM = '\uFEFF'
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' })
+      const url = window.URL.createObjectURL(blob)
+      
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `utilisateurs_${new Date().toISOString().split('T')[0]}.csv`
+      a.style.display = 'none'
+      
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Export CSV réussi')
+    } catch (error) {
+      console.error('Failed to export CSV:', error)
+      toast.error('Erreur lors de l\'export CSV')
+    }
+  }, [filteredUsers])
 
   return (
     <RoleGuard allowedRoles={['1', '2']} showUnauthorized={true}>
@@ -221,10 +248,10 @@ export default function UsersPage() {
               <Button
                 variant="outline"
                 onClick={exportUsers}
-                disabled={filteredUsers.length === 0}
+                disabled={filteredUsers.length === 0 || loading}
               >
                 <Download className="mr-2 h-4 w-4" />
-                Exporter CSV
+                Exporter CSV ({filteredUsers.length})
               </Button>
               {hasPermission('users_manage') && (
                 <>

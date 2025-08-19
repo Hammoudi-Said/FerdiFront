@@ -15,17 +15,30 @@ import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
 import { Edit3, Trash2, Mail, Phone } from 'lucide-react'
 
 export function UsersTable({ users, onEdit, onDelete, canManage }) {
+  // 🔧 FIX: Safe helper function to get user initials
   const getInitials = (firstName, lastName) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase()
+    const first = firstName?.charAt(0)?.toUpperCase() || ''
+    const last = lastName?.charAt(0)?.toUpperCase() || ''
+    return first + last || '?'
   }
 
+  // 🔧 FIX: Enhanced date formatting with error handling
   const formatDate = (dateString) => {
     if (!dateString) return 'Jamais'
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
+    
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return 'Date invalide'
+      
+      return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    } catch (error) {
+      console.warn('Invalid date format:', dateString)
+      return 'Date invalide'
+    }
   }
 
   const getRoleBadge = (roleId) => {
@@ -49,6 +62,17 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
         Inactif
       </Badge>
     )
+  }
+
+  // 🔧 FIX: Safe helper function to get user display name
+  const getUserDisplayName = (user) => {
+    if (user.full_name) return user.full_name
+    
+    const firstName = user.first_name || ''
+    const lastName = user.last_name || ''
+    const fullName = `${firstName} ${lastName}`.trim()
+    
+    return fullName || user.email || 'Utilisateur inconnu'
   }
 
   if (users.length === 0) {
@@ -84,14 +108,14 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
               <TableCell>
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar_url} />
+                    <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
                     <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
                       {getInitials(user.first_name, user.last_name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium text-gray-900">
-                      {user.full_name || `${user.first_name} ${user.last_name}`}
+                      {getUserDisplayName(user)}
                     </div>
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
@@ -99,14 +123,16 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
               </TableCell>
               <TableCell>
                 <div className="space-y-1">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Mail className="h-3 w-3 mr-1" />
-                    {user.email}
-                  </div>
+                  {user.email && (
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span className="truncate">{user.email}</span>
+                    </div>
+                  )}
                   {user.mobile && (
                     <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="h-3 w-3 mr-1" />
-                      {user.mobile}
+                      <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
+                      <span>{user.mobile}</span>
                     </div>
                   )}
                 </div>
@@ -127,6 +153,7 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
                       variant="ghost"
                       size="sm"
                       onClick={() => onEdit(user)}
+                      title="Modifier l'utilisateur"
                     >
                       <Edit3 className="h-4 w-4" />
                     </Button>
@@ -135,6 +162,7 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
                       size="sm"
                       onClick={() => onDelete(user)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      title="Supprimer l'utilisateur"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

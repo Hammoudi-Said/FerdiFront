@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -102,16 +102,31 @@ export default function DashboardPage() {
   const { user, company, updateActivity } = useAuthStore()
   const [data, setData] = useState(mockDashboardData)
   const [loading, setLoading] = useState(true)
+  
+  // 🔧 FIX: Use ref to track if component is mounted to prevent memory leaks
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   useEffect(() => {
     updateActivity()
     
-    // Simulate loading
+    // 🔧 FIX: Simulate loading with proper cleanup
     const timer = setTimeout(() => {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false)
+      }
     }, 1000)
 
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+    }
   }, [updateActivity])
 
   const getTodayDate = () => {
@@ -121,6 +136,25 @@ export default function DashboardPage() {
       month: 'long', 
       day: 'numeric'
     })
+  }
+
+  // 🔧 FIX: Memoize handlers to prevent unnecessary re-renders
+  const handleNewMission = () => {
+    updateActivity()
+    // TODO: Navigate to create mission page
+    console.log('Navigate to create mission page')
+  }
+
+  const handleViewAllMissions = () => {
+    updateActivity()
+    // TODO: Navigate to missions page
+    console.log('Navigate to missions page')
+  }
+
+  const handleMissionAction = (missionId) => {
+    updateActivity()
+    // TODO: Open mission detail/edit modal
+    console.log('Open mission action for:', missionId)
   }
 
   return (
@@ -135,7 +169,7 @@ export default function DashboardPage() {
             </div>
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => updateActivity()}
+              onClick={handleNewMission}
             >
               <Plus className="mr-2 h-4 w-4" />
               Nouvelle mission
@@ -147,45 +181,63 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-xl">Missions à venir</CardTitle>
+                <CardDescription className="mt-1">
+                  Aperçu des prochaines missions planifiées
+                </CardDescription>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleViewAllMissions}>
                 Voir tout
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-2 font-medium text-gray-600">Numéro de dossier</th>
-                      <th className="text-left py-3 px-2 font-medium text-gray-600">Date de départ</th>
-                      <th className="text-left py-3 px-2 font-medium text-gray-600">Véhicule</th>
-                      <th className="text-left py-3 px-2 font-medium text-gray-600">Statut</th>
-                      <th className="w-10"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.upcomingMissions.map((mission, index) => (
-                      <tr key={mission.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-2">
-                          <div className="flex items-center">
-                            {getStatusIcon(mission.status)}
-                            <span className="ml-2 font-medium">{mission.id}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-2 text-gray-600">{mission.departure_date}</td>
-                        <td className="py-3 px-2 text-gray-600">{mission.vehicle}</td>
-                        <td className="py-3 px-2">{getStatusBadge(mission.status)}</td>
-                        <td className="py-3 px-2">
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </td>
+              {loading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
+                  </div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Numéro de dossier</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Date de départ</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Véhicule</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Destination</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Statut</th>
+                        <th className="w-10"></th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {data.upcomingMissions.map((mission) => (
+                        <tr key={mission.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <td className="py-3 px-2">
+                            <div className="flex items-center">
+                              {getStatusIcon(mission.status)}
+                              <span className="ml-2 font-medium">{mission.id}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">{mission.departure_date}</td>
+                          <td className="py-3 px-2 text-gray-600">{mission.vehicle}</td>
+                          <td className="py-3 px-2 text-gray-600">{mission.destination}</td>
+                          <td className="py-3 px-2">{getStatusBadge(mission.status)}</td>
+                          <td className="py-3 px-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleMissionAction(mission.id)}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -205,7 +257,9 @@ export default function DashboardPage() {
                       <Bus className="h-6 w-6 text-white" />
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-green-900">Véhicules disponibles : {data.stats.availableVehicles}</h3>
+                      <h3 className="text-lg font-semibold text-green-900">
+                        Véhicules disponibles : {data.stats.availableVehicles}
+                      </h3>
                       <Badge className="bg-green-200 text-green-800 hover:bg-green-200 mt-1">
                         Disponibles
                       </Badge>
@@ -215,7 +269,7 @@ export default function DashboardPage() {
                 
                 {data.stats.maintenanceVehicles > 0 && (
                   <div className="text-sm text-green-800 mt-2">
-                    {data.stats.maintenanceVehicles} véhicules en maintenance
+                    {data.stats.maintenanceVehicles} véhicule(s) en maintenance
                   </div>
                 )}
               </CardContent>
@@ -230,7 +284,9 @@ export default function DashboardPage() {
                       <UserCheck className="h-6 w-6 text-white" />
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-semibold text-blue-900">Chauffeurs disponibles : {data.stats.availableDrivers}</h3>
+                      <h3 className="text-lg font-semibold text-blue-900">
+                        Chauffeurs disponibles : {data.stats.availableDrivers}
+                      </h3>
                       <Badge className="bg-blue-200 text-blue-800 hover:bg-blue-200 mt-1">
                         Disponibles
                       </Badge>

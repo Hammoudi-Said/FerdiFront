@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -23,10 +23,20 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
+// 🔧 FIX: Enhanced form schema with better phone validation
 const formSchema = z.object({
-  first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères'),
-  last_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
-  mobile: z.string().optional(),
+  first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères')
+    .max(50, 'Le prénom ne peut pas dépasser 50 caractères'),
+  last_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères')
+    .max(50, 'Le nom ne peut pas dépasser 50 caractères'),
+  mobile: z.string().optional().refine((val) => {
+    if (!val) return true // Optional field
+    // French phone number validation (flexible)
+    const phoneRegex = /^(?:(?:\+33|0)[1-9](?:[\s.-]?\d{2}){4})$/
+    return phoneRegex.test(val.replace(/[\s.-]/g, ''))
+  }, {
+    message: 'Format de téléphone invalide (ex: 06 12 34 56 78)'
+  }),
 })
 
 export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
@@ -41,31 +51,62 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
     },
   })
 
-  // Update form when profile changes - use useEffect to avoid infinite loops
-  useEffect(() => {
-    if (profile && open) {
+  // 🔧 FIX: Memoize form reset function to prevent infinite loop dependencies
+  const resetFormWithProfile = useCallback((profileData) => {
+    if (profileData) {
       form.reset({
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        mobile: profile.mobile || '',
+        first_name: profileData.first_name || '',
+        last_name: profileData.last_name || '',
+        mobile: profileData.mobile || '',
       })
     }
-  }, [profile, open, form])
+  }, [form.reset]) // Only depend on form.reset, not the whole form object
 
+  // 🔧 FIX: Update form when profile changes - prevent infinite loops
+  useEffect(() => {
+    if (profile && open) {
+      resetFormWithProfile(profile)
+    }
+  }, [profile, open, resetFormWithProfile])
+
+  // 🔧 FIX: Enhanced submit handler with better error handling
   const onSubmit = async (data) => {
+    if (isLoading) return // Prevent double submission
+    
     setIsLoading(true)
     try {
-      await onSave(data)
+      // Validate data before sending
+      const validatedData = formSchema.parse(data)
+      
+      await onSave(validatedData)
       onOpenChange(false)
     } catch (error) {
       console.error('Error updating profile:', error)
+      
+      // Handle validation errors
+      if (error.name === 'ZodError') {
+        error.errors.forEach(err => {
+          form.setError(err.path[0], {
+            type: 'manual',
+            message: err.message
+          })
+        })
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
+  // 🔧 FIX: Handle modal close properly
+  const handleClose = useCallback(() => {
+    if (isLoading) return // Don't close while saving
+    
+    form.clearErrors()
+    onOpenChange(false)
+  }, [form, isLoading, onOpenChange])
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Modifier le profil</DialogTitle>
@@ -83,7 +124,12 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
                 <FormItem>
                   <FormLabel>Prénom</FormLabel>
                   <FormControl>
-                    <Input placeholder="Votre prénom" {...field} />
+                    <Input 
+                      placeholder="Votre prénom" 
+                      {...field} 
+                      disabled={isLoading}
+                      maxLength={50}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -97,7 +143,12 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
                 <FormItem>
                   <FormLabel>Nom</FormLabel>
                   <FormControl>
-                    <Input placeholder="Votre nom" {...field} />
+                    <Input 
+                      placeholder="Votre nom" 
+                      {...field} 
+                      disabled={isLoading}
+                      maxLength={50}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,9 +162,18 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
                 <FormItem>
                   <FormLabel>Téléphone mobile</FormLabel>
                   <FormControl>
-                    <Input placeholder="06 12 34 56 78" {...field} />
+                    <Input 
+                      placeholder="06 12 34 56 78" 
+                      {...field} 
+                      disabled={isLoading}
+                      type="tel"
+                      maxLength={20}
+                    />
                   </FormControl>
                   <FormMessage />
+                  <p className="text-xs text-gray-500">
+                    Format accepté: 06 12 34 56 78 ou +33 6 12 34 56 78
+                  </p>
                 </FormItem>
               )}
             />
@@ -122,7 +182,7 @@ export function EditProfileModal({ open, onOpenChange, profile, onSave }) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={handleClose}
                 disabled={isLoading}
               >
                 Annuler

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { 
@@ -15,7 +15,8 @@ import { Clock, RefreshCw, LogOut, Wifi, WifiOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 /**
- * Session Manager - Handles session timeout warnings and automatic logout
+ * 🔧 FIXED: Session Manager - Handles session timeout warnings and automatic logout
+ * Fixed memory leaks and improved cleanup
  */
 export function SessionManager() {
   const { 
@@ -32,25 +33,40 @@ export function SessionManager() {
   const [isOnline, setIsOnline] = useState(true)
   const [autoExtendEnabled, setAutoExtendEnabled] = useState(true)
   
-  const warningShown = useRef(false)
+  // 🔧 FIX: Use refs to prevent stale closures and manage cleanup
+  const warningShownRef = useRef(false)
   const intervalRef = useRef(null)
-  const timeoutRef = useRef(null)
+  const activityThrottleRef = useRef(0)
+  const mountedRef = useRef(true)
   
-  // Track online/offline status
+  // 🔧 FIX: Cleanup on unmount
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+  
+  // 🔧 FIX: Improved online/offline handling with proper cleanup
   useEffect(() => {
     const handleOnline = () => {
+      if (!mountedRef.current) return
       setIsOnline(true)
       console.log('🌐 Connection restored')
       toast.success('Connexion rétablie')
     }
     
     const handleOffline = () => {
+      if (!mountedRef.current) return
       setIsOnline(false)
       console.log('📡 Connection lost')
       toast.warning('Connexion perdue', {
         description: 'Mode hors ligne activé'
       })
     }
+    
+    // Check initial online status
+    setIsOnline(navigator.onLine)
     
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
@@ -61,47 +77,54 @@ export function SessionManager() {
     }
   }, [])
   
-  // Track user activity for auto-extension
+  // 🔧 FIX: Throttled activity handler to prevent excessive updates
+  const handleActivity = useCallback(() => {
+    if (!mountedRef.current || !autoExtendEnabled) return
+    
+    const now = Date.now()
+    // Throttle to maximum once per 30 seconds
+    if (now - activityThrottleRef.current < 30000) return
+    
+    activityThrottleRef.current = now
+    updateActivity()
+    
+    // Reset warning if user becomes active
+    if (showWarning) {
+      setShowWarning(false)
+      warningShownRef.current = false
+      toast.success('Session prolongée automatiquement')
+    }
+  }, [updateActivity, showWarning, autoExtendEnabled])
+  
+  // 🔧 FIX: Improved activity tracking with proper cleanup
   useEffect(() => {
     if (!autoExtendEnabled) return
     
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
     
-    const handleActivity = () => {
-      updateActivity()
-      
-      // Reset warning if user becomes active
-      if (showWarning) {
-        setShowWarning(false)
-        warningShown.current = false
-        toast.success('Session prolongée automatiquement')
-      }
-    }
-    
-    // Throttle activity tracking to avoid excessive updates
-    let lastActivity = 0
-    const throttledActivity = () => {
-      const now = Date.now()
-      if (now - lastActivity > 30000) { // 30 seconds throttle
-        lastActivity = now
-        handleActivity()
-      }
-    }
-    
-    activityEvents.forEach(event => {
-      document.addEventListener(event, throttledActivity, true)
-    })
-    
-    return () => {
+    // Add passive listeners for better performance
+    const addEventListeners = () => {
       activityEvents.forEach(event => {
-        document.removeEventListener(event, throttledActivity, true)
+        document.addEventListener(event, handleActivity, { passive: true, capture: true })
       })
     }
-  }, [updateActivity, showWarning, autoExtendEnabled])
+    
+    const removeEventListeners = () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleActivity, { capture: true })
+      })
+    }
+    
+    addEventListeners()
+    
+    return removeEventListeners
+  }, [handleActivity, autoExtendEnabled])
   
-  // Session monitoring
+  // 🔧 FIX: Improved session monitoring with better cleanup
   useEffect(() => {
     const checkSession = () => {
+      if (!mountedRef.current) return
+      
       if (!isSessionValid()) {
         console.log('💀 Session expired, logging out')
         logout('session_expired')
@@ -114,12 +137,14 @@ export function SessionManager() {
       const sessionInfo = getSessionInfo()
       const timeLeft = sessionInfo.remainingTime
       
+      if (!mountedRef.current) return
       setRemainingTime(timeLeft)
       
       // Show warning when 5 minutes remain (300000 ms)
-      if (timeLeft <= 300000 && timeLeft > 0 && !warningShown.current) {
+      if (timeLeft <= 300000 && timeLeft > 0 && !warningShownRef.current) {
         setShowWarning(true)
-        warningShown.current = true
+        warningShownRef.current = true
+        console.log('⚠️ Session warning shown, time left:', Math.round(timeLeft / 1000), 'seconds')
       }
       
       // Auto logout when time is up
@@ -131,38 +156,47 @@ export function SessionManager() {
       }
     }
     
-    // Check every 30 seconds
-    intervalRef.current = setInterval(checkSession, 30000)
-    
     // Initial check
     checkSession()
+    
+    // Check every 30 seconds
+    intervalRef.current = setInterval(checkSession, 30000)
     
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
     }
   }, [isSessionValid, getSessionInfo, logout])
   
-  // Handle session extension
+  // 🔧 FIX: Enhanced session extension with proper error handling
   const handleExtendSession = async () => {
+    if (!mountedRef.current) return
+    
     try {
       if (isOnline) {
         // Refresh auth data from server
+        console.log('🔄 Extending session with server refresh...')
         const result = await checkAuth(true) // Skip cache
         if (result.authenticated) {
           extendSession()
-          setShowWarning(false)
-          warningShown.current = false
+          if (mountedRef.current) {
+            setShowWarning(false)
+            warningShownRef.current = false
+          }
           toast.success('Session prolongée avec succès')
         } else {
           throw new Error('Failed to extend session')
         }
       } else {
         // Offline mode - just extend locally
+        console.log('🔄 Extending session offline...')
         extendSession()
-        setShowWarning(false)
-        warningShown.current = false
+        if (mountedRef.current) {
+          setShowWarning(false)
+          warningShownRef.current = false
+        }
         toast.info('Session prolongée en mode hors ligne')
       }
     } catch (error) {
@@ -170,6 +204,13 @@ export function SessionManager() {
       toast.error('Échec de la prolongation', {
         description: 'Impossible de prolonger votre session'
       })
+      
+      // If extension fails, force logout after a delay
+      setTimeout(() => {
+        if (mountedRef.current) {
+          logout('extension_failed')
+        }
+      }, 5000)
     }
   }
   
@@ -193,10 +234,17 @@ export function SessionManager() {
     return Math.max(0, (remainingTime / totalTime) * 100)
   }
 
+  // 🔧 FIX: Handle dialog close properly
+  const handleDialogChange = (open) => {
+    if (!open && mountedRef.current) {
+      setShowWarning(false)
+    }
+  }
+
   return (
     <>
       {/* Session Warning Dialog */}
-      <Dialog open={showWarning} onOpenChange={setShowWarning}>
+      <Dialog open={showWarning} onOpenChange={handleDialogChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center text-amber-700">
@@ -212,7 +260,7 @@ export function SessionManager() {
             {/* Session expiring indicator */}
             <div className="text-center">
               <div className="text-lg font-medium text-amber-600 mb-2">
-                Votre session va bientôt expirer
+                Temps restant : {formatTime(remainingTime)}
               </div>
               <Progress value={getProgressPercentage()} className="w-full" />
             </div>
@@ -266,8 +314,6 @@ export function SessionManager() {
           </div>
         </DialogContent>
       </Dialog>
-      
-
     </>
   )
 }

@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { usersAPI } from '@/lib/api-client'
 import { useAuthStore } from '@/lib/stores/auth-store'
+import { UserRole } from '@/lib/constants/enums'
 import { 
   UserCheck, 
   Search, 

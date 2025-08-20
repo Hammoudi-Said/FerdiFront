@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timedelta
 
 # Configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://ferdi-ui-overhaul.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://transport-admin-3.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Test data

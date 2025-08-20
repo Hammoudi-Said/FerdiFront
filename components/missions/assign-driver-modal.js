@@ -96,7 +96,7 @@ export function AssignDriverModal({ open, onOpenChange, mission, onSave }) {
         // Use mock data - filter only drivers (role 4)
         setDrivers(mockDrivers)
       } else {
-        const response = await usersAPI.getUsers({ role: '4' }) // Only drivers
+        const response = await usersAPI.getUsers({ role: UserRole.DRIVER }) // Only drivers
         setDrivers(response.data.data || response.data)
       }
     } catch (error) {

@@ -20,6 +20,8 @@ import { toast } from 'sonner'
  */
 export function SessionManager() {
   const { 
+    user,
+    token,
     isSessionValid, 
     getSessionInfo, 
     updateActivity, 

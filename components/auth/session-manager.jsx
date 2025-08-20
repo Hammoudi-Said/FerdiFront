@@ -127,10 +127,7 @@ export function SessionManager() {
     const checkSession = () => {
       if (!mountedRef.current) return
       
-      // 🔧 FIX: Get auth state first to check if user is logged in
-      const { user, token } = useAuthStore.getState()
-      
-      // Only show session warnings if user is actually logged in
+      // ✅ FIX: Only check session if user is actually logged in
       if (!user || !token) {
         // User is not logged in, no need to show session warnings
         return

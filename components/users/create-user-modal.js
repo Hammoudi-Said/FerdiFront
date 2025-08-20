@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useAuthStore } from '@/lib/stores/auth-store'
+import { UserRole, ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import {
   Dialog,
   DialogContent,
@@ -30,7 +31,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
 
 const formSchema = z.object({
   first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères'),
@@ -64,18 +64,18 @@ export function CreateUserModal({ open, onOpenChange, onSave }) {
     },
   })
 
-  // Filter roles based on current user's permissions
+  // ✅ FIX: Use enum values instead of numbers for role filtering
   const getAvailableRoles = () => {
     const allRoles = Object.entries(ROLE_DEFINITIONS)
     
-    // Super admin (role 1) can create any role
-    if (user?.role === '1') {
+    // Super admin can create any role
+    if (user?.role === UserRole.SUPER_ADMIN) {
       return allRoles
     }
     
-    // Admin (role 2) can create roles 2-6 (cannot create super admin)
-    if (user?.role === '2') {
-      return allRoles.filter(([roleId]) => roleId !== '1')
+    // Admin can create roles except super admin
+    if (user?.role === UserRole.ADMIN) {
+      return allRoles.filter(([roleId]) => roleId !== UserRole.SUPER_ADMIN)
     }
     
     // No other role can create users

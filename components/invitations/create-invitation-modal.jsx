@@ -43,14 +43,14 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
 
   const watchedRole = watch('role')
 
-  // 🔧 FIX: Memoize role filtering to prevent recalculation
+  // ✅ FIX: Use enum values instead of numbers for role filtering
   const getAvailableRoles = useCallback(() => {
-    if (user?.role === '1') {
+    if (user?.role === UserRole.SUPER_ADMIN) {
       // Super admin can invite anyone
       return Object.entries(ROLE_DEFINITIONS)
-    } else if (user?.role === '2') {
+    } else if (user?.role === UserRole.ADMIN) {
       // Admin cannot create super_admin
-      return Object.entries(ROLE_DEFINITIONS).filter(([roleId]) => roleId !== '1')
+      return Object.entries(ROLE_DEFINITIONS).filter(([roleId]) => roleId !== UserRole.SUPER_ADMIN)
     }
     return []
   }, [user?.role])

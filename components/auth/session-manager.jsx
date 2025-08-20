@@ -120,10 +120,19 @@ export function SessionManager() {
     return removeEventListeners
   }, [handleActivity, autoExtendEnabled])
   
-  // 🔧 FIX: Improved session monitoring with better cleanup
+  // ✅ FIX: Improved session monitoring - only check if user is actually logged in
   useEffect(() => {
     const checkSession = () => {
       if (!mountedRef.current) return
+      
+      // 🔧 FIX: Get auth state first to check if user is logged in
+      const { user, token } = useAuthStore.getState()
+      
+      // Only show session warnings if user is actually logged in
+      if (!user || !token) {
+        // User is not logged in, no need to show session warnings
+        return
+      }
       
       if (!isSessionValid()) {
         console.log('💀 Session expired, logging out')

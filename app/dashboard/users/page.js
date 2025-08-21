@@ -6,7 +6,8 @@ import { RoleGuard } from '@/components/auth/role-guard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useAuthStore, ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { useAuthStore } from '@/lib/stores/auth-store'
+import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
 import { Users, Plus, Edit, Trash2, UserCheck } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -51,7 +52,7 @@ export default function UsersPage() {
   }
 
   return (
-    <RoleGuard allowedRoles={['1', '2']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}
@@ -62,7 +63,7 @@ export default function UsersPage() {
                 Gestion des Utilisateurs
               </h1>
               <p className="text-gray-600">
-                {user?.role === '1' 
+                {user?.role === UserRole.SUPER_ADMIN
                   ? 'Gestion globale de tous les utilisateurs'
                   : `Équipe de ${company?.name}`
                 }
@@ -102,7 +103,7 @@ export default function UsersPage() {
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Email</th>
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Rôle</th>
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Statut</th>
-                        {user?.role === '1' && (
+                        {user?.role === UserRole.SUPER_ADMIN && (
                           <th className="text-left py-3 px-4 font-medium text-gray-600">Entreprise</th>
                         )}
                         <th className="text-left py-3 px-4 font-medium text-gray-600">Dernière connexion</th>
@@ -136,7 +137,7 @@ export default function UsersPage() {
                               {user.is_active ? 'Actif' : 'Inactif'}
                             </Badge>
                           </td>
-                          {user?.role === '1' && (
+                          {user?.role === UserRole.SUPER_ADMIN && (
                             <td className="py-3 px-4 text-gray-600">{user.company?.name || 'N/A'}</td>
                           )}
                           <td className="py-3 px-4 text-gray-600">

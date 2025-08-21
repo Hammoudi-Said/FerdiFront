@@ -14,7 +14,7 @@ import { CreateUserModal } from '@/components/users/create-user-modal'
 import { EditUserModal } from '@/components/users/edit-user-modal'
 import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
 import { usersAPI } from '@/lib/api-client'
-import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
 import {
   Users,
   Plus,
@@ -235,7 +235,7 @@ export default function UsersPage() {
   }, [filteredUsers])
 
   return (
-    <RoleGuard allowedRoles={['1', '2']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

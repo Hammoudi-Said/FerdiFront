@@ -7,6 +7,7 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { UserRole } from '@/lib/constants/enums'
 import { 
   Users, 
   Bus, 
@@ -158,7 +159,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '4', '5', '6']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER, UserRole.INTERNAL_SUPPORT, UserRole.ACCOUNTANT]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

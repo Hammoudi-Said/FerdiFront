@@ -329,7 +329,7 @@ export default function FleetPage() {
   })
 
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '5']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.INTERNAL_SUPPORT]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

@@ -13,6 +13,7 @@ import { PlanningFilters } from '@/components/planning/planning-filters'
 import { PlanningStats } from '@/components/planning/planning-stats'
 import { QuickAssignModal } from '@/components/planning/quick-assign-modal'
 import { planningAPI, missionsAPI } from '@/lib/api-client'
+import { UserRole } from '@/lib/constants/enums'
 import {
   Calendar,
   Filter,
@@ -305,7 +306,7 @@ export default function PlanningPage() {
   const canManagePlanning = hasPermission('routes_manage')
 
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '5']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.INTERNAL_SUPPORT]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

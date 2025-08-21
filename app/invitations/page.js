@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { CreateInvitationModal } from '@/components/invitations/create-invitation-modal'
 import { InvitationsTable } from '@/components/invitations/invitations-table'
+import { UserRole } from '@/lib/constants/enums'
 import {
   Mail,
   Plus,
@@ -206,7 +207,7 @@ export default function InvitationsPage() {
   const canManage = hasPermission('users_manage')
 
   return (
-    <RoleGuard allowedRoles={['1', '2']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

@@ -16,6 +16,7 @@ import { DeleteMissionDialog } from '@/components/missions/delete-mission-dialog
 import { AssignDriverModal } from '@/components/missions/assign-driver-modal'
 import { AssignVehicleModal } from '@/components/missions/assign-vehicle-modal'
 import { missionsAPI } from '@/lib/api-client'
+import { UserRole } from '@/lib/constants/enums'
 import {
   MapPin,
   Plus,
@@ -151,14 +152,14 @@ export default function MissionsPage() {
       if (USE_MOCK_DATA) {
         // Filter missions for drivers (only their assigned missions)
         let filteredMissions = mockMissions
-        if (user?.role === '4') { // Driver role
+        if (user?.role === UserRole.DRIVER) {
           filteredMissions = mockMissions.filter(m => m.driver_id === user.id)
         }
         setMissions(filteredMissions)
         calculateStats(filteredMissions)
       } else {
         const params = {}
-        if (user?.role === '4') { // Driver role
+        if (user?.role === UserRole.DRIVER) {
           params.driver_id = user.id
         }
         const response = await missionsAPI.getMissions(params)
@@ -407,20 +408,20 @@ export default function MissionsPage() {
   })
 
   const canManageMissions = hasPermission('routes_manage')
-  const canViewAllMissions = user?.role !== '4' // Not driver
+  const canViewAllMissions = user?.role !== UserRole.DRIVER
 
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '4', '5']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER, UserRole.INTERNAL_SUPPORT]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {user?.role === '4' ? 'Mes missions' : 'Gestion des missions'}
+                {user?.role === UserRole.DRIVER ? 'Mes missions' : 'Gestion des missions'}
               </h1>
               <p className="text-gray-600">
-                {user?.role === '4' 
+                {user?.role === UserRole.DRIVER 
                   ? 'Consultez vos missions assignées'
                   : 'Gérez les missions de transport de votre flotte'
                 }

@@ -13,6 +13,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EditProfileModal } from '@/components/profile/edit-profile-modal'
 import { ChangePasswordModal } from '@/components/profile/change-password-modal'
 import { usersAPI } from '@/lib/api-client'
+import { UserRole } from '@/lib/constants/enums'
 import {
   User,
   Mail,
@@ -153,7 +154,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <RoleGuard allowedRoles={['1', '2', '3', '4', '5', '6']} showUnauthorized={true}>
+    <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER, UserRole.INTERNAL_SUPPORT, UserRole.ACCOUNTANT]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
           {/* Header */}

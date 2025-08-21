@@ -15,6 +15,7 @@ import { EditVehicleModal } from '@/components/fleet/edit-vehicle-modal'
 import { DeleteVehicleDialog } from '@/components/fleet/delete-vehicle-dialog'
 import { MaintenanceModal } from '@/components/fleet/maintenance-modal'
 import { vehiclesAPI } from '@/lib/api-client'
+import { UserRole } from '@/lib/constants/enums'
 import {
   Bus,
   Plus,

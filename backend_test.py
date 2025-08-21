@@ -15,7 +15,7 @@ import sys
 from typing import Dict, Any, List
 
 # Test configuration
-BASE_URL = "https://transport-admin-3.preview.emergentagent.com"
+BASE_URL = "https://enum-value-frontend.preview.emergentagent.com"
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Expected enum values after migration

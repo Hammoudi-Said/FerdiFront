@@ -7,6 +7,7 @@ FERDI est une application de gestion de flotte d'autocars construite avec **Next
 ## 🏗️ Architecture du projet
 
 ### Structure des dossiers
+
 ```
 /app/
 ├── app/                          # Application Next.js (App Router)
@@ -41,6 +42,7 @@ FERDI est une application de gestion de flotte d'autocars construite avec **Next
 ## 🔧 Configuration et Installation
 
 ### Variables d'environnement (.env)
+
 ```bash
 # Base de données MongoDB
 MONGO_URL=mongodb://localhost:27017
@@ -54,6 +56,7 @@ NEXT_PUBLIC_USE_MOCK_DATA=false
 ```
 
 ### Installation
+
 ```bash
 # Installation des dépendances
 yarn install
@@ -69,12 +72,14 @@ yarn start
 ## 🔐 Système d'authentification
 
 ### Architecture
+
 - **Store**: Zustand (`/lib/stores/auth-store.js`)
 - **Persistance**: LocalStorage + Cookies
 - **Session**: 8 heures d'inactivité
 - **JWT**: Stocké dans cookie `ferdi_token`
 
 ### Rôles utilisateur
+
 ```javascript
 '1': 'super_admin'    // Admin FERDI - Accès total multi-entreprises
 '2': 'admin'          // Admin entreprise - Gestion complète entreprise
@@ -85,16 +90,17 @@ yarn start
 ```
 
 ### Exemple d'utilisation
+
 ```jsx
 import { useAuthStore } from '@/lib/stores/auth-store'
 
 function MonComposant() {
   const { user, hasPermission, logout } = useAuthStore()
-  
+
   if (!hasPermission('routes_manage')) {
     return <div>Accès refusé</div>
   }
-  
+
   return <div>Contenu autorisé</div>
 }
 ```
@@ -102,6 +108,7 @@ function MonComposant() {
 ## 🌐 Gestion des API
 
 ### Configuration de base (`/lib/api.js`)
+
 ```javascript
 export const api = axios.create({
   baseURL: '/api',  // Proxy vers backend via Next.js
@@ -117,6 +124,7 @@ api.interceptors.request.use((config) => {
 ```
 
 ### Clients API typés (`/lib/api-client.js`)
+
 ```javascript
 export const usersAPI = {
   getProfile: () => api.get('/users/me'),
@@ -133,12 +141,15 @@ export const companyAPI = {
 ## 🎨 Système de composants UI
 
 ### Shadcn/ui
+
 Tous les composants de base utilisent shadcn/ui dans `/components/ui/`:
+
 - `Button`, `Input`, `Card`, `Dialog`, etc.
 - Personnalisables via Tailwind CSS
 - Accessibles et typés
 
 ### Composants personnalisés
+
 ```jsx
 // Exemple de composant avec authentification
 import { RoleGuard } from '@/components/auth/role-guard'
@@ -157,6 +168,7 @@ export function ComposantAdmin() {
 ### ➕ Ajouter une nouvelle feature
 
 #### 1. Créer une nouvelle page
+
 ```bash
 # Créer le dossier et fichier
 mkdir -p app/ma-nouvelle-page
@@ -185,6 +197,7 @@ export default function MaNouvelleFeature() {
 ```
 
 #### 2. Ajouter les appels API
+
 ```javascript
 // Dans /lib/api-client.js
 export const maFeatureAPI = {
@@ -196,6 +209,7 @@ export const maFeatureAPI = {
 ```
 
 #### 3. Créer les composants
+
 ```jsx
 // components/ma-feature/ma-feature-table.js
 'use client'
@@ -237,6 +251,7 @@ export function MaFeatureTable() {
 ```
 
 #### 4. Ajouter au menu (optionnel)
+
 ```jsx
 // Dans components/layout/sidebar.js
 const menuItems = [
@@ -245,7 +260,7 @@ const menuItems = [
     title: 'Ma Feature',
     href: '/ma-nouvelle-page',
     icon: MonIcon,
-    roles: ['1', '2', '3'], // Rôles autorisés
+    roles: ['1', '2', '3'], // Rôles autorisé
     permissions: ['ma_feature_access']
   }
 ]
@@ -254,27 +269,29 @@ const menuItems = [
 ### 🔌 Ajouter un nouvel endpoint backend
 
 #### 1. Définir l'endpoint dans l'API client
+
 ```javascript
 // lib/api-client.js
 export const monNouveauAPI = {
   // GET /api/mon-endpoint
   getItems: (params = {}) => api.get('/mon-endpoint/', { params }),
-  
+
   // POST /api/mon-endpoint
   createItem: (data) => api.post('/mon-endpoint/', data),
-  
+
   // GET /api/mon-endpoint/{id}
   getItemById: (id) => api.get(`/mon-endpoint/${id}`),
-  
+
   // PATCH /api/mon-endpoint/{id}
   updateItem: (id, data) => api.patch(`/mon-endpoint/${id}`, data),
-  
+
   // DELETE /api/mon-endpoint/{id}
   deleteItem: (id) => api.delete(`/mon-endpoint/${id}`)
 }
 ```
 
 #### 2. Créer le hook personnalisé (optionnel)
+
 ```javascript
 // lib/hooks/use-mon-endpoint.js
 import { useState, useEffect } from 'react'
@@ -326,6 +343,7 @@ export function useMonEndpoint() {
 ```
 
 #### 3. Utiliser dans un composant
+
 ```jsx
 // components/mon-composant.js
 import { useMonEndpoint } from '@/lib/hooks/use-mon-endpoint'
@@ -360,6 +378,7 @@ export function MonComposant() {
 ### ✏️ Modifier une feature existante
 
 #### 1. Identifier les fichiers à modifier
+
 - **Page principale**: `/app/[feature]/page.js`
 - **Composants**: `/components/[feature]/`
 - **API client**: `/lib/api-client.js`
@@ -396,6 +415,7 @@ export const usersAPI = {
 ```
 
 #### 3. Exemple: Modifier une permission
+
 ```javascript
 // lib/stores/auth-store.js
 const ROLE_DEFINITIONS = {
@@ -415,23 +435,27 @@ const ROLE_DEFINITIONS = {
 ### 🔄 Workflow de développement recommandé
 
 #### 1. Planification
+
 - [ ] Définir les besoins utilisateur
 - [ ] Concevoir l'API (endpoints, schémas)
 - [ ] Créer les maquettes UI
 - [ ] Identifier les composants réutilisables
 
 #### 2. Développement Backend d'abord
+
 - [ ] Implémenter les endpoints FastAPI
 - [ ] Tester avec des outils comme Postman
 - [ ] Documenter l'API (OpenAPI/Swagger)
 
 #### 3. Développement Frontend
+
 - [ ] Créer les clients API
 - [ ] Développer les composants UI
 - [ ] Implémenter la logique métier
 - [ ] Gérer les états de chargement/erreur
 
 #### 4. Tests et validation
+
 - [ ] Tests unitaires (composants)
 - [ ] Tests d'intégration (API)
 - [ ] Tests utilisateur (UX/UI)
@@ -440,6 +464,7 @@ const ROLE_DEFINITIONS = {
 ## 🚨 Gestion des erreurs
 
 ### Intercepteur global
+
 ```javascript
 // lib/api.js
 api.interceptors.response.use(
@@ -450,18 +475,19 @@ api.interceptors.response.use(
       Cookies.remove('ferdi_token')
       window.location.href = '/auth/login'
     }
-    
+
     // Log des erreurs en développement
     if (process.env.NODE_ENV === 'development') {
       console.error('API Error:', error.response?.data || error.message)
     }
-    
+
     return Promise.reject(error)
   }
 )
 ```
 
 ### Gestion d'erreurs dans les composants
+
 ```jsx
 import { toast } from 'sonner'
 
@@ -480,6 +506,7 @@ const handleAction = async () => {
 ## 📊 Gestion des états
 
 ### Store principal (Zustand)
+
 ```javascript
 // lib/stores/auth-store.js
 export const useAuthStore = create(
@@ -489,11 +516,11 @@ export const useAuthStore = create(
       user: null,
       token: null,
       isLoading: false,
-      
+
       // Actions
       login: async (email, password) => { /* ... */ },
       logout: () => { /* ... */ },
-      
+
       // Sélecteurs
       hasPermission: (permission) => { /* ... */ }
     }),
@@ -506,15 +533,16 @@ export const useAuthStore = create(
 ```
 
 ### État local (useState)
+
 ```jsx
 function MonComposant() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  
+
   // Gestion d'état avec useReducer pour logique complexe
   const [state, dispatch] = useReducer(reducer, initialState)
-  
+
   return <div>...</div>
 }
 ```
@@ -522,24 +550,28 @@ function MonComposant() {
 ## 🎯 Bonnes pratiques
 
 ### Sécurité
+
 - ✅ Toujours valider les permissions côté frontend ET backend
 - ✅ Utiliser HTTPS en production
 - ✅ Nettoyer les inputs utilisateur
 - ✅ Gérer l'expiration des sessions
 
 ### Performance
+
 - ✅ Utiliser `useCallback` et `useMemo` pour optimiser
 - ✅ Implémenter la pagination pour les listes
 - ✅ Mettre en cache les données fréquemment utilisées
 - ✅ Optimiser les images (Next.js Image)
 
 ### Code quality
+
 - ✅ Composants petits et réutilisables
 - ✅ Nommage explicite des variables/fonctions
 - ✅ Comments pour la logique complexe
 - ✅ Gestion d'erreurs cohérente
 
 ### UX/UI
+
 - ✅ États de chargement visibles
 - ✅ Messages d'erreur explicites
 - ✅ Interface responsive (mobile-first)
@@ -548,12 +580,15 @@ function MonComposant() {
 ## 📧 Configuration du reset password
 
 ### URL de réinitialisation
+
 Quand l'utilisateur clique sur le lien dans l'email, il doit être redirigé vers:
+
 ```
 https://votre-domaine.com/auth/reset-password?token=ABC123XYZ
 ```
 
 ### Configuration email backend
+
 ```python
 # Dans votre backend FastAPI
 email_content = f"""
@@ -569,6 +604,7 @@ L'équipe FERDI
 ```
 
 ### Flow complet
+
 1. **Utilisateur**: Clique "Mot de passe oublié" → Modal s'ouvre
 2. **Frontend**: Appelle `POST /api/password-recovery/{email}`
 3. **Backend**: Génère token + envoie email avec lien
@@ -581,6 +617,7 @@ L'équipe FERDI
 ## 🛠️ Outils de développement
 
 ### Extensions VS Code recommandées
+
 - ES7+ React/Redux/React-Native snippets
 - Tailwind CSS IntelliSense
 - Auto Rename Tag
@@ -588,6 +625,7 @@ L'équipe FERDI
 - ESLint
 
 ### Commandes utiles
+
 ```bash
 # Générer un composant shadcn/ui
 npx shadcn-ui@latest add button
@@ -605,6 +643,7 @@ npm run lint
 ## 📞 Support et contribution
 
 ### Structure des commits
+
 ```bash
 git commit -m "feat(auth): add password reset functionality"
 git commit -m "fix(profile): correct API call method"
@@ -612,7 +651,9 @@ git commit -m "docs(readme): update installation guide"
 ```
 
 ### Signalement de bugs
+
 Créer une issue avec:
+
 - Description claire du problème
 - Étapes de reproduction
 - Comportement attendu vs observé

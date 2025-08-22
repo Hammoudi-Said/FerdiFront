@@ -36,11 +36,11 @@ export default function RegisterUserPage() {
   const router = useRouter()
   const [success, setSuccess] = useState(false)
   const { registerUser, isLoading } = useAuthStore()
-  
+
   const form = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      role: '4', // Default to CHAUFFEUR
+      role: 'CHAUFFEUR', // Default to CHAUFFEUR
     },
   })
 
@@ -56,7 +56,7 @@ export default function RegisterUserPage() {
     }
 
     const result = await registerUser(userData)
-    
+
     if (result.success) {
       setSuccess(true)
       toast.success('Inscription réussie!')
@@ -84,8 +84,8 @@ export default function RegisterUserPage() {
                 Vous pouvez maintenant vous connecter avec vos identifiants
               </p>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={() => router.push('/auth/login')}
               className="w-full"
             >
@@ -108,7 +108,7 @@ export default function RegisterUserPage() {
               Retour à la connexion
             </Button>
           </Link>
-          
+
           <div className="flex items-center">
             <div className="bg-primary p-2 rounded-full mr-3">
               <Bus className="h-6 w-6 text-primary-foreground" />
@@ -247,9 +247,9 @@ export default function RegisterUserPage() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (

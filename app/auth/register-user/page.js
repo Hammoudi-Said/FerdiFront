@@ -41,7 +41,7 @@ export default function RegisterUserPage() {
   const form = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      role: 'CHAUFFEUR', // Default to CHAUFFEUR
+      role: UserRole.DRIVER, // Default to DRIVER
     },
   })
 

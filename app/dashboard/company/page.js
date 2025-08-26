@@ -36,7 +36,8 @@ export default function CompanyPage() {
     }
   }, [company])
 
-  const canEdit = user?.role === '1' || user?.role === '2' // Super Admin or Admin
+  // ✅ PERMISSIONS SELON OPENAPI - ADMIN peut modifier SON entreprise
+  const canEdit = canModifyCompany(user, company?.id)
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(company?.company_code || '')

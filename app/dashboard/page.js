@@ -2,32 +2,17 @@
 
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { useEffect, useState, useRef } from 'react'
-import { useAuthStore } from '@/lib/stores/auth-store'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { UserRole } from '@/lib/constants/enums'
-import { 
-  Users, 
-  Bus, 
-  UserCheck,
-  Plus,
-  MoreHorizontal,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-} from 'lucide-react'
+import { DashboardRouter } from '@/components/dashboard/dashboard-router'
 
-// Mock data for the main dashboard overview
-const mockDashboardData = {
-  stats: {
-    totalUsers: 28,
-    availableVehicles: 7,
-    availableDrivers: 5,
-    maintenanceVehicles: 2,
-  },
-  upcomingMissions: [
+export default function DashboardPage() {
+  return (
+    <DashboardLayout>
+      <RoleGuard>
+        <DashboardRouter />
+      </RoleGuard>
+    </DashboardLayout>
+  )
+}
     {
       id: 'MSN-2025-001',
       departure_date: '25/07/2025',

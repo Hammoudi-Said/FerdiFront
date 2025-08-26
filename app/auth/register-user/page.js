@@ -210,9 +210,9 @@ export default function RegisterUserPage() {
                     <SelectValue placeholder="Choisir votre rôle" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2">Administrateur</SelectItem>
-                    <SelectItem value="3">Autocariste / Dispatcher</SelectItem>
-                    <SelectItem value="4">Chauffeur</SelectItem>
+                    <SelectItem value={UserRole.ADMIN}>Administrateur</SelectItem>
+                    <SelectItem value={UserRole.DISPATCH}>Autocariste / Dispatcher</SelectItem>
+                    <SelectItem value={UserRole.DRIVER}>Chauffeur</SelectItem>
                   </SelectContent>
                 </Select>
                 {form.formState.errors.role && (

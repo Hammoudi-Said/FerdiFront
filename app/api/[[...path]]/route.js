@@ -63,7 +63,7 @@ async function forwardRequest(request, params, method) {
 
     // Handle body for POST, PUT, PATCH requests
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
-      if (path === 'login/access-token') {
+      if (path === 'auth/login') {
         // Special handling for OAuth2PasswordRequestForm endpoint
         try {
           const originalContentType = request.headers.get('content-type')

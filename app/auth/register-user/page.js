@@ -15,13 +15,14 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { toast } from 'sonner'
 import { Bus, ArrowLeft, CheckCircle } from 'lucide-react'
+import { UserRole } from '@/lib/constants/enums'
 
 const userSchema = z.object({
   email: z.string().email('Email invalide'),
   first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères').max(100),
   last_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(100),
   mobile: z.string().min(10, 'Le téléphone doit contenir au moins 10 caractères').max(20),
-  role: z.enum(['2', '3', '4']),
+  role: z.enum([UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER]),
   password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères').max(40),
   confirmPassword: z.string(),
   company_code: z.string()

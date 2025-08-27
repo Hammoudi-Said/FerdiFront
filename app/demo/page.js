@@ -192,6 +192,13 @@ export default function DemoPage() {
                   </Button>
                 </Link>
                 
+                <Link href="/invitations/accept-demo">
+                  <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Démonstration Acceptation d'Invitation
+                  </Button>
+                </Link>
+                
                 <Link href="/users?demo=admin">
                   <Button className="w-full bg-purple-600 hover:bg-purple-700">
                     <Users className="mr-2 h-4 w-4" />

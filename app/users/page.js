@@ -55,7 +55,7 @@ export default function UsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true)
-      
+
       if (USE_MOCK_DATA) {
         const result = await getUsers()
         if (result.success) {
@@ -81,7 +81,7 @@ export default function UsersPage() {
     const total = usersList.length
     const active = usersList.filter(u => u.is_active).length
     const inactive = total - active
-    
+
     const byRole = {}
     usersList.forEach(u => {
       const roleName = ROLE_DEFINITIONS[u.role]?.name || 'unknown'
@@ -96,17 +96,17 @@ export default function UsersPage() {
     return users.filter(user => {
       // 🔧 FIX: Safe name comparison with fallback
       const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()
-      
-      const matchesSearch = !searchTerm || 
+
+      const matchesSearch = !searchTerm ||
         fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      
+
       const matchesRole = filterRole === 'all' || user.role === filterRole
-      
-      const matchesStatus = filterStatus === 'all' || 
+
+      const matchesStatus = filterStatus === 'all' ||
         (filterStatus === 'active' && user.is_active) ||
         (filterStatus === 'inactive' && !user.is_active)
-      
+
       return matchesSearch && matchesRole && matchesStatus
     })
   }, [users, searchTerm, filterRole, filterStatus])
@@ -142,8 +142,8 @@ export default function UsersPage() {
     try {
       if (USE_MOCK_DATA) {
         // Mock user update
-        setUsers(prev => prev.map(u => 
-          u.id === userId 
+        setUsers(prev => prev.map(u =>
+          u.id === userId
             ? { ...u, ...userData, full_name: `${userData.first_name} ${userData.last_name}` }
             : u
         ))
@@ -215,18 +215,18 @@ export default function UsersPage() {
       const BOM = '\uFEFF'
       const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' })
       const url = window.URL.createObjectURL(blob)
-      
+
       const a = document.createElement('a')
       a.href = url
       a.download = `utilisateurs_${new Date().toISOString().split('T')[0]}.csv`
       a.style.display = 'none'
-      
+
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      
+
       window.URL.revokeObjectURL(url)
-      
+
       toast.success('Export CSV réussi')
     } catch (error) {
       console.error('Failed to export CSV:', error)
@@ -253,9 +253,9 @@ export default function UsersPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Exporter CSV ({filteredUsers.length})
               </Button>
-              {hasPermission('users_manage') && (
+              {(
                 <>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={() => window.location.href = '/invitations'}
                     className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
@@ -345,7 +345,7 @@ export default function UsersPage() {
                     />
                   </div>
                 </div>
-                
+
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
@@ -356,7 +356,7 @@ export default function UsersPage() {
                     <option key={roleId} value={roleId}>{roleData.label}</option>
                   ))}
                 </select>
-                
+
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -367,7 +367,7 @@ export default function UsersPage() {
                   <option value="inactive">Inactif</option>
                 </select>
               </div>
-              
+
               {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
                 <div className="mt-3 flex items-center gap-2">
                   <span className="text-sm text-gray-600">

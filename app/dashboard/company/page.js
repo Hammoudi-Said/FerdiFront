@@ -32,6 +32,7 @@ export default function CompanyPage() {
         phone: company.phone || '',
         email: company.email || '',
         website: company.website || '',
+        siret: company.siret,
       })
     }
   }, [company])
@@ -59,6 +60,7 @@ export default function CompanyPage() {
         phone: company.phone || '',
         email: company.email || '',
         website: company.website || '',
+        siret: company.siret,
       })
     }
   }
@@ -66,7 +68,7 @@ export default function CompanyPage() {
   const handleSave = async () => {
     setLoading(true)
     try {
-      const response = await companyAPI.updateCompany(company.id, editForm)
+      const response = await companyAPI.updateMyCompany(company.id, editForm)
       setCompany(response.data)
       setIsEditing(false)
       toast.success('Informations mises à jour avec succès!')
@@ -160,7 +162,7 @@ export default function CompanyPage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-800">
-                  <strong>Mode lecture seule :</strong> Vous pouvez consulter les informations de l'entreprise mais vous n'avez pas les droits pour les modifier. 
+                  <strong>Mode lecture seule :</strong> Vous pouvez consulter les informations de l'entreprise mais vous n'avez pas les droits pour les modifier.
                   Contactez votre administrateur pour toute modification.
                 </p>
               </div>

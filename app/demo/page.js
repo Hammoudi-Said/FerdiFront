@@ -185,6 +185,20 @@ export default function DemoPage() {
                   </Button>
                 </Link>
                 
+                <Link href="/invitations?demo=admin">
+                  <Button className="w-full bg-green-600 hover:bg-green-700">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Voir Système d'Invitations (Admin)
+                  </Button>
+                </Link>
+                
+                <Link href="/users?demo=admin">
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                    <Users className="mr-2 h-4 w-4" />
+                    Voir Gestion Utilisateurs (Admin)
+                  </Button>
+                </Link>
+                
                 <Link href="/auth/register-company">
                   <Button variant="outline" className="w-full">
                     Créer une entreprise

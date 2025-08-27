@@ -58,18 +58,18 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         setLoadingInvitation(true)
         
         if (USE_MOCK_DATA) {
-          // Mock invitation data
+          // Mock invitation data - Handle any token in demo mode
           const mockInvitation = {
             id: 'inv-mock',
-            email: 'nouveau.employe@transport-bretagne.fr',
-            role: 'DRIVER',
-            first_name: 'Nouveau',
-            last_name: 'Employé',
+            email: 'utilisateur.invite@transport-bretagne.fr',
+            role: 'DRIVER', // You can change this based on token or make it dynamic
+            first_name: '',
+            last_name: '',
             mobile: '',
-            personal_message: 'Bienvenue dans notre équipe de chauffeurs !',
+            personal_message: 'Bienvenue dans notre équipe ! Votre rôle a été défini par l\'administrateur.',
             company_name: 'Transport Bretagne SARL',
             invited_by: {
-              full_name: 'Administrateur Demo',
+              full_name: 'Administrateur Transport',
               email: 'admin@transport-bretagne.fr'
             },
             expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
@@ -81,7 +81,7 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           
           setInvitation(mockInvitation)
           
-          // Pre-fill form with invitation data
+          // Pre-fill form with invitation data (empty for user to fill)
           if (mockInvitation.first_name) setValue('first_name', mockInvitation.first_name)
           if (mockInvitation.last_name) setValue('last_name', mockInvitation.last_name)
           if (mockInvitation.mobile) setValue('mobile', mockInvitation.mobile)
@@ -99,7 +99,29 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         }
       } catch (error) {
         console.error('Error loading invitation:', error)
-        onError?.('Invitation non trouvée, expirée ou invalide')
+        
+        if (USE_MOCK_DATA) {
+          // In mock mode, still show a generic invitation for any token
+          const fallbackInvitation = {
+            id: 'inv-fallback',
+            email: 'utilisateur.invite@transport-bretagne.fr',
+            role: 'DRIVER',
+            first_name: '',
+            last_name: '',
+            mobile: '',
+            personal_message: 'Invitation de démonstration - Votre rôle sera assigné par l\'administrateur.',
+            company_name: 'Transport Bretagne SARL (Démonstration)',
+            invited_by: {
+              full_name: 'Administrateur Démonstration',
+              email: 'demo@transport-bretagne.fr'
+            },
+            expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          }
+          setInvitation(fallbackInvitation)
+        } else {
+          onError?.('Invitation non trouvée, expirée ou invalide')
+        }
       } finally {
         setLoadingInvitation(false)
       }

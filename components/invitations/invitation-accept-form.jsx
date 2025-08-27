@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { invitationsAPI } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import { 
   UserPlus, 
   AlertCircle, 
@@ -17,20 +19,25 @@ import {
   EyeOff,
   Mail,
   Phone,
-  Lock
+  Lock,
+  Shield,
+  Clock
 } from 'lucide-react'
 
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 
 export function InvitationAcceptForm({ token, onSuccess, onError }) {
   const [loading, setLoading] = useState(false)
+  const [loadingInvitation, setLoadingInvitation] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [invitation, setInvitation] = useState(null)
   
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -43,6 +50,65 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
   })
 
   const password = watch('password')
+
+  // Load invitation details when component mounts
+  useEffect(() => {
+    const loadInvitationDetails = async () => {
+      try {
+        setLoadingInvitation(true)
+        
+        if (USE_MOCK_DATA) {
+          // Mock invitation data
+          const mockInvitation = {
+            id: 'inv-mock',
+            email: 'nouveau.employe@transport-bretagne.fr',
+            role: 'DRIVER',
+            first_name: 'Nouveau',
+            last_name: 'Employé',
+            mobile: '',
+            personal_message: 'Bienvenue dans notre équipe de chauffeurs !',
+            company_name: 'Transport Bretagne SARL',
+            invited_by: {
+              full_name: 'Administrateur Demo',
+              email: 'admin@transport-bretagne.fr'
+            },
+            expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          }
+          
+          // Simulate loading delay
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          setInvitation(mockInvitation)
+          
+          // Pre-fill form with invitation data
+          if (mockInvitation.first_name) setValue('first_name', mockInvitation.first_name)
+          if (mockInvitation.last_name) setValue('last_name', mockInvitation.last_name)
+          if (mockInvitation.mobile) setValue('mobile', mockInvitation.mobile)
+          
+        } else {
+          const response = await invitationsAPI.getInvitationByToken(token)
+          const invitationData = response.data
+          
+          setInvitation(invitationData)
+          
+          // Pre-fill form with invitation data
+          if (invitationData.first_name) setValue('first_name', invitationData.first_name)
+          if (invitationData.last_name) setValue('last_name', invitationData.last_name)
+          if (invitationData.mobile) setValue('mobile', invitationData.mobile)
+        }
+      } catch (error) {
+        console.error('Error loading invitation:', error)
+        onError?.('Invitation non trouvée, expirée ou invalide')
+      } finally {
+        setLoadingInvitation(false)
+      }
+    }
+
+    if (token) {
+      loadInvitationDetails()
+    }
+  }, [token, setValue, onError])
 
   const onSubmit = async (data) => {
     setLoading(true)
@@ -63,13 +129,13 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         // Mock success response
         const mockResponse = {
           id: `user-${Date.now()}`,
-          email: 'invitation@example.com',
+          email: invitation.email,
           first_name: data.first_name,
           last_name: data.last_name,
           full_name: `${data.first_name} ${data.last_name}`,
           mobile: data.mobile,
-          role: 'driver',
-          status: 'active',
+          role: invitation.role,
+          status: 'ACTIVE',
           is_active: true,
           created_at: new Date().toISOString()
         }
@@ -98,6 +164,35 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
     }
   }
 
+  // Show loading state while fetching invitation details
+  if (loadingInvitation) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardContent className="flex flex-col items-center justify-center p-8">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-gray-600">Chargement des détails de l'invitation...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Show error if invitation not found
+  if (!invitation) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <CardTitle className="text-red-900">Invitation non trouvée</CardTitle>
+          <CardDescription>
+            Cette invitation n'existe pas, a expiré ou a déjà été utilisée.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
   if (success) {
     return (
       <Card className="w-full max-w-lg mx-auto">
@@ -107,7 +202,8 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           </div>
           <CardTitle className="text-green-900">Compte créé avec succès!</CardTitle>
           <CardDescription>
-            Votre compte a été créé. Vous pouvez maintenant vous connecter avec vos identifiants.
+            Votre compte a été créé avec le rôle <strong>{ROLE_DEFINITIONS[invitation.role]?.label}</strong>. 
+            Vous pouvez maintenant vous connecter avec vos identifiants.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -122,6 +218,25 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
     )
   }
 
+  const roleInfo = ROLE_DEFINITIONS[invitation.role]
+  const isExpired = new Date(invitation.expires_at) < new Date()
+
+  if (isExpired) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+            <Clock className="h-6 w-6 text-red-600" />
+          </div>
+          <CardTitle className="text-red-900">Invitation expirée</CardTitle>
+          <CardDescription>
+            Cette invitation a expiré. Contactez votre administrateur pour recevoir une nouvelle invitation.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center">
@@ -130,11 +245,40 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         </div>
         <CardTitle>Accepter l'invitation</CardTitle>
         <CardDescription>
-          Complétez vos informations pour créer votre compte
+          Vous avez été invité à rejoindre <strong>{invitation.company_name}</strong>
         </CardDescription>
       </CardHeader>
       
       <CardContent>
+        {/* Invitation Details */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Email:</span>
+            <span className="text-sm text-gray-900">{invitation.email}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Rôle assigné:</span>
+            <Badge className={`${roleInfo?.bgColor} ${roleInfo?.textColor} ${roleInfo?.borderColor} border`}>
+              <Shield className="w-3 h-3 mr-1" />
+              {roleInfo?.label || invitation.role}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Invité par:</span>
+            <span className="text-sm text-gray-900">{invitation.invited_by?.full_name}</span>
+          </div>
+          
+          {invitation.personal_message && (
+            <div className="pt-2 border-t border-gray-200">
+              <p className="text-sm text-gray-600 italic">
+                "{invitation.personal_message}"
+              </p>
+            </div>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* First Name */}
@@ -189,7 +333,10 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
               type="tel"
               {...register('mobile', {
                 required: 'Le numéro de téléphone est requis',
-                maxLength: { value: 20, message: 'Maximum 20 caractères' }
+                pattern: {
+                  value: /^(?:(?:\+33|0)[1-9](?:[\s.-]?\d{2}){4})$/,
+                  message: 'Format invalide (ex: 06 12 34 56 78)'
+                }
               })}
               disabled={loading}
               placeholder="06 12 34 56 78"
@@ -215,7 +362,11 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
                 {...register('password', {
                   required: 'Le mot de passe est requis',
                   minLength: { value: 8, message: 'Minimum 8 caractères' },
-                  maxLength: { value: 40, message: 'Maximum 40 caractères' }
+                  maxLength: { value: 40, message: 'Maximum 40 caractères' },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                    message: 'Doit contenir au moins 1 minuscule, 1 majuscule et 1 chiffre'
+                  }
                 })}
                 disabled={loading}
                 placeholder="••••••••"
@@ -258,10 +409,11 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
             )}
           </div>
 
-          <Alert>
-            <Mail className="h-4 w-4" />
-            <AlertDescription>
-              Une fois votre compte créé, vous recevrez un email de confirmation et pourrez vous connecter immédiatement.
+          <Alert className="border-green-200 bg-green-50">
+            <Shield className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Rôle assigné: {roleInfo?.label}</strong><br />
+              {roleInfo?.description}. Ce rôle a été défini par votre administrateur et ne peut pas être modifié.
             </AlertDescription>
           </Alert>
 
@@ -278,7 +430,7 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Créer mon compte
+                Créer mon compte avec le rôle {roleInfo?.label}
               </>
             )}
           </Button>

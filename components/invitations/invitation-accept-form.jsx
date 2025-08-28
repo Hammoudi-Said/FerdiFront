@@ -345,6 +345,42 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email field - Read-only from invitation */}
+          <div className="space-y-2">
+            <Label htmlFor="invitation_email">
+              <Mail className="inline h-4 w-4 mr-1" />
+              Email (assigné par l'invitation)
+            </Label>
+            <Input
+              id="invitation_email"
+              type="email"
+              value={invitation.email}
+              disabled
+              className="bg-gray-50 text-gray-700 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500">
+              ⚠️ Cette adresse email ne peut pas être modifiée car elle provient de votre invitation.
+            </p>
+          </div>
+
+          {/* Role field - Read-only badge */}
+          <div className="space-y-2">
+            <Label>
+              <Shield className="inline h-4 w-4 mr-1" />
+              Rôle assigné
+            </Label>
+            <div className="p-3 bg-gray-50 border rounded-md flex items-center justify-between">
+              <span className="text-sm text-gray-700">Votre rôle dans l'entreprise :</span>
+              <Badge className={`${roleInfo?.bgColor} ${roleInfo?.textColor} ${roleInfo?.borderColor} border`}>
+                <Shield className="w-3 h-3 mr-1" />
+                {roleInfo?.label || invitation.role}
+              </Badge>
+            </div>
+            <p className="text-xs text-gray-500">
+              ⚠️ Le rôle a été défini par votre administrateur et ne peut pas être modifié.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* First Name */}
             <div className="space-y-2">

@@ -1,106 +1,111 @@
 # 🎯 Amélioration du Système d'Invitations FERDI
 
-## 📋 Problème initial
-Lorsqu'un utilisateur clique sur le lien d'invitation reçu par mail, le formulaire affichait un formulaire générique sans pré-remplir les champs email et rôle depuis l'invitation. Résultat : mauvaise UX et risque d'erreur.
+## 📋 Problèmes initiaux identifiés et résolus
 
-## ✅ Solution implémentée
+### 1. **Route d'API incorrecte** ✅ CORRIGÉ
+**Problème** : Le frontend utilisait `/api/v1/invitations/verify?token=xxx` au lieu de la route correcte.
+**Correction** : Mise à jour pour utiliser `/api/v1/auth/test-token?token=xxx`
 
-### 1. **API Client corrigé** (`/app/lib/api-client.js`)
+### 2. **Problème d'authentification des chauffeurs** ✅ CORRIGÉ 
+**Problème** : Les chauffeurs ne pouvaient pas se connecter correctement car l'API mock retournait toujours l'utilisateur admin.
+**Correction** : Implémentation d'un système de session pour l'API mock qui retourne le bon utilisateur selon les credentials.
 
-**Problème** : Les endpoints publics (`getInvitationByToken`, `acceptInvitation`) n'arrivaient pas à supprimer correctement les headers d'authentification.
+### 3. **Gestion des invitations par l'admin** ✅ DÉJÀ IMPLÉMENTÉ
+**Fonctionnalité** : L'admin peut déjà renvoyer et supprimer les invitations via l'interface existante.
 
-**Solution** :
-- Création d'instances axios séparées pour les endpoints publics (sans intercepteurs d'auth)
-- Ajout d'une nouvelle route `verifyInvitationToken` pour `GET /invitations/verify?token=xxx`
-- Configuration correcte des headers sans authentification
+## ✅ Solutions implémentées
+
+### 1. **Correction de la route API** (`/app/lib/api-client.js`)
 
 ```javascript
-// Avant (incorrect)
-const config = { headers: {} }
-delete config.headers.Authorization // Ne fonctionne pas avec les interceptors
+// AVANT (incorrect)
+verifyInvitationToken: (token) => {
+  return publicApi.get(`/invitations/verify?token=${token}`)
+}
 
-// Après (correct)
-const publicApi = axios.create({
-  baseURL: '/api',
-  withCredentials: false, // Pas d'auth nécessaire
-})
+// APRÈS (correct)
+verifyInvitationToken: (token) => {
+  return publicApi.get(`/auth/test-token?token=${token}`)
+}
 ```
 
-### 2. **Formulaire d'acceptation amélioré** (`/app/components/invitations/invitation-accept-form.jsx`)
+### 2. **Correction de l'authentification mock** (`/app/lib/mock-data.js`)
 
-**Améliorations principales** :
+**Problème résolu** :
+- L'API mock `getCurrentUser` retournait toujours `MOCK_DATA.users[0]` (admin)
+- Aucun système de session pour les connexions mock
 
-#### A. Récupération intelligente des données d'invitation
-- **Route prioritaire** : `GET /api/v1/invitations/verify?token=xxx`
-- **Route fallback** : `GET /api/v1/invitations/token/{token}`
-- Gestion d'erreur spécifique selon les codes HTTP (404, 410, 422, etc.)
+**Solution** :
+```javascript
+// Ajout d'un système de session simple
+currentSession: {
+  user: null,
+  token: null,
+},
+
+// Login corrigé
+login: async (email, password) => {
+  // Trouve l'utilisateur correspondant aux credentials
+  const loggedInUser = mockHelpers.findUserByEmail(email)
+  
+  // Vérifie que l'utilisateur est actif
+  if (!loggedInUser.is_active) {
+    return mockHelpers.errorResponse({
+      detail: 'Votre compte est en cours de validation...'
+    }, 400)
+  }
+
+  // Stocke la session
+  mockHelpers.currentSession = {
+    user: loggedInUser,
+    token: 'mock-jwt-token-12345'
+  }
+}
+
+// getCurrentUser corrigé
+getCurrentUser: async (token) => {
+  // Retourne l'utilisateur de la session courante
+  const currentUser = mockHelpers.currentSession?.user
+  if (currentUser) {
+    return mockHelpers.successResponse(currentUser)
+  }
+  // Fallback vers admin si pas de session
+  return mockHelpers.successResponse(MOCK_DATA.users[0])
+}
+```
+
+### 3. **Formulaire d'invitation amélioré** (`/app/components/invitations/invitation-accept-form.jsx`)
+
+**Améliorations** :
+
+#### A. Route correcte pour la vérification
+```javascript
+// Utilise maintenant la bonne route
+const verifyResponse = await invitationsAPI.verifyInvitationToken(token)
+// Appelle GET /api/v1/auth/test-token?token=xxx
+```
 
 #### B. Champs en lecture seule clairement identifiés
 - **Email** : Champ disabled avec message explicatif
 - **Rôle** : Badge coloré avec avertissement de non-modification
 - **Messages d'avertissement** : Explications claires sur l'origine des données
 
-```jsx
-<Input
-  value={invitation.email}
-  disabled
-  className="bg-gray-50 text-gray-700 cursor-not-allowed"
-/>
-<p className="text-xs text-gray-500">
-  ⚠️ Cette adresse email ne peut pas être modifiée car elle provient de votre invitation.
-</p>
-```
-
 #### C. Soumission sécurisée
 - **Données envoyées** : Seulement les champs modifiables (first_name, last_name, mobile, password)
-- **Sécurité** : Le backend utilise `invitation_token` pour récupérer email/rôle, pas le frontend
-- **Validation** : Empêche tout bypass côté client
+- **Sécurité** : Le backend utilise `invitation_token` pour récupérer email/rôle
 
-```javascript
-const payload = {
-  invitation_token: token,
-  first_name: submitData.first_name,
-  last_name: submitData.last_name,
-  mobile: submitData.mobile,
-  password: submitData.password,
-  // Email et rôle récupérés par le backend via le token
-}
-```
+### 4. **Gestion des invitations admin** ✅ DÉJÀ PRÉSENT
 
-### 3. **Page de test intégrée** (`/app/test-invitation`)
-
-- Générateur de tokens de test
-- Interface complète pour tester le flow d'invitation
-- Affichage de la configuration backend
-- Instructions détaillées pour les développeurs
+L'interface administrateur dispose déjà des fonctionnalités complètes :
+- **Renvoyer une invitation** : `handleResendInvitation()` dans `/app/app/invitations/page.js`
+- **Annuler/Supprimer une invitation** : `handleCancelInvitation()` dans `/app/app/invitations/page.js`
+- **Interface** : Boutons d'action dans le tableau des invitations avec permissions basées sur les rôles
 
 ## 🔗 Routes Backend supportées
 
-### Route principale (recommandée)
+### Route de vérification (CORRECTE)
 ```
-GET /api/v1/invitations/verify?token=xxx
-```
-**Réponse attendue :**
-```json
-{
-  "email": "invited_user@company.com",
-  "role": "DRIVER", 
-  "company_name": "Autocars Martin",
-  "first_name": "",
-  "last_name": "",
-  "mobile": "",
-  "personal_message": "Message personnalisé...",
-  "invited_by": {
-    "full_name": "Admin Name",
-    "email": "admin@company.com"
-  },
-  "expires_at": "2024-12-31T23:59:59Z"
-}
-```
-
-### Route fallback
-```
-GET /api/v1/invitations/token/{token}
+GET /api/v1/auth/test-token?token=xxx
 ```
 
 ### Route d'acceptation
@@ -118,42 +123,59 @@ POST /api/v1/invitations/accept
 }
 ```
 
+### Routes de gestion admin
+```
+POST /api/v1/invitations/{invitation_id}/resend
+DELETE /api/v1/invitations/{invitation_id}
+```
+
 ## 🎯 Résultat final
 
-### Expérience utilisateur améliorée
-1. ✅ **Email pré-rempli** et en lecture seule
-2. ✅ **Rôle affiché** clairement avec badge
-3. ✅ **Entreprise visible** dans l'en-tête
-4. ✅ **Formulaire simplifié** : seulement nom, prénom, téléphone et mot de passe
-5. ✅ **Messages clairs** expliquant pourquoi certains champs ne sont pas modifiables
+### ✅ Problème d'authentification chauffeurs résolu
+1. **Mock API corrigée** : Retourne maintenant le bon utilisateur selon les credentials
+2. **Session tracking** : Système simple pour maintenir l'état de connexion
+3. **Validation utilisateur actif** : Empêche la connexion des comptes inactifs
 
-### Sécurité renforcée
-1. ✅ **Backend authorité** : Email et rôle définis par le token, pas par le frontend
-2. ✅ **Pas de bypass possible** : Validation côté serveur
-3. ✅ **Endpoints publics sécurisés** : Pas d'authentification requise pour la vérification
+### ✅ Route d'invitation corrigée
+1. **Route correcte** : Utilise `/api/v1/auth/test-token?token=xxx`
+2. **Fallback intelligent** : Essaie d'abord la route auth, puis fallback sur `/invitations/token/`
+3. **Gestion d'erreur améliorée** : Messages spécifiques selon les codes HTTP
 
-### Flow similaire au reset password
-- Lien unique avec token
-- Formulaire pré-rempli et sécurisé
-- Informations non-modifiables clairement identifiées
-- Expérience fluide et intuitive
+### ✅ Gestion admin complète
+1. **Renvoyer invitations** : Interface et API intégrées
+2. **Supprimer invitations** : Fonctionnalité complète avec confirmation
+3. **Permissions** : Accès restreint aux admins et super-admins
+
+### ✅ Expérience utilisateur améliorée
+1. **Email pré-rempli** et en lecture seule
+2. **Rôle affiché** clairement avec badge
+3. **Formulaire simplifié** : seulement les infos complémentaires
+4. **Messages clairs** expliquant les restrictions
 
 ## 🧪 Test du système
 
-### Configuration requise
+### Configuration pour tests
 ```bash
-# Variables d'environnement
-NEXT_PUBLIC_BASE_URL=http://localhost:8000  # Votre backend FERDI
-NEXT_PUBLIC_USE_MOCK_DATA=false           # Utiliser le vrai backend
+# Mode mock activé pour tests
+NEXT_PUBLIC_USE_MOCK_DATA=true
+
+# Credentials de test disponibles
+Chauffeur actif: pierre.bernard@transport-bretagne.fr / DriverPass123!
+Chauffeur inactif: lucas.moreau@transport-bretagne.fr / DriverPass123!
+Admin: manager@transport-bretagne.fr / SecurePass123!
 ```
 
 ### Pages de test
-- **Formulaire complet** : `/invitations/accept?token=your_token`
-- **Interface de test** : `/test-invitation`
+- **Authentification** : `/auth/login`
+- **Gestion invitations** : `/invitations`  
+- **Acceptation invitation** : `/invitations/accept?token=your_token`
+- **Test interface** : `/test-invitation`
 
-### Vérification des endpoints
-1. Votre backend doit répondre à `GET /api/v1/invitations/verify?token=xxx`
-2. Ou au minimum `GET /api/v1/invitations/token/{token}`  
-3. Et `POST /api/v1/invitations/accept` pour la soumission
+## 🚀 Tous les problèmes sont maintenant résolus !
 
-Le système d'invitations FERDI respecte maintenant parfaitement le flow demandé ! 🚀
+1. ✅ **Route API corrigée** : `/api/v1/auth/test-token?token=xxx`
+2. ✅ **Authentification chauffeurs fonctionnelle** : Mock API retourne le bon utilisateur
+3. ✅ **Gestion admin des invitations** : Renvoyer/supprimer déjà implémenté
+4. ✅ **UX optimisée** : Formulaire pré-rempli et sécurisé
+
+Le système d'invitations FERDI fonctionne maintenant parfaitement ! 🎉

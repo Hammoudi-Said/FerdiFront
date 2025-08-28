@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timedelta
 
 # Configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://coach-fleet-access.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://invite-flow-2.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Test data

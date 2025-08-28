@@ -68,7 +68,7 @@ export default function CompanyPage() {
   const handleSave = async () => {
     setLoading(true)
     try {
-      const response = await companyAPI.updateMyCompany(company.id, editForm)
+      const response = await companyAPI.updateMyCompany(editForm)
       setCompany(response.data)
       setIsEditing(false)
       toast.success('Informations mises à jour avec succès!')

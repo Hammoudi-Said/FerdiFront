@@ -87,15 +87,44 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           if (mockInvitation.mobile) setValue('mobile', mockInvitation.mobile)
           
         } else {
-          const response = await invitationsAPI.getInvitationByToken(token)
-          const invitationData = response.data
+          // Try to get invitation details from backend
+          let invitationData = null
+          
+          // Option 1: Try the verify endpoint first (as requested by user)
+          try {
+            console.log('🔍 Trying to verify invitation token via /invitations/verify...')
+            const verifyResponse = await invitationsAPI.verifyInvitationToken(token)
+            invitationData = verifyResponse.data
+            console.log('✅ Invitation verified successfully:', invitationData)
+          } catch (verifyError) {
+            console.log('❌ Verify endpoint failed, trying /invitations/token/... endpoint')
+            
+            // Option 2: Fallback to the token details endpoint
+            try {
+              const detailsResponse = await invitationsAPI.getInvitationByToken(token)
+              invitationData = detailsResponse.data
+              console.log('✅ Invitation details retrieved successfully:', invitationData)
+            } catch (detailsError) {
+              console.error('❌ Both invitation endpoints failed:', {
+                verifyError: verifyError.message,
+                detailsError: detailsError.message
+              })
+              throw detailsError // Throw the last error
+            }
+          }
           
           setInvitation(invitationData)
           
-          // Pre-fill form with invitation data
+          // Pre-fill form with invitation data if available
           if (invitationData.first_name) setValue('first_name', invitationData.first_name)
           if (invitationData.last_name) setValue('last_name', invitationData.last_name)
           if (invitationData.mobile) setValue('mobile', invitationData.mobile)
+          
+          console.log('📋 Form pre-filled with invitation data:', {
+            email: invitationData.email,
+            role: invitationData.role,
+            company_name: invitationData.company_name
+          })
         }
       } catch (error) {
         console.error('Error loading invitation:', error)
@@ -120,7 +149,21 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           }
           setInvitation(fallbackInvitation)
         } else {
-          onError?.('Invitation non trouvée, expirée ou invalide')
+          // Show specific error message based on error type
+          let errorMessage = 'Invitation non trouvée, expirée ou invalide'
+          
+          if (error.response?.status === 404) {
+            errorMessage = 'Cette invitation n\'existe pas ou a déjà été utilisée'
+          } else if (error.response?.status === 410) {
+            errorMessage = 'Cette invitation a expiré'
+          } else if (error.response?.status === 422) {
+            errorMessage = 'Le lien d\'invitation n\'est pas valide'
+          } else if (error.response?.data?.detail) {
+            errorMessage = error.response.data.detail
+          }
+          
+          console.error('🚨 Final error in invitation loading:', errorMessage)
+          onError?.(errorMessage)
         }
       } finally {
         setLoadingInvitation(false)

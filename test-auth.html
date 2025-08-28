@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Authentification FERDI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+        input, button { padding: 10px; margin: 5px; }
+        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Test d'Authentification FERDI</h1>
+    
+    <div class="test-section">
+        <h2>Test de connexion chauffeur</h2>
+        <p><strong>Chauffeur actif:</strong> pierre.bernard@transport-bretagne.fr / DriverPass123!</p>
+        <p><strong>Chauffeur inactif:</strong> lucas.moreau@transport-bretagne.fr / DriverPass123!</p>
+        
+        <div>
+            <input type="email" id="email" placeholder="Email" value="pierre.bernard@transport-bretagne.fr">
+            <input type="password" id="password" placeholder="Mot de passe" value="DriverPass123!">
+            <button onclick="testLogin()">Tester la connexion</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '<div class="info">Test en cours...</div>';
+            
+            try {
+                // Test login API
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        grant_type: 'password',
+                        username: email,
+                        password: password,
+                        scope: '',
+                        client_id: '',
+                        client_secret: ''
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">✅ Connexion réussie!</div>
+                        <div>Token: ${data.access_token}</div>
+                    `;
+                    
+                    // Test getCurrentUser with the token
+                    const userResponse = await fetch('/api/users/me', {
+                        headers: { 'Authorization': `Bearer ${data.access_token}` }
+                    });
+                    
+                    const userData = await userResponse.json();
+                    
+                    if (userResponse.ok) {
+                        resultDiv.innerHTML += `
+                            <div class="success">✅ Profil utilisateur récupéré:</div>
+                            <pre>${JSON.stringify(userData, null, 2)}</pre>
+                        `;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">❌ Erreur profil: ${JSON.stringify(userData)}</div>`;
+                    }
+                    
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Erreur connexion: ${data.detail}</div>`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Erreur réseau: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-test au chargement
+        window.onload = () => {
+            console.log('Page de test chargée');
+        };
+    </script>
+</body>
+</html>

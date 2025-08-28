@@ -90,9 +90,9 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           // Try to get invitation details from backend
           let invitationData = null
           
-          // Option 1: Try the verify endpoint first (as requested by user)
+          // Option 1: Try the verify endpoint first (using auth/test-token)
           try {
-            console.log('🔍 Trying to verify invitation token via /invitations/verify...')
+            console.log('🔍 Trying to verify invitation token via /auth/test-token...')
             const verifyResponse = await invitationsAPI.verifyInvitationToken(token)
             invitationData = verifyResponse.data
             console.log('✅ Invitation verified successfully:', invitationData)

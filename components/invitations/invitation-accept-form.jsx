@@ -179,13 +179,26 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
     setLoading(true)
 
     try {
-      // Remove confirmPassword from data
+      // Remove confirmPassword from data and ensure we don't send email/role
       const { confirmPassword, ...submitData } = data
       
+      // 🔒 SECURITY: Only send user-fillable fields to backend
+      // Backend will use token to get email, role, and company from invitation
       const payload = {
         invitation_token: token,
-        ...submitData
+        first_name: submitData.first_name,
+        last_name: submitData.last_name,
+        mobile: submitData.mobile,
+        password: submitData.password,
       }
+
+      console.log('📤 Sending invitation acceptance payload:', {
+        invitation_token: token,
+        first_name: submitData.first_name,
+        last_name: submitData.last_name,
+        mobile: submitData.mobile,
+        // password is not logged for security
+      })
 
       if (USE_MOCK_DATA) {
         // Mock invitation acceptance
@@ -194,35 +207,47 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         // Mock success response
         const mockResponse = {
           id: `user-${Date.now()}`,
-          email: invitation.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          full_name: `${data.first_name} ${data.last_name}`,
-          mobile: data.mobile,
-          role: invitation.role,
+          email: invitation.email, // From invitation, not user input
+          first_name: submitData.first_name,
+          last_name: submitData.last_name,
+          full_name: `${submitData.first_name} ${submitData.last_name}`,
+          mobile: submitData.mobile,
+          role: invitation.role, // From invitation, not user input
           status: 'ACTIVE',
           is_active: true,
           created_at: new Date().toISOString()
         }
         
+        console.log('✅ Mock invitation accepted successfully:', mockResponse)
         setSuccess(true)
         onSuccess?.(mockResponse)
       } else {
+        console.log('🚀 Sending invitation acceptance to backend...')
         const response = await invitationsAPI.acceptInvitation(payload)
+        console.log('✅ Invitation accepted successfully:', response.data)
         setSuccess(true)
         onSuccess?.(response.data)
       }
     } catch (error) {
-      console.error('Error accepting invitation:', error)
+      console.error('❌ Error accepting invitation:', error)
       
       let errorMessage = 'Erreur lors de l\'acceptation de l\'invitation'
       
-      if (error.response?.data?.detail) {
+      if (error.response?.status === 400) {
+        errorMessage = 'Données invalides. Veuillez vérifier votre saisie.'
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Invitation non trouvée ou déjà utilisée'
+      } else if (error.response?.status === 410) {
+        errorMessage = 'Cette invitation a expiré'
+      } else if (error.response?.status === 409) {
+        errorMessage = 'Un compte avec cet email existe déjà'
+      } else if (error.response?.data?.detail) {
         errorMessage = error.response.data.detail
       } else if (error.message) {
         errorMessage = error.message
       }
       
+      console.error('🚨 Final error message:', errorMessage)
       onError?.(errorMessage)
     } finally {
       setLoading(false)

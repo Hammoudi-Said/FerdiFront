@@ -52,13 +52,7 @@ export function DashboardRouter() {
       return <AdminDashboard />
       
     case UserRole.DISPATCH:
-      // Dashboard dispatcher (à créer si nécessaire)
-      return (
-        <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold">Dashboard Dispatcher</h2>
-          <p className="text-muted-foreground">À venir - Gestion des opérations et planning</p>
-        </div>
-      )
+      return <DispatchDashboard />
       
     case UserRole.DRIVER:
       return <DriverDashboard />

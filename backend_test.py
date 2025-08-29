@@ -15,7 +15,7 @@ import sys
 from typing import Dict, Any, List
 
 # Test configuration
-BASE_URL = "https://ferdi-onboarding.preview.emergentagent.com"
+BASE_URL = "https://bus-admin-access.preview.emergentagent.com"
 API_BASE_URL = f"{BASE_URL}/api"
 
 # Expected enum values after migration

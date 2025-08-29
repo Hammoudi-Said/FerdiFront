@@ -1,0 +1,111 @@
+{
+  "summary": {
+    "passed": 5,
+    "total": 10,
+    "success_rate": 50.0,
+    "timestamp": "2025-08-29T18:34:53.061650"
+  },
+  "tests": [
+    {
+      "test": "Invitation API Client Integration",
+      "success": true,
+      "message": "All invitationsAPI methods properly exported",
+      "details": {
+        "methods": [
+          "createInvitation",
+          "getInvitations",
+          "acceptInvitation",
+          "cancelInvitation",
+          "resendInvitation"
+        ]
+      },
+      "timestamp": "2025-08-29T18:34:48.303004"
+    },
+    {
+      "test": "Create Invitation Endpoint",
+      "success": false,
+      "message": "Unexpected status code: 500",
+      "details": {
+        "response": "{\"message\":\"Erreur de connexion au serveur\",\"error\":\"fetch failed\"}"
+      },
+      "timestamp": "2025-08-29T18:34:50.237136"
+    },
+    {
+      "test": "List Invitations Endpoint",
+      "success": false,
+      "message": "Unexpected status code: 500",
+      "details": {
+        "response": "{\"message\":\"Erreur de connexion au serveur\",\"error\":\"fetch failed\"}"
+      },
+      "timestamp": "2025-08-29T18:34:50.576299"
+    },
+    {
+      "test": "Accept Invitation Endpoint",
+      "success": false,
+      "message": "Unexpected status code: 500",
+      "details": {
+        "response": "{\"message\":\"Erreur de connexion au serveur\",\"error\":\"fetch failed\"}"
+      },
+      "timestamp": "2025-08-29T18:34:50.907157"
+    },
+    {
+      "test": "Cancel Invitation Endpoint",
+      "success": false,
+      "message": "Unexpected status code: 500",
+      "details": {
+        "response": "{\"message\":\"Erreur de connexion au serveur\",\"error\":\"fetch failed\"}"
+      },
+      "timestamp": "2025-08-29T18:34:51.240001"
+    },
+    {
+      "test": "Resend Invitation Endpoint",
+      "success": false,
+      "message": "Unexpected status code: 500",
+      "details": {
+        "response": "{\"message\":\"Erreur de connexion au serveur\",\"error\":\"fetch failed\"}"
+      },
+      "timestamp": "2025-08-29T18:34:51.559877"
+    },
+    {
+      "test": "Invitation Permissions Fix",
+      "success": true,
+      "message": "Invitation permissions correctly use 'invitations_manage' instead of 'users_manage'",
+      "details": {
+        "checked_files": [
+          "/app/components/invitations/invitations-table.jsx",
+          "/app/app/invitations/page.js"
+        ]
+      },
+      "timestamp": "2025-08-29T18:34:51.860195"
+    },
+    {
+      "test": "Mock Data Configuration",
+      "success": true,
+      "message": "Mock data properly configured for invitation system",
+      "details": {
+        "env_configured": true,
+        "pages_support_mock": true
+      },
+      "timestamp": "2025-08-29T18:34:52.160483"
+    },
+    {
+      "test": "API Proxy Configuration",
+      "success": true,
+      "message": "Next.js API proxy correctly configured for invitation endpoints",
+      "details": {
+        "proxy_file": "/app/app/api/[[...path]]/route.js"
+      },
+      "timestamp": "2025-08-29T18:34:52.460790"
+    },
+    {
+      "test": "Invitation System Completeness",
+      "success": true,
+      "message": "Invitation system appears complete with 5/5 files",
+      "details": {
+        "existing_files": 5,
+        "missing_files": []
+      },
+      "timestamp": "2025-08-29T18:34:52.761234"
+    }
+  ]
+}

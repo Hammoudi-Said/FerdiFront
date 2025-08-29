@@ -73,7 +73,7 @@ export default function TestInvitationPage() {
                   placeholder="Entrez un token ou générez-en un"
                 />
               </div>
-              <Button 
+              <Button
                 onClick={generateTestToken}
                 variant="outline"
                 className="mt-6"
@@ -83,7 +83,7 @@ export default function TestInvitationPage() {
             </div>
 
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={() => {
                   setShowForm(true)
                   setError(null)
@@ -94,10 +94,10 @@ export default function TestInvitationPage() {
               >
                 Tester le formulaire
               </Button>
-              
+
               {testToken && (
                 <>
-                  <Button 
+                  <Button
                     onClick={() => {
                       navigator.clipboard.writeText(`/invitations/accept?token=${testToken}`)
                     }}
@@ -106,8 +106,8 @@ export default function TestInvitationPage() {
                     <Copy className="h-4 w-4 mr-2" />
                     Copier l'URL
                   </Button>
-                  
-                  <Button 
+
+                  <Button
                     onClick={() => {
                       window.open(`/invitations/accept?token=${testToken}`, '_blank')
                     }}
@@ -138,7 +138,7 @@ export default function TestInvitationPage() {
 
               <p><strong>2. Endpoints testés :</strong></p>
               <ul className="list-disc list-inside ml-4 space-y-1 text-gray-600">
-                <li><code>GET /api/v1/invitations/verify?token=xxx</code> (prioritaire)</li>
+                <li><code>POST /api/v1/auth/test-token?token=xxx</code> (prioritaire)</li>
                 <li><code>GET /api/v1/invitations/token/xxx</code> (fallback)</li>
                 <li><code>POST /api/v1/invitations/accept</code> (soumission)</li>
               </ul>

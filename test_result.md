@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the FERDI application backend integration and authentication system. The frontend includes authentication system with company registration, employee signup, login/logout with JWT tokens, and role-based access. Key endpoints to test include company registration, user signup, login, protected routes, and error handling."
+user_problem_statement: "FERDI est une application de gestion d'autocars pour les autocaristes. Le système d'acceptation d'invitation ne fonctionne pas, quand l'utilisateur clic sur le mail pour accepter l'invitation il a l'erreur 'Cette invitation n'existe pas ou a déjà été utilisée'. L'utilisateur souhaite corriger l'acceptation en tant que formulaire similaire au formulaire de reset password avec les champs adaptés à l'acceptation d'invitation selon la spécification OpenAPI fournie."
 
   - task: "Invitation System API Integration"
     implemented: true

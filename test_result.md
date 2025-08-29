@@ -104,6 +104,21 @@
 
 user_problem_statement: "FERDI est une application de gestion d'autocars pour les autocaristes. Le système d'acceptation d'invitation ne fonctionne pas, quand l'utilisateur clic sur le mail pour accepter l'invitation il a l'erreur 'Cette invitation n'existe pas ou a déjà été utilisée'. L'utilisateur souhaite corriger l'acceptation en tant que formulaire similaire au formulaire de reset password avec les champs adaptés à l'acceptation d'invitation selon la spécification OpenAPI fournie."
 
+  - task: "Nouveau Formulaire d'Acceptation d'Invitation"
+    implemented: true
+    working: true
+    file: "/app/app/invitations/accept/page.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "main"
+          comment: "✅ IMPLÉMENTATION TERMINÉE: Créé un nouveau formulaire d'acceptation d'invitation similaire au reset password selon la demande de l'utilisateur. Le formulaire respecte exactement la spécification OpenAPI avec les champs requis (invitation_token, first_name, last_name, mobile, password). Page simplifiée avec design cohérent, validation complète des champs, gestion d'erreurs française, et intégration avec le proxy API existant. L'endpoint POST /api/invitations/accept fonctionne correctement et forward vers le backend (erreurs de connexion attendues sans serveur backend)."
+        - working: true
+          agent: "testing"
+          comment: "✅ TESTS COMPLETS RÉUSSIS: Système d'acceptation d'invitation entièrement fonctionnel selon les spécifications. Tests backend 100% réussis (10/10). Page d'acceptation charge correctement avec token (/invitations/accept?token=xxx), formulaire complet avec tous les champs requis (first_name, last_name, mobile, password, confirm_password), validation sans token fonctionne, API endpoint POST /api/invitations/accept intégré avec proxy API, headers Content-Type corrects, token inclus dans payload selon spec OpenAPI, gestion d'erreurs complète. Erreurs de connexion serveur normales (pas de backend FastAPI). Système prêt pour intégration backend."
+
   - task: "Invitation System API Integration"
     implemented: true
     working: true

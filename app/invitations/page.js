@@ -204,7 +204,7 @@ export default function InvitationsPage() {
     return matchesSearch && matchesActiveFilter
   })
 
-  const canManage = hasPermission('users_manage')
+  const canManage = hasPermission('invitations_manage')
 
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>

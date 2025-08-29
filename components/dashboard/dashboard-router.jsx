@@ -61,13 +61,7 @@ export function DashboardRouter() {
       return <SupportDashboard />
       
     case UserRole.ACCOUNTANT:
-      // Dashboard comptable (à créer si nécessaire)
-      return (
-        <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold">Dashboard Comptable</h2>
-          <p className="text-muted-foreground">À venir - Gestion financière et facturation</p>
-        </div>
-      )
+      return <AccountantDashboard />
       
     default:
       return (

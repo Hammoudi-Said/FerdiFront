@@ -183,12 +183,8 @@ export default function HomePage() {
         sessionStorage.removeItem('ferdi_intended_path')
       }
       
-      // Redirect to appropriate page
-      if (USE_MOCK_DATA) {
-        router.push('/demo')
-      } else {
-        router.push('/auth/login')
-      }
+      // Redirect to appropriate page - Always redirect unauthenticated users to login
+      router.push('/auth/login')
     }
   }, [authState, token, isSessionValid, router])
 

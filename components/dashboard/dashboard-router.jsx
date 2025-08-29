@@ -58,13 +58,7 @@ export function DashboardRouter() {
       return <DriverDashboard />
       
     case UserRole.INTERNAL_SUPPORT:
-      // Dashboard support (à créer si nécessaire)
-      return (
-        <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold">Dashboard Support Interne</h2>
-          <p className="text-muted-foreground">À venir - Interface de support client</p>
-        </div>
-      )
+      return <SupportDashboard />
       
     case UserRole.ACCOUNTANT:
       // Dashboard comptable (à créer si nécessaire)

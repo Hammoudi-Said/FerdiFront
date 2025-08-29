@@ -1,0 +1,123 @@
+{
+  "summary": {
+    "passed": 8,
+    "total": 10,
+    "success_rate": 80.0,
+    "timestamp": "2025-08-29T18:37:49.109143"
+  },
+  "tests": [
+    {
+      "test": "Frontend Accessibility",
+      "success": true,
+      "message": "FERDI frontend is accessible and responding",
+      "details": {
+        "status_code": 200,
+        "content_length": 8634
+      },
+      "timestamp": "2025-08-29T18:37:32.401832"
+    },
+    {
+      "test": "Invitations Page Accessibility",
+      "success": false,
+      "message": "Cannot access invitations page: HTTPConnectionPool(host='localhost', port=3000): Read timed out. (read timeout=10)",
+      "details": {},
+      "timestamp": "2025-08-29T18:37:42.613296"
+    },
+    {
+      "test": "Invitations Demo Page",
+      "success": true,
+      "message": "Invitations demo page is accessible",
+      "details": {
+        "status_code": 200,
+        "found_indicators": [
+          "demo"
+        ]
+      },
+      "timestamp": "2025-08-29T18:37:45.602414"
+    },
+    {
+      "test": "Accept Demo Page",
+      "success": false,
+      "message": "Accept demo page accessible but missing form content",
+      "details": {
+        "found_indicators": [
+          "accept",
+          "invitation"
+        ]
+      },
+      "timestamp": "2025-08-29T18:37:47.706046"
+    },
+    {
+      "test": "Invitation Components Exist",
+      "success": true,
+      "message": "Invitation components exist with 3/3 files",
+      "details": {
+        "existing": 3,
+        "missing": []
+      },
+      "timestamp": "2025-08-29T18:37:47.906584"
+    },
+    {
+      "test": "Mock Data Configuration",
+      "success": true,
+      "message": "Mock data properly configured for invitation system",
+      "details": {
+        "env_enabled": true,
+        "page_support": true,
+        "demo_exists": true
+      },
+      "timestamp": "2025-08-29T18:37:48.106906"
+    },
+    {
+      "test": "Permissions Fix Verification",
+      "success": true,
+      "message": "Invitation permissions appear to be correctly configured",
+      "details": {
+        "files_checked": 3,
+        "issues": []
+      },
+      "timestamp": "2025-08-29T18:37:48.307266"
+    },
+    {
+      "test": "API Client Integration",
+      "success": true,
+      "message": "All invitationsAPI methods properly exported",
+      "details": {
+        "methods": [
+          "createInvitation",
+          "getInvitations",
+          "acceptInvitation",
+          "cancelInvitation",
+          "resendInvitation"
+        ]
+      },
+      "timestamp": "2025-08-29T18:37:48.507585"
+    },
+    {
+      "test": "French Localization",
+      "success": true,
+      "message": "French localization properly implemented in invitation system",
+      "details": {
+        "found_terms": [
+          "Nouvelle invitation",
+          "Invitations",
+          "Accept\u00e9",
+          "En attente",
+          "Expir\u00e9",
+          "Email"
+        ]
+      },
+      "timestamp": "2025-08-29T18:37:48.708045"
+    },
+    {
+      "test": "System Completeness After Corrections",
+      "success": true,
+      "message": "Invitation system appears complete (100% of elements found)",
+      "details": {
+        "completeness": "100%",
+        "missing": []
+      },
+      "timestamp": "2025-08-29T18:37:48.908771"
+    }
+  ]
+}

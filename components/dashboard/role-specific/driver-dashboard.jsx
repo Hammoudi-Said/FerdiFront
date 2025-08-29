@@ -5,8 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuthStore } from '@/lib/stores/auth-store'
-import { hasPermission } from '@/lib/utils/permission-manager'
-import { PERMISSIONS } from '@/lib/constants/enums'
+import { hasPermission, PERMISSIONS } from '@/lib/utils/permission-manager'
 import { 
   Car, 
   MapPin, 

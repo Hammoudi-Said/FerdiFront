@@ -24,7 +24,7 @@ import sys
 from typing import Dict, Any, List
 
 # Test configuration from environment
-BASE_URL = "https://bus-admin-access.preview.emergentagent.com"
+BASE_URL = "https://code-detox-2.preview.emergentagent.com"
 API_BASE_URL = f"{BASE_URL}/api/v1"
 
 # Test data for FERDI API testing

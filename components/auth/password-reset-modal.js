@@ -66,7 +66,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`/api/password-recovery/${encodeURIComponent(data.email)}`, {
+      const response = await fetch(`/api/auth/password-recovery/${encodeURIComponent(data.email)}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export function PasswordResetModal({ open, onOpenChange }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/reset-password/', {
+      const response = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -49,7 +49,7 @@ export default function InvitationsPage() {
   const loadInvitations = async () => {
     try {
       setLoading(true)
-      
+
       if (USE_MOCK_DATA) {
         // Mock invitations data
         const mockInvitations = [
@@ -111,7 +111,7 @@ export default function InvitationsPage() {
             }
           }
         ]
-        
+
         setInvitations(mockInvitations)
         calculateStats(mockInvitations)
       } else {
@@ -176,8 +176,8 @@ export default function InvitationsPage() {
       if (USE_MOCK_DATA) {
         // Mock cancel
         await new Promise(resolve => setTimeout(resolve, 1000))
-        setInvitations(prev => prev.map(inv => 
-          inv.id === invitation.id 
+        setInvitations(prev => prev.map(inv =>
+          inv.id === invitation.id
             ? { ...inv, is_active: false }
             : inv
         ))
@@ -195,16 +195,16 @@ export default function InvitationsPage() {
 
   // Filter invitations based on search term and active only setting
   const filteredInvitations = invitations.filter(invitation => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       invitation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       `${invitation.first_name || ''} ${invitation.last_name || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesActiveFilter = !showActiveOnly || invitation.is_active
-    
+
     return matchesSearch && matchesActiveFilter
   })
 
-  const canManage = hasPermission('users_manage')
+  const canManage = hasPermission('invitations_manage')
 
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
@@ -216,7 +216,7 @@ export default function InvitationsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
               <p className="text-gray-600">Gérez les invitations des nouveaux utilisateurs</p>
             </div>
-            {canManage && (
+            {(
               <Button onClick={() => setCreateModalOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 Nouvelle invitation
@@ -305,7 +305,7 @@ export default function InvitationsPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -319,7 +319,7 @@ export default function InvitationsPage() {
                   </label>
                 </div>
               </div>
-              
+
               {(searchTerm || !showActiveOnly) && (
                 <div className="mt-3 flex items-center gap-2">
                   <span className="text-sm text-gray-600">

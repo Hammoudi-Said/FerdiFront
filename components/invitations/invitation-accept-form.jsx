@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { invitationsAPI } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import { 
   UserPlus, 
   AlertCircle, 
@@ -17,20 +19,25 @@ import {
   EyeOff,
   Mail,
   Phone,
-  Lock
+  Lock,
+  Shield,
+  Clock
 } from 'lucide-react'
 
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 
 export function InvitationAcceptForm({ token, onSuccess, onError }) {
   const [loading, setLoading] = useState(false)
+  const [loadingInvitation, setLoadingInvitation] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [invitation, setInvitation] = useState(null)
   
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -44,17 +51,154 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
 
   const password = watch('password')
 
+  // Load invitation details when component mounts
+  useEffect(() => {
+    const loadInvitationDetails = async () => {
+      try {
+        setLoadingInvitation(true)
+        
+        if (USE_MOCK_DATA) {
+          // Mock invitation data - Handle any token in demo mode
+          const mockInvitation = {
+            id: 'inv-mock',
+            email: 'utilisateur.invite@transport-bretagne.fr',
+            role: 'DRIVER', // You can change this based on token or make it dynamic
+            first_name: '',
+            last_name: '',
+            mobile: '',
+            personal_message: 'Bienvenue dans notre équipe ! Votre rôle a été défini par l\'administrateur.',
+            company_name: 'Transport Bretagne SARL',
+            invited_by: {
+              full_name: 'Administrateur Transport',
+              email: 'admin@transport-bretagne.fr'
+            },
+            expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          }
+          
+          // Simulate loading delay
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          
+          setInvitation(mockInvitation)
+          
+          // Pre-fill form with invitation data (empty for user to fill)
+          if (mockInvitation.first_name) setValue('first_name', mockInvitation.first_name)
+          if (mockInvitation.last_name) setValue('last_name', mockInvitation.last_name)
+          if (mockInvitation.mobile) setValue('mobile', mockInvitation.mobile)
+          
+        } else {
+          // Try to get invitation details from backend
+          let invitationData = null
+          
+          // Option 1: Try the verify endpoint first (using auth/test-token)
+          try {
+            console.log('🔍 Trying to verify invitation token via /auth/test-token...')
+            const verifyResponse = await invitationsAPI.verifyInvitationToken(token)
+            invitationData = verifyResponse.data
+            console.log('✅ Invitation verified successfully:', invitationData)
+          } catch (verifyError) {
+            console.log('❌ Verify endpoint failed, trying /invitations/token/... endpoint')
+            
+            // Option 2: Fallback to the token details endpoint
+            try {
+              const detailsResponse = await invitationsAPI.getInvitationByToken(token)
+              invitationData = detailsResponse.data
+              console.log('✅ Invitation details retrieved successfully:', invitationData)
+            } catch (detailsError) {
+              console.error('❌ Both invitation endpoints failed:', {
+                verifyError: verifyError.message,
+                detailsError: detailsError.message
+              })
+              throw detailsError // Throw the last error
+            }
+          }
+          
+          setInvitation(invitationData)
+          
+          // Pre-fill form with invitation data if available
+          if (invitationData.first_name) setValue('first_name', invitationData.first_name)
+          if (invitationData.last_name) setValue('last_name', invitationData.last_name)
+          if (invitationData.mobile) setValue('mobile', invitationData.mobile)
+          
+          console.log('📋 Form pre-filled with invitation data:', {
+            email: invitationData.email,
+            role: invitationData.role,
+            company_name: invitationData.company_name
+          })
+        }
+      } catch (error) {
+        console.error('Error loading invitation:', error)
+        
+        if (USE_MOCK_DATA) {
+          // In mock mode, still show a generic invitation for any token
+          const fallbackInvitation = {
+            id: 'inv-fallback',
+            email: 'utilisateur.invite@transport-bretagne.fr',
+            role: 'DRIVER',
+            first_name: '',
+            last_name: '',
+            mobile: '',
+            personal_message: 'Invitation de démonstration - Votre rôle sera assigné par l\'administrateur.',
+            company_name: 'Transport Bretagne SARL (Démonstration)',
+            invited_by: {
+              full_name: 'Administrateur Démonstration',
+              email: 'demo@transport-bretagne.fr'
+            },
+            expires_at: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString()
+          }
+          setInvitation(fallbackInvitation)
+        } else {
+          // Show specific error message based on error type
+          let errorMessage = 'Invitation non trouvée, expirée ou invalide'
+          
+          if (error.response?.status === 404) {
+            errorMessage = 'Cette invitation n\'existe pas ou a déjà été utilisée'
+          } else if (error.response?.status === 410) {
+            errorMessage = 'Cette invitation a expiré'
+          } else if (error.response?.status === 422) {
+            errorMessage = 'Le lien d\'invitation n\'est pas valide'
+          } else if (error.response?.data?.detail) {
+            errorMessage = error.response.data.detail
+          }
+          
+          console.error('🚨 Final error in invitation loading:', errorMessage)
+          onError?.(errorMessage)
+        }
+      } finally {
+        setLoadingInvitation(false)
+      }
+    }
+
+    if (token) {
+      loadInvitationDetails()
+    }
+  }, [token, setValue, onError])
+
   const onSubmit = async (data) => {
     setLoading(true)
 
     try {
-      // Remove confirmPassword from data
+      // Remove confirmPassword from data and ensure we don't send email/role
       const { confirmPassword, ...submitData } = data
       
+      // 🔒 SECURITY: Only send user-fillable fields to backend
+      // Backend will use token to get email, role, and company from invitation
       const payload = {
         invitation_token: token,
-        ...submitData
+        first_name: submitData.first_name,
+        last_name: submitData.last_name,
+        mobile: submitData.mobile,
+        password: submitData.password,
       }
+
+      console.log('📤 Sending invitation acceptance payload:', {
+        invitation_token: token,
+        first_name: submitData.first_name,
+        last_name: submitData.last_name,
+        mobile: submitData.mobile,
+        // password is not logged for security
+      })
 
       if (USE_MOCK_DATA) {
         // Mock invitation acceptance
@@ -63,39 +207,80 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         // Mock success response
         const mockResponse = {
           id: `user-${Date.now()}`,
-          email: 'invitation@example.com',
-          first_name: data.first_name,
-          last_name: data.last_name,
-          full_name: `${data.first_name} ${data.last_name}`,
-          mobile: data.mobile,
-          role: 'driver',
-          status: 'active',
+          email: invitation.email, // From invitation, not user input
+          first_name: submitData.first_name,
+          last_name: submitData.last_name,
+          full_name: `${submitData.first_name} ${submitData.last_name}`,
+          mobile: submitData.mobile,
+          role: invitation.role, // From invitation, not user input
+          status: 'ACTIVE',
           is_active: true,
           created_at: new Date().toISOString()
         }
         
+        console.log('✅ Mock invitation accepted successfully:', mockResponse)
         setSuccess(true)
         onSuccess?.(mockResponse)
       } else {
+        console.log('🚀 Sending invitation acceptance to backend...')
         const response = await invitationsAPI.acceptInvitation(payload)
+        console.log('✅ Invitation accepted successfully:', response.data)
         setSuccess(true)
         onSuccess?.(response.data)
       }
     } catch (error) {
-      console.error('Error accepting invitation:', error)
+      console.error('❌ Error accepting invitation:', error)
       
       let errorMessage = 'Erreur lors de l\'acceptation de l\'invitation'
       
-      if (error.response?.data?.detail) {
+      if (error.response?.status === 400) {
+        errorMessage = 'Données invalides. Veuillez vérifier votre saisie.'
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Invitation non trouvée ou déjà utilisée'
+      } else if (error.response?.status === 410) {
+        errorMessage = 'Cette invitation a expiré'
+      } else if (error.response?.status === 409) {
+        errorMessage = 'Un compte avec cet email existe déjà'
+      } else if (error.response?.data?.detail) {
         errorMessage = error.response.data.detail
       } else if (error.message) {
         errorMessage = error.message
       }
       
+      console.error('🚨 Final error message:', errorMessage)
       onError?.(errorMessage)
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading state while fetching invitation details
+  if (loadingInvitation) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardContent className="flex flex-col items-center justify-center p-8">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-gray-600">Chargement des détails de l'invitation...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Show error if invitation not found
+  if (!invitation) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <CardTitle className="text-red-900">Invitation non trouvée</CardTitle>
+          <CardDescription>
+            Cette invitation n'existe pas, a expiré ou a déjà été utilisée.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
   }
 
   if (success) {
@@ -107,7 +292,8 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           </div>
           <CardTitle className="text-green-900">Compte créé avec succès!</CardTitle>
           <CardDescription>
-            Votre compte a été créé. Vous pouvez maintenant vous connecter avec vos identifiants.
+            Votre compte a été créé avec le rôle <strong>{ROLE_DEFINITIONS[invitation.role]?.label}</strong>. 
+            Vous pouvez maintenant vous connecter avec vos identifiants.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -122,6 +308,25 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
     )
   }
 
+  const roleInfo = ROLE_DEFINITIONS[invitation.role]
+  const isExpired = new Date(invitation.expires_at) < new Date()
+
+  if (isExpired) {
+    return (
+      <Card className="w-full max-w-lg mx-auto">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+            <Clock className="h-6 w-6 text-red-600" />
+          </div>
+          <CardTitle className="text-red-900">Invitation expirée</CardTitle>
+          <CardDescription>
+            Cette invitation a expiré. Contactez votre administrateur pour recevoir une nouvelle invitation.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
   return (
     <Card className="w-full max-w-lg mx-auto">
       <CardHeader className="text-center">
@@ -130,12 +335,77 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
         </div>
         <CardTitle>Accepter l'invitation</CardTitle>
         <CardDescription>
-          Complétez vos informations pour créer votre compte
+          Vous avez été invité à rejoindre <strong>{invitation.company_name}</strong>
         </CardDescription>
       </CardHeader>
       
       <CardContent>
+        {/* Invitation Details */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Email:</span>
+            <span className="text-sm text-gray-900">{invitation.email}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Rôle assigné:</span>
+            <Badge className={`${roleInfo?.bgColor} ${roleInfo?.textColor} ${roleInfo?.borderColor} border`}>
+              <Shield className="w-3 h-3 mr-1" />
+              {roleInfo?.label || invitation.role}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-600">Invité par:</span>
+            <span className="text-sm text-gray-900">{invitation.invited_by?.full_name}</span>
+          </div>
+          
+          {invitation.personal_message && (
+            <div className="pt-2 border-t border-gray-200">
+              <p className="text-sm text-gray-600 italic">
+                "{invitation.personal_message}"
+              </p>
+            </div>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email field - Read-only from invitation */}
+          <div className="space-y-2">
+            <Label htmlFor="invitation_email">
+              <Mail className="inline h-4 w-4 mr-1" />
+              Email (assigné par l'invitation)
+            </Label>
+            <Input
+              id="invitation_email"
+              type="email"
+              value={invitation.email}
+              disabled
+              className="bg-gray-50 text-gray-700 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500">
+              ⚠️ Cette adresse email ne peut pas être modifiée car elle provient de votre invitation.
+            </p>
+          </div>
+
+          {/* Role field - Read-only badge */}
+          <div className="space-y-2">
+            <Label>
+              <Shield className="inline h-4 w-4 mr-1" />
+              Rôle assigné
+            </Label>
+            <div className="p-3 bg-gray-50 border rounded-md flex items-center justify-between">
+              <span className="text-sm text-gray-700">Votre rôle dans l'entreprise :</span>
+              <Badge className={`${roleInfo?.bgColor} ${roleInfo?.textColor} ${roleInfo?.borderColor} border`}>
+                <Shield className="w-3 h-3 mr-1" />
+                {roleInfo?.label || invitation.role}
+              </Badge>
+            </div>
+            <p className="text-xs text-gray-500">
+              ⚠️ Le rôle a été défini par votre administrateur et ne peut pas être modifié.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* First Name */}
             <div className="space-y-2">
@@ -189,7 +459,10 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
               type="tel"
               {...register('mobile', {
                 required: 'Le numéro de téléphone est requis',
-                maxLength: { value: 20, message: 'Maximum 20 caractères' }
+                pattern: {
+                  value: /^(?:(?:\+33|0)[1-9](?:[\s.-]?\d{2}){4})$/,
+                  message: 'Format invalide (ex: 06 12 34 56 78)'
+                }
               })}
               disabled={loading}
               placeholder="06 12 34 56 78"
@@ -215,7 +488,11 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
                 {...register('password', {
                   required: 'Le mot de passe est requis',
                   minLength: { value: 8, message: 'Minimum 8 caractères' },
-                  maxLength: { value: 40, message: 'Maximum 40 caractères' }
+                  maxLength: { value: 40, message: 'Maximum 40 caractères' },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                    message: 'Doit contenir au moins 1 minuscule, 1 majuscule et 1 chiffre'
+                  }
                 })}
                 disabled={loading}
                 placeholder="••••••••"
@@ -258,10 +535,11 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
             )}
           </div>
 
-          <Alert>
-            <Mail className="h-4 w-4" />
-            <AlertDescription>
-              Une fois votre compte créé, vous recevrez un email de confirmation et pourrez vous connecter immédiatement.
+          <Alert className="border-green-200 bg-green-50">
+            <Shield className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>Rôle assigné: {roleInfo?.label}</strong><br />
+              {roleInfo?.description}. Ce rôle a été défini par votre administrateur et ne peut pas être modifié.
             </AlertDescription>
           </Alert>
 
@@ -278,7 +556,7 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Créer mon compte
+                Créer mon compte avec le rôle {roleInfo?.label}
               </>
             )}
           </Button>

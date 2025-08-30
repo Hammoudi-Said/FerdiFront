@@ -15,13 +15,14 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { toast } from 'sonner'
 import { Bus, ArrowLeft, CheckCircle } from 'lucide-react'
+import { UserRole } from '@/lib/constants/enums'
 
 const userSchema = z.object({
   email: z.string().email('Email invalide'),
   first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères').max(100),
   last_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').max(100),
   mobile: z.string().min(10, 'Le téléphone doit contenir au moins 10 caractères').max(20),
-  role: z.enum(['2', '3', '4']),
+  role: z.enum([UserRole.ADMIN, UserRole.DISPATCH, UserRole.DRIVER]),
   password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères').max(40),
   confirmPassword: z.string(),
   company_code: z.string()
@@ -36,11 +37,11 @@ export default function RegisterUserPage() {
   const router = useRouter()
   const [success, setSuccess] = useState(false)
   const { registerUser, isLoading } = useAuthStore()
-  
+
   const form = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      role: '4', // Default to CHAUFFEUR
+      role: UserRole.DRIVER, // Default to DRIVER
     },
   })
 
@@ -56,7 +57,7 @@ export default function RegisterUserPage() {
     }
 
     const result = await registerUser(userData)
-    
+
     if (result.success) {
       setSuccess(true)
       toast.success('Inscription réussie!')
@@ -84,8 +85,8 @@ export default function RegisterUserPage() {
                 Vous pouvez maintenant vous connecter avec vos identifiants
               </p>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={() => router.push('/auth/login')}
               className="w-full"
             >
@@ -108,7 +109,7 @@ export default function RegisterUserPage() {
               Retour à la connexion
             </Button>
           </Link>
-          
+
           <div className="flex items-center">
             <div className="bg-primary p-2 rounded-full mr-3">
               <Bus className="h-6 w-6 text-primary-foreground" />
@@ -209,9 +210,9 @@ export default function RegisterUserPage() {
                     <SelectValue placeholder="Choisir votre rôle" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="2">Administrateur</SelectItem>
-                    <SelectItem value="3">Autocariste / Dispatcher</SelectItem>
-                    <SelectItem value="4">Chauffeur</SelectItem>
+                    <SelectItem value={UserRole.ADMIN}>Administrateur</SelectItem>
+                    <SelectItem value={UserRole.DISPATCH}>Autocariste / Dispatcher</SelectItem>
+                    <SelectItem value={UserRole.DRIVER}>Chauffeur</SelectItem>
                   </SelectContent>
                 </Select>
                 {form.formState.errors.role && (
@@ -247,9 +248,9 @@ export default function RegisterUserPage() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (

@@ -9,6 +9,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { api } from '@/lib/api'
+import { companyAPI } from '@/lib/api-client'
+import { UserRole } from '@/lib/constants/enums'
+import { canModifyCompany } from '@/lib/utils/permission-manager'
 import { toast } from 'sonner'
 import { Building2, MapPin, Phone, Mail, Globe, Copy, Edit, Save, X } from 'lucide-react'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -29,11 +32,13 @@ export default function CompanyPage() {
         phone: company.phone || '',
         email: company.email || '',
         website: company.website || '',
+        siret: company.siret,
       })
     }
   }, [company])
 
-  const canEdit = user?.role === '1' || user?.role === '2' // Super Admin or Admin
+  // ✅ PERMISSIONS SELON OPENAPI - ADMIN peut modifier SON entreprise
+  const canEdit = canModifyCompany(user, company?.id)
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(company?.company_code || '')
@@ -55,6 +60,7 @@ export default function CompanyPage() {
         phone: company.phone || '',
         email: company.email || '',
         website: company.website || '',
+        siret: company.siret,
       })
     }
   }
@@ -62,7 +68,7 @@ export default function CompanyPage() {
   const handleSave = async () => {
     setLoading(true)
     try {
-      const response = await api.put(`/companies/${company.id}`, editForm)
+      const response = await companyAPI.updateMyCompany(editForm)
       setCompany(response.data)
       setIsEditing(false)
       toast.success('Informations mises à jour avec succès!')
@@ -156,7 +162,7 @@ export default function CompanyPage() {
               </div>
               <div className="ml-3">
                 <p className="text-sm text-blue-800">
-                  <strong>Mode lecture seule :</strong> Vous pouvez consulter les informations de l'entreprise mais vous n'avez pas les droits pour les modifier. 
+                  <strong>Mode lecture seule :</strong> Vous pouvez consulter les informations de l'entreprise mais vous n'avez pas les droits pour les modifier.
                   Contactez votre administrateur pour toute modification.
                 </p>
               </div>

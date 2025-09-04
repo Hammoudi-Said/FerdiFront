@@ -166,54 +166,39 @@ export function UsersTable({
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 overflow-hidden">
+    <div className="overflow-hidden">
       <Table>
-        <TableHeader className="bg-gray-50/50">
-          <TableRow className="hover:bg-gray-50/80 border-gray-200">
+        <TableHeader className="bg-gray-50">
+          <TableRow className="hover:bg-gray-50 border-gray-200">
             {canManage && (
               <TableHead className="w-12">
                 <Checkbox
                   checked={isAllSelected}
                   onCheckedChange={handleSelectAll}
-                  className="border-gray-400"
+                  className="border-gray-300"
                   ref={(el) => {
                     if (el) el.indeterminate = isPartiallySelected
                   }}
                 />
               </TableHead>
             )}
-            <TableHead className="font-semibold text-gray-700">
-              <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4" />
-                <span>Utilisateur</span>
-              </div>
+            <TableHead className="font-medium text-gray-700">
+              Utilisateur
             </TableHead>
-            <TableHead className="font-semibold text-gray-700">
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4" />
-                <span>Contact</span>
-              </div>
+            <TableHead className="font-medium text-gray-700">
+              Contact  
             </TableHead>
-            <TableHead className="font-semibold text-gray-700">
-              <div className="flex items-center space-x-2">
-                <UserCheck className="h-4 w-4" />
-                <span>Rôle</span>
-              </div>
+            <TableHead className="font-medium text-gray-700">
+              Rôle
             </TableHead>
-            <TableHead className="font-semibold text-gray-700">
-              <div className="flex items-center space-x-2">
-                <Activity className="h-4 w-4" />
-                <span>Statut</span>
-              </div>
+            <TableHead className="font-medium text-gray-700">
+              Statut
             </TableHead>
-            <TableHead className="font-semibold text-gray-700">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4" />
-                <span>Dernière connexion</span>
-              </div>
+            <TableHead className="font-medium text-gray-700">
+              Dernière connexion
             </TableHead>
             {canManage && (
-              <TableHead className="w-24 font-semibold text-gray-700">
+              <TableHead className="w-20 font-medium text-gray-700">
                 Actions
               </TableHead>
             )}
@@ -224,53 +209,43 @@ export function UsersTable({
             <TableRow 
               key={user.id}
               className={`
-                hover:bg-blue-50/50 transition-all duration-200 border-gray-100
-                ${selectedUsers.includes(user.id) ? 'bg-blue-50/30 border-blue-200' : ''}
-                ${hoveredRow === user.id ? 'shadow-sm' : ''}
+                hover:bg-gray-50 transition-colors border-gray-100
+                ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
               `}
-              onMouseEnter={() => setHoveredRow(user.id)}
-              onMouseLeave={() => setHoveredRow(null)}
             >
               {canManage && (
                 <TableCell>
                   <Checkbox
                     checked={selectedUsers.includes(user.id)}
                     onCheckedChange={(checked) => handleSelectUser(user.id, checked)}
-                    className="border-gray-400"
+                    className="border-gray-300"
                   />
                 </TableCell>
               )}
               <TableCell>
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-10 w-10 ring-2 ring-gray-100 ring-offset-1">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
-                    <AvatarFallback className="text-sm bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                    <AvatarFallback className="text-xs bg-gray-100 text-gray-700 font-medium">
                       {getInitials(user.first_name, user.last_name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                    <div className="font-medium text-gray-900">
                       {getUserDisplayName(user)}
                     </div>
-                    <div className="text-sm text-gray-500 flex items-center">
-                      <Mail className="h-3 w-3 mr-1" />
+                    <div className="text-sm text-gray-500">
                       {user.email}
                     </div>
                   </div>
                 </div>
               </TableCell>
               <TableCell>
-                <div className="space-y-2">
-                  {user.email && (
-                    <div className="flex items-center text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">
-                      <Mail className="h-3 w-3 mr-2 flex-shrink-0 text-blue-500" />
-                      <span className="truncate font-mono text-xs">{user.email}</span>
-                    </div>
-                  )}
+                <div className="space-y-1">
                   {user.mobile && (
-                    <div className="flex items-center text-sm text-gray-600 bg-gray-50 px-2 py-1 rounded">
-                      <Phone className="h-3 w-3 mr-2 flex-shrink-0 text-green-500" />
-                      <span className="font-mono text-xs">{user.mobile}</span>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Phone className="h-3 w-3 mr-2 text-gray-400" />
+                      <span className="text-xs">{user.mobile}</span>
                     </div>
                   )}
                 </div>
@@ -282,8 +257,7 @@ export function UsersTable({
                 {getStatusBadge(user)}
               </TableCell>
               <TableCell>
-                <div className="text-sm text-gray-600 flex items-center">
-                  <Calendar className="h-3 w-3 mr-1 text-gray-400" />
+                <div className="text-sm text-gray-500">
                   {formatDate(user.last_login_at)}
                 </div>
               </TableCell>
@@ -294,29 +268,29 @@ export function UsersTable({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 hover:bg-blue-100"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onEdit(user)}
-                        className="cursor-pointer text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="cursor-pointer text-gray-700 hover:bg-gray-50"
                       >
                         <Edit3 className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer text-gray-600 hover:text-gray-700 hover:bg-gray-50">
+                      <DropdownMenuItem className="cursor-pointer text-gray-700 hover:bg-gray-50">
                         <Eye className="mr-2 h-4 w-4" />
                         Voir le profil
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onDelete(user)}
-                        className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="cursor-pointer text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Supprimer

@@ -13,6 +13,7 @@ import { UsersTable } from '@/components/users/users-table'
 import { CreateUserModal } from '@/components/users/create-user-modal'
 import { EditUserModal } from '@/components/users/edit-user-modal'
 import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
+import { BulkActionsModal } from '@/components/users/bulk-actions-modal'
 import { usersAPI } from '@/lib/api-client'
 import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
 import {
@@ -23,7 +24,15 @@ import {
   UserCheck,
   UserX,
   Download,
-  Mail
+  Mail,
+  Settings,
+  Eye,
+  Trash2,
+  Edit3,
+  MoreHorizontal,
+  Activity,
+  UserPlus,
+  Zap
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -36,9 +45,11 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [selectedUsers, setSelectedUsers] = useState([])
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [bulkModalOpen, setBulkModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [stats, setStats] = useState({
     total: 0,
@@ -84,8 +95,9 @@ export default function UsersPage() {
         }
       } else {
         const response = await usersAPI.getUsers()
-        setUsers(response.data.data || response.data)
-        calculateStats(response.data.data || response.data)
+        const userData = response.data?.data || response.data || []
+        setUsers(userData)
+        calculateStats(userData)
       }
     } catch (error) {
       console.error('Failed to load users:', error)
@@ -95,10 +107,8 @@ export default function UsersPage() {
     }
   }
 
-  // 🔧 FIX: Memoize filtered users to prevent recalculation and fix CSV export reference
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // 🔧 FIX: Safe name comparison with fallback
       const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()
 
       const matchesSearch = !searchTerm ||
@@ -107,7 +117,6 @@ export default function UsersPage() {
 
       const matchesRole = filterRole === 'all' || user.role === filterRole
 
-      // Enhanced status filtering logic
       const matchesStatus = filterStatus === 'all' ||
         (filterStatus === 'active' && (user.status === 'ACTIVE' || (user.is_active && !user.status))) ||
         (filterStatus === 'inactive' && (user.status === 'INACTIVE' || (!user.is_active && !user.status))) ||
@@ -121,7 +130,6 @@ export default function UsersPage() {
   const handleCreateUser = async (userData) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user creation
         const newUser = {
           id: `user-${Date.now()}`,
           ...userData,
@@ -134,8 +142,8 @@ export default function UsersPage() {
         calculateStats([...users, newUser])
         toast.success('Utilisateur créé avec succès')
       } else {
-        const response = await usersAPI.createUser(userData)
-        await loadUsers() // Refresh the list
+        await usersAPI.createUser(userData)
+        await loadUsers()
         toast.success('Utilisateur créé avec succès')
       }
     } catch (error) {
@@ -148,7 +156,6 @@ export default function UsersPage() {
   const handleEditUser = async (userId, userData) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user update
         setUsers(prev => prev.map(u =>
           u.id === userId
             ? { ...u, ...userData, full_name: `${userData.first_name} ${userData.last_name}` }
@@ -157,7 +164,7 @@ export default function UsersPage() {
         toast.success('Utilisateur modifié avec succès')
       } else {
         await usersAPI.updateUser(userId, userData)
-        await loadUsers() // Refresh the list
+        await loadUsers()
         toast.success('Utilisateur modifié avec succès')
       }
     } catch (error) {
@@ -170,19 +177,40 @@ export default function UsersPage() {
   const handleDeleteUser = async (userId) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user deletion
         const updatedUsers = users.filter(u => u.id !== userId)
         setUsers(updatedUsers)
         calculateStats(updatedUsers)
         toast.success('Utilisateur supprimé avec succès')
       } else {
         await usersAPI.deleteUser(userId)
-        await loadUsers() // Refresh the list
+        await loadUsers()
         toast.success('Utilisateur supprimé avec succès')
       }
     } catch (error) {
       console.error('Failed to delete user:', error)
       toast.error('Erreur lors de la suppression de l\'utilisateur')
+      throw error
+    }
+  }
+
+  const handleBulkAction = async (action, userIds, reason) => {
+    try {
+      if (USE_MOCK_DATA) {
+        // Mock bulk operations
+        toast.success(`Opération ${action} effectuée sur ${userIds.length} utilisateur(s)`)
+      } else {
+        await usersAPI.bulkUserOperation({
+          user_ids: userIds,
+          operation: action,
+          reason
+        })
+        await loadUsers()
+        toast.success(`Opération ${action} effectuée avec succès`)
+      }
+      setSelectedUsers([])
+    } catch (error) {
+      console.error('Failed to perform bulk action:', error)
+      toast.error('Erreur lors de l\'opération groupée')
       throw error
     }
   }
@@ -197,7 +225,6 @@ export default function UsersPage() {
     setDeleteDialogOpen(true)
   }
 
-  // 🔧 FIX: Enhanced CSV export with better error handling and safer data access
   const exportUsers = useCallback(() => {
     try {
       if (filteredUsers.length === 0) {
@@ -208,7 +235,7 @@ export default function UsersPage() {
       const csvContent = [
         ['Nom', 'Prénom', 'Email', 'Téléphone', 'Rôle', 'Statut', 'Date de création'].join(','),
         ...filteredUsers.map(user => [
-          (user.last_name || '').replace(/,/g, ';'), // Escape commas
+          (user.last_name || '').replace(/,/g, ';'),
           (user.first_name || '').replace(/,/g, ';'),
           (user.email || '').replace(/,/g, ';'),
           (user.mobile || '').replace(/,/g, ';'),
@@ -218,7 +245,6 @@ export default function UsersPage() {
         ].join(','))
       ].join('\n')
 
-      // Add BOM for proper UTF-8 handling in Excel
       const BOM = '\uFEFF'
       const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' })
       const url = window.URL.createObjectURL(blob)
@@ -244,21 +270,36 @@ export default function UsersPage() {
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-              <p className="text-gray-600">Gérez les membres de votre équipe</p>
+        <div className="space-y-8">
+          {/* Modern Header */}
+          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Gestion des utilisateurs
+              </h1>
+              <p className="text-gray-600">
+                Gérez les membres de votre équipe et leurs permissions
+              </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-3">
+              {selectedUsers.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setBulkModalOpen(true)}
+                  className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Actions groupées ({selectedUsers.length})
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={exportUsers}
                 disabled={filteredUsers.length === 0 || loading}
+                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Exporter CSV ({filteredUsers.length})
+                Export CSV ({filteredUsers.length})
               </Button>
               {hasPermission('users_manage') && (
                 <>
@@ -270,8 +311,11 @@ export default function UsersPage() {
                     <Mail className="mr-2 h-4 w-4" />
                     Invitations
                   </Button>
-                  <Button onClick={() => setCreateModalOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
+                  <Button 
+                    onClick={() => setCreateModalOpen(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" />
                     Nouvel utilisateur
                   </Button>
                 </>
@@ -279,91 +323,90 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-6">
-            <Card>
+          {/* Modern Stats Cards */}
+          <div className="grid gap-6 md:grid-cols-4">
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-sm font-medium text-blue-700 mb-1">Total utilisateurs</p>
+                    <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      +{stats.byRole.admin || 0} admin(s)
+                    </p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <div className="h-12 w-12 rounded-full bg-blue-200 flex items-center justify-center">
+                    <Users className="h-6 w-6 text-blue-700" />
+                  </div>
                 </div>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Actifs</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.active}</p>
+                    <p className="text-sm font-medium text-green-700 mb-1">Utilisateurs actifs</p>
+                    <p className="text-3xl font-bold text-green-900">{stats.active}</p>
+                    <p className="text-xs text-green-600 mt-1">
+                      {Math.round((stats.active / stats.total) * 100) || 0}% du total
+                    </p>
                   </div>
-                  <UserCheck className="h-8 w-8 text-green-600" />
+                  <div className="h-12 w-12 rounded-full bg-green-200 flex items-center justify-center">
+                    <UserCheck className="h-6 w-6 text-green-700" />
+                  </div>
                 </div>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Inactifs</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.inactive}</p>
+                    <p className="text-sm font-medium text-orange-700 mb-1">En attente</p>
+                    <p className="text-3xl font-bold text-orange-900">{stats.pending}</p>
+                    <p className="text-xs text-orange-600 mt-1">
+                      Validation requise
+                    </p>
                   </div>
-                  <UserX className="h-8 w-8 text-red-600" />
+                  <div className="h-12 w-12 rounded-full bg-orange-200 flex items-center justify-center">
+                    <Activity className="h-6 w-6 text-orange-700" />
+                  </div>
                 </div>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-orange-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">En attente</p>
-                    <p className="text-2xl font-bold text-orange-600">{stats.pending}</p>
+                    <p className="text-sm font-medium text-purple-700 mb-1">Inactifs / Bloqués</p>
+                    <p className="text-3xl font-bold text-purple-900">{stats.inactive + stats.locked}</p>
+                    <p className="text-xs text-purple-600 mt-1">
+                      {stats.locked} bloqué(s)
+                    </p>
                   </div>
-                  <Users className="h-8 w-8 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Bloqués</p>
-                    <p className="text-2xl font-bold text-purple-600">{stats.locked}</p>
-                  </div>
-                  <UserX className="h-8 w-8 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Par rôle</p>
-                  <div className="space-y-1">
-                    {Object.entries(stats.byRole).map(([role, count]) => (
-                      <div key={role} className="flex justify-between text-xs">
-                        <span className="capitalize">{role}</span>
-                        <span className="font-medium">{count}</span>
-                      </div>
-                    ))}
+                  <div className="h-12 w-12 rounded-full bg-purple-200 flex items-center justify-center">
+                    <UserX className="h-6 w-6 text-purple-700" />
                   </div>
                 </div>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtres et recherche</CardTitle>
+          {/* Modern Filters */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+              <div className="flex items-center space-x-2">
+                <Search className="h-5 w-5 text-gray-600" />
+                <CardTitle className="text-lg text-gray-800">Recherche et filtres</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -372,7 +415,7 @@ export default function UsersPage() {
                       placeholder="Rechercher par nom ou email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -380,31 +423,33 @@ export default function UsersPage() {
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 bg-white"
                 >
-                  <option value="all">Tous les rôles</option>
+                  <option value="all">🎭 Tous les rôles</option>
                   {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
-                    <option key={roleId} value={roleId}>{roleData.label}</option>
+                    <option key={roleId} value={roleId}>
+                      {roleData.icon} {roleData.label}
+                    </option>
                   ))}
                 </select>
 
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 bg-white"
                 >
-                  <option value="all">Tous les statuts</option>
-                  <option value="active">Actif ({stats.active})</option>
-                  <option value="inactive">Inactif ({stats.inactive})</option>
-                  <option value="pending">En attente ({stats.pending})</option>
-                  <option value="locked">Bloqués ({stats.locked})</option>
+                  <option value="all">📊 Tous les statuts</option>
+                  <option value="active">✅ Actifs ({stats.active})</option>
+                  <option value="inactive">❌ Inactifs ({stats.inactive})</option>
+                  <option value="pending">⏳ En attente ({stats.pending})</option>
+                  <option value="locked">🔒 Bloqués ({stats.locked})</option>
                 </select>
               </div>
 
               {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
-                    {filteredUsers.length} utilisateur(s) trouvé(s)
+                <div className="mt-4 flex items-center justify-between bg-blue-50 p-4 rounded-lg">
+                  <span className="text-sm text-blue-700 font-medium">
+                    🔍 {filteredUsers.length} résultat(s) trouvé(s)
                   </span>
                   <Button
                     variant="ghost"
@@ -414,20 +459,36 @@ export default function UsersPage() {
                       setFilterRole('all')
                       setFilterStatus('all')
                     }}
+                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
                   >
-                    Réinitialiser les filtres
+                    <Zap className="mr-1 h-4 w-4" />
+                    Réinitialiser
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Users Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Utilisateurs ({filteredUsers.length})</CardTitle>
+          {/* Modern Users Table */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-gray-600" />
+                  <CardTitle className="text-lg text-gray-800">
+                    Utilisateurs ({filteredUsers.length})
+                  </CardTitle>
+                </div>
+                {hasPermission('users_manage') && (
+                  <div className="flex items-center space-x-2">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {selectedUsers.length} sélectionné(s)
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
                   <LoadingSpinner size="lg" />
@@ -435,6 +496,8 @@ export default function UsersPage() {
               ) : (
                 <UsersTable
                   users={filteredUsers}
+                  selectedUsers={selectedUsers}
+                  onSelectionChange={setSelectedUsers}
                   onEdit={handleEditClick}
                   onDelete={handleDeleteClick}
                   canManage={hasPermission('users_manage')}
@@ -468,6 +531,13 @@ export default function UsersPage() {
             onConfirm={() => handleDeleteUser(selectedUser.id)}
           />
         )}
+
+        <BulkActionsModal
+          open={bulkModalOpen}
+          onOpenChange={setBulkModalOpen}
+          selectedUsers={selectedUsers.map(id => users.find(u => u.id === id)).filter(Boolean)}
+          onConfirm={handleBulkAction}
+        />
       </DashboardLayout>
     </RoleGuard>
   )

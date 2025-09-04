@@ -246,6 +246,11 @@ export default function UsersDemoPage() {
     setDeleteDialogOpen(true)
   }
 
+  const handleViewClick = (user) => {
+    setSelectedUser(user)
+    setDetailsModalOpen(true)
+  }
+
   const exportUsers = useCallback(() => {
     try {
       if (filteredUsers.length === 0) {

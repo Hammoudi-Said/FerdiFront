@@ -575,6 +575,17 @@ export default function UsersDemoPage() {
         selectedUsers={selectedUsers.map(id => users.find(u => u.id === id)).filter(Boolean)}
         onConfirm={handleBulkAction}
       />
+
+      {selectedUser && (
+        <UserDetailsModal
+          open={detailsModalOpen}
+          onOpenChange={setDetailsModalOpen}
+          user={selectedUser}
+          onEdit={handleEditClick}
+          onDelete={handleDeleteClick}
+          canManage={true}
+        />
+      )}
     </div>
   )
 }

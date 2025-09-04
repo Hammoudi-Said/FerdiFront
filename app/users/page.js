@@ -270,10 +270,10 @@ export default function UsersPage() {
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Clean Header */}
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-            <div className="space-y-2">
+            <div className="space-y-1">
               <h1 className="text-2xl font-semibold text-gray-900">
                 Gestion des utilisateurs
               </h1>
@@ -287,6 +287,7 @@ export default function UsersPage() {
                   variant="outline"
                   onClick={() => setBulkModalOpen(true)}
                   className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                  size="sm"
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Actions groupées ({selectedUsers.length})
@@ -297,6 +298,7 @@ export default function UsersPage() {
                 onClick={exportUsers}
                 disabled={filteredUsers.length === 0 || loading}
                 className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                size="sm"
               >
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV
@@ -305,6 +307,7 @@ export default function UsersPage() {
                 <Button 
                   onClick={() => window.location.href = '/invitations'}
                   className="bg-gray-900 hover:bg-gray-800 text-white"
+                  size="sm"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   Inviter un utilisateur
@@ -315,7 +318,7 @@ export default function UsersPage() {
 
           {/* Clean Stats Cards */}
           <div className="grid gap-4 md:grid-cols-4">
-            <Card className="border border-gray-200">
+            <Card className="border border-gray-200 bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -329,7 +332,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-gray-200">
+            <Card className="border border-gray-200 bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -343,7 +346,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-gray-200">
+            <Card className="border border-gray-200 bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -357,7 +360,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-gray-200">
+            <Card className="border border-gray-200 bg-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -373,8 +376,8 @@ export default function UsersPage() {
           </div>
 
           {/* Clean Filters */}
-          <Card className="border border-gray-200">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
               <div className="flex items-center space-x-2">
                 <Search className="h-4 w-4 text-gray-500" />
                 <CardTitle className="text-base font-medium text-gray-900">Recherche et filtres</CardTitle>
@@ -397,7 +400,7 @@ export default function UsersPage() {
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
                 >
                   <option value="all">Tous les rôles</option>
                   {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
@@ -410,7 +413,7 @@ export default function UsersPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
                 >
                   <option value="all">Tous les statuts</option>
                   <option value="active">Actifs ({stats.active})</option>
@@ -443,8 +446,8 @@ export default function UsersPage() {
           </Card>
 
           {/* Clean Users Table */}
-          <Card className="border border-gray-200">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Users className="h-4 w-4 text-gray-500" />

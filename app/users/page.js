@@ -44,6 +44,8 @@ export default function UsersPage() {
     total: 0,
     active: 0,
     inactive: 0,
+    pending: 0,
+    locked: 0,
     byRole: {}
   })
 
@@ -51,6 +53,22 @@ export default function UsersPage() {
     updateActivity()
     loadUsers()
   }, [updateActivity])
+
+  const calculateStats = useCallback((usersList) => {
+    const total = usersList.length
+    const active = usersList.filter(u => u.status === 'ACTIVE' || (u.is_active && !u.status)).length
+    const inactive = usersList.filter(u => u.status === 'INACTIVE' || (!u.is_active && !u.status)).length
+    const pending = usersList.filter(u => u.status === 'PENDING').length
+    const locked = usersList.filter(u => u.status === 'LOCKED').length
+
+    const byRole = {}
+    usersList.forEach(u => {
+      const roleName = ROLE_DEFINITIONS[u.role]?.name || 'unknown'
+      byRole[roleName] = (byRole[roleName] || 0) + 1
+    })
+
+    setStats({ total, active, inactive, pending, locked, byRole })
+  }, [])
 
   const loadUsers = async () => {
     try {
@@ -77,20 +95,6 @@ export default function UsersPage() {
     }
   }
 
-  const calculateStats = useCallback((usersList) => {
-    const total = usersList.length
-    const active = usersList.filter(u => u.is_active).length
-    const inactive = total - active
-
-    const byRole = {}
-    usersList.forEach(u => {
-      const roleName = ROLE_DEFINITIONS[u.role]?.name || 'unknown'
-      byRole[roleName] = (byRole[roleName] || 0) + 1
-    })
-
-    setStats({ total, active, inactive, byRole })
-  }, [])
-
   // 🔧 FIX: Memoize filtered users to prevent recalculation and fix CSV export reference
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -103,9 +107,12 @@ export default function UsersPage() {
 
       const matchesRole = filterRole === 'all' || user.role === filterRole
 
+      // Enhanced status filtering logic
       const matchesStatus = filterStatus === 'all' ||
-        (filterStatus === 'active' && user.is_active) ||
-        (filterStatus === 'inactive' && !user.is_active)
+        (filterStatus === 'active' && (user.status === 'ACTIVE' || (user.is_active && !user.status))) ||
+        (filterStatus === 'inactive' && (user.status === 'INACTIVE' || (!user.is_active && !user.status))) ||
+        (filterStatus === 'pending' && user.status === 'PENDING') ||
+        (filterStatus === 'locked' && user.status === 'LOCKED')
 
       return matchesSearch && matchesRole && matchesStatus
     })
@@ -253,7 +260,7 @@ export default function UsersPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Exporter CSV ({filteredUsers.length})
               </Button>
-              {(
+              {hasPermission('users_manage') && (
                 <>
                   <Button
                     variant="outline"
@@ -273,7 +280,7 @@ export default function UsersPage() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -306,6 +313,30 @@ export default function UsersPage() {
                     <p className="text-2xl font-bold text-red-600">{stats.inactive}</p>
                   </div>
                   <UserX className="h-8 w-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">En attente</p>
+                    <p className="text-2xl font-bold text-orange-600">{stats.pending}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-orange-600" />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Bloqués</p>
+                    <p className="text-2xl font-bold text-purple-600">{stats.locked}</p>
+                  </div>
+                  <UserX className="h-8 w-8 text-purple-600" />
                 </div>
               </CardContent>
             </Card>
@@ -363,8 +394,10 @@ export default function UsersPage() {
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="all">Tous les statuts</option>
-                  <option value="active">Actif</option>
-                  <option value="inactive">Inactif</option>
+                  <option value="active">Actif ({stats.active})</option>
+                  <option value="inactive">Inactif ({stats.inactive})</option>
+                  <option value="pending">En attente ({stats.pending})</option>
+                  <option value="locked">Bloqués ({stats.locked})</option>
                 </select>
               </div>
 

@@ -25,11 +25,11 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
   // 🔧 FIX: Enhanced date formatting with error handling
   const formatDate = (dateString) => {
     if (!dateString) return 'Jamais'
-    
+
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return 'Date invalide'
-      
+
       return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
@@ -44,7 +44,7 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
   const getRoleBadge = (roleId) => {
     const role = ROLE_DEFINITIONS[roleId]
     if (!role) return <Badge variant="secondary">Inconnu</Badge>
-    
+
     return (
       <Badge className={`${role.textColor} ${role.bgColor} hover:${role.bgColor}`}>
         {role.label}
@@ -52,26 +52,31 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
     )
   }
 
-  const getStatusBadge = (isActive) => {
-    return isActive ? (
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-        Actif
-      </Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-        Inactif
-      </Badge>
+
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      ACTIVE: { color: 'bg-green-100 text-green-800', label: 'Actif' },
+      INACTIVE: { color: 'bg-gray-100 text-gray-800', label: 'Inactif' },
+      PENDING: { color: 'bg-yellow-100 text-yellow-800', label: 'En attente d\'activation' },
+      LOCKED: { color: 'bg-red-100 text-red-800', label: 'Verrouillé' },
+    }
+    const config = statusConfig[status] || statusConfig.INACTIVE
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+        {config.label}
+      </span>
     )
   }
 
   // 🔧 FIX: Safe helper function to get user display name
   const getUserDisplayName = (user) => {
     if (user.full_name) return user.full_name
-    
+
     const firstName = user.first_name || ''
     const lastName = user.last_name || ''
     const fullName = `${firstName} ${lastName}`.trim()
-    
+
     return fullName || user.email || 'Utilisateur inconnu'
   }
 
@@ -141,7 +146,7 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
                 {getRoleBadge(user.role)}
               </TableCell>
               <TableCell>
-                {getStatusBadge(user.is_active)}
+                {getStatusBadge(user.status)}
               </TableCell>
               <TableCell className="text-sm text-gray-600">
                 {formatDate(user.last_login_at)}

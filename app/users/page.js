@@ -481,6 +481,7 @@ export default function UsersPage() {
                   onSelectionChange={setSelectedUsers}
                   onEdit={handleEditClick}
                   onDelete={handleDeleteClick}
+                  onView={handleViewClick}
                   canManage={hasPermission('users_manage')}
                 />
               )}

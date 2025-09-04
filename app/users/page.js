@@ -313,77 +313,61 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Modern Stats Cards */}
-          <div className="grid gap-6 md:grid-cols-4">
-            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
+          {/* Clean Stats Cards */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card className="border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-blue-700 mb-1">Total utilisateurs</p>
-                    <p className="text-3xl font-bold text-blue-900">{stats.total}</p>
-                    <p className="text-xs text-blue-600 mt-1">
-                      +{stats.byRole.admin || 0} admin(s)
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-blue-200 flex items-center justify-center">
-                    <Users className="h-6 w-6 text-blue-700" />
+                  <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-gray-600" />
                   </div>
                 </div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100">
+            <Card className="border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-green-700 mb-1">Utilisateurs actifs</p>
-                    <p className="text-3xl font-bold text-green-900">{stats.active}</p>
-                    <p className="text-xs text-green-600 mt-1">
-                      {Math.round((stats.active / stats.total) * 100) || 0}% du total
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.active}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-green-200 flex items-center justify-center">
-                    <UserCheck className="h-6 w-6 text-green-700" />
+                  <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-green-600" />
                   </div>
                 </div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-green-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100">
+            <Card className="border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-orange-700 mb-1">En attente</p>
-                    <p className="text-3xl font-bold text-orange-900">{stats.pending}</p>
-                    <p className="text-xs text-orange-600 mt-1">
-                      Validation requise
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">En attente</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.pending}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-orange-200 flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-orange-700" />
+                  <div className="h-10 w-10 rounded-lg bg-yellow-50 flex items-center justify-center">
+                    <Activity className="h-5 w-5 text-yellow-600" />
                   </div>
                 </div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-orange-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100">
+            <Card className="border border-gray-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-purple-700 mb-1">Inactifs / Bloqués</p>
-                    <p className="text-3xl font-bold text-purple-900">{stats.inactive + stats.locked}</p>
-                    <p className="text-xs text-purple-600 mt-1">
-                      {stats.locked} bloqué(s)
-                    </p>
+                    <p className="text-sm font-medium text-gray-600">Inactifs</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.inactive + stats.locked}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-full bg-purple-200 flex items-center justify-center">
-                    <UserX className="h-6 w-6 text-purple-700" />
+                  <div className="h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center">
+                    <UserX className="h-5 w-5 text-gray-600" />
                   </div>
                 </div>
-                <div className="absolute top-0 right-0 w-20 h-20 bg-purple-200 rounded-full opacity-20 -mr-10 -mt-10"></div>
               </CardContent>
             </Card>
           </div>

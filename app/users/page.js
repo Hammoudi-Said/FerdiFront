@@ -442,22 +442,20 @@ export default function UsersPage() {
             </CardContent>
           </Card>
 
-          {/* Modern Users Table */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+          {/* Clean Users Table */}
+          <Card className="border border-gray-200">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-gray-600" />
-                  <CardTitle className="text-lg text-gray-800">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <CardTitle className="text-base font-medium text-gray-900">
                     Utilisateurs ({filteredUsers.length})
                   </CardTitle>
                 </div>
-                {hasPermission('users_manage') && (
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                      {selectedUsers.length} sélectionné(s)
-                    </Badge>
-                  </div>
+                {hasPermission('users_manage') && selectedUsers.length > 0 && (
+                  <Badge variant="outline" className="text-gray-700 border-gray-300">
+                    {selectedUsers.length} sélectionné(s)
+                  </Badge>
                 )}
               </div>
             </CardHeader>

@@ -284,7 +284,10 @@ export function UsersTable({
                         <Edit3 className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer text-gray-700 hover:bg-gray-50">
+                      <DropdownMenuItem 
+                        onClick={() => onView && onView(user)}
+                        className="cursor-pointer text-gray-700 hover:bg-gray-50"
+                      >
                         <Eye className="mr-2 h-4 w-4" />
                         Voir le profil
                       </DropdownMenuItem>

@@ -73,11 +73,19 @@ export function UsersTable({
 
   const getRoleBadge = (roleId) => {
     const role = ROLE_DEFINITIONS[roleId]
-    if (!role) return <Badge variant="secondary">Inconnu</Badge>
+    if (!role) return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
+
+    const colorMap = {
+      SUPER_ADMIN: 'bg-red-50 text-red-700 border-red-200',
+      ADMIN: 'bg-purple-50 text-purple-700 border-purple-200', 
+      DISPATCH: 'bg-blue-50 text-blue-700 border-blue-200',
+      DRIVER: 'bg-green-50 text-green-700 border-green-200',
+      INTERNAL_SUPPORT: 'bg-orange-50 text-orange-700 border-orange-200',
+      ACCOUNTANT: 'bg-teal-50 text-teal-700 border-teal-200'
+    }
 
     return (
-      <Badge className={`${role.textColor} ${role.bgColor} hover:${role.bgColor} font-medium`}>
-        <span className="mr-1">{role.icon}</span>
+      <Badge className={`${colorMap[roleId] || 'bg-gray-50 text-gray-700 border-gray-200'} font-medium border`}>
         {role.label}
       </Badge>
     )

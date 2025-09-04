@@ -271,22 +271,22 @@ export default function UsersPage() {
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-8">
-          {/* Modern Header */}
+          {/* Clean Header */}
           <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold text-gray-900">
                 Gestion des utilisateurs
               </h1>
-              <p className="text-gray-600">
+              <p className="text-sm text-gray-600">
                 Gérez les membres de votre équipe et leurs permissions
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {selectedUsers.length > 0 && (
                 <Button
                   variant="outline"
                   onClick={() => setBulkModalOpen(true)}
-                  className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                  className="text-gray-700 border-gray-300 hover:bg-gray-50"
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Actions groupées ({selectedUsers.length})
@@ -296,29 +296,19 @@ export default function UsersPage() {
                 variant="outline"
                 onClick={exportUsers}
                 disabled={filteredUsers.length === 0 || loading}
-                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Export CSV ({filteredUsers.length})
+                Export CSV
               </Button>
               {hasPermission('users_manage') && (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.href = '/invitations'}
-                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    Invitations
-                  </Button>
-                  <Button 
-                    onClick={() => setCreateModalOpen(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Nouvel utilisateur
-                  </Button>
-                </>
+                <Button 
+                  onClick={() => window.location.href = '/invitations'}
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Inviter un utilisateur
+                </Button>
               )}
             </div>
           </div>

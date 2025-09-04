@@ -51,6 +51,7 @@ export default function UsersPage() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [bulkModalOpen, setBulkModalOpen] = useState(false)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [stats, setStats] = useState({
     total: 0,

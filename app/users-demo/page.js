@@ -536,6 +536,7 @@ export default function UsersDemoPage() {
                 onSelectionChange={setSelectedUsers}
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
+                onView={handleViewClick}
                 canManage={true}
               />
             )}

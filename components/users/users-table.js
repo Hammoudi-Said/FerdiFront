@@ -43,6 +43,7 @@ export function UsersTable({
   onSelectionChange, 
   onEdit, 
   onDelete, 
+  onView,
   canManage 
 }) {
   const [hoveredRow, setHoveredRow] = useState(null)

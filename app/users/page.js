@@ -372,12 +372,12 @@ export default function UsersPage() {
             </Card>
           </div>
 
-          {/* Modern Filters */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+          {/* Clean Filters */}
+          <Card className="border border-gray-200">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center space-x-2">
-                <Search className="h-5 w-5 text-gray-600" />
-                <CardTitle className="text-lg text-gray-800">Recherche et filtres</CardTitle>
+                <Search className="h-4 w-4 text-gray-500" />
+                <CardTitle className="text-base font-medium text-gray-900">Recherche et filtres</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6">
@@ -389,7 +389,7 @@ export default function UsersPage() {
                       placeholder="Rechercher par nom ou email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                      className="pl-10 border-gray-200 focus:border-gray-900 focus:ring-gray-900"
                     />
                   </div>
                 </div>
@@ -397,12 +397,12 @@ export default function UsersPage() {
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white"
                 >
-                  <option value="all">🎭 Tous les rôles</option>
+                  <option value="all">Tous les rôles</option>
                   {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
                     <option key={roleId} value={roleId}>
-                      {roleData.icon} {roleData.label}
+                      {roleData.label}
                     </option>
                   ))}
                 </select>
@@ -410,20 +410,20 @@ export default function UsersPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 bg-white"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white"
                 >
-                  <option value="all">📊 Tous les statuts</option>
-                  <option value="active">✅ Actifs ({stats.active})</option>
-                  <option value="inactive">❌ Inactifs ({stats.inactive})</option>
-                  <option value="pending">⏳ En attente ({stats.pending})</option>
-                  <option value="locked">🔒 Bloqués ({stats.locked})</option>
+                  <option value="all">Tous les statuts</option>
+                  <option value="active">Actifs ({stats.active})</option>
+                  <option value="inactive">Inactifs ({stats.inactive})</option>
+                  <option value="pending">En attente ({stats.pending})</option>
+                  <option value="locked">Bloqués ({stats.locked})</option>
                 </select>
               </div>
 
               {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
-                <div className="mt-4 flex items-center justify-between bg-blue-50 p-4 rounded-lg">
-                  <span className="text-sm text-blue-700 font-medium">
-                    🔍 {filteredUsers.length} résultat(s) trouvé(s)
+                <div className="mt-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <span className="text-sm text-gray-700">
+                    {filteredUsers.length} résultat(s) trouvé(s)
                   </span>
                   <Button
                     variant="ghost"
@@ -433,9 +433,8 @@ export default function UsersPage() {
                       setFilterRole('all')
                       setFilterStatus('all')
                     }}
-                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   >
-                    <Zap className="mr-1 h-4 w-4" />
                     Réinitialiser
                   </Button>
                 </div>

@@ -166,13 +166,15 @@ export default function UsersPage() {
         ))
         toast.success('Utilisateur modifié avec succès')
       } else {
+        // ✅ APPEL API BACKEND: PATCH /api/v1/users/{user_id}
         await usersAPI.updateUser(userId, userData)
-        await loadUsers()
+        await loadUsers() // Recharger la liste
         toast.success('Utilisateur modifié avec succès')
       }
     } catch (error) {
       console.error('Failed to update user:', error)
-      toast.error('Erreur lors de la modification de l\'utilisateur')
+      const errorMessage = error.response?.data?.detail || 'Erreur lors de la modification de l\'utilisateur'
+      toast.error(errorMessage)
       throw error
     }
   }

@@ -187,13 +187,15 @@ export default function UsersPage() {
         calculateStats(updatedUsers)
         toast.success('Utilisateur supprimé avec succès')
       } else {
+        // ✅ APPEL API BACKEND: DELETE /api/v1/users/{user_id}
         await usersAPI.deleteUser(userId)
-        await loadUsers()
+        await loadUsers() // Recharger la liste
         toast.success('Utilisateur supprimé avec succès')
       }
     } catch (error) {
       console.error('Failed to delete user:', error)
-      toast.error('Erreur lors de la suppression de l\'utilisateur')
+      const errorMessage = error.response?.data?.detail || 'Erreur lors de la suppression de l\'utilisateur'
+      toast.error(errorMessage)
       throw error
     }
   }

@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import { 
   Edit3, 
   Trash2, 

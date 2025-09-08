@@ -96,6 +96,7 @@ export default function UsersPage() {
           toast.error(result.error)
         }
       } else {
+        // ✅ APPEL API BACKEND SELON OPENAPI SPEC
         const response = await usersAPI.getUsers()
         const userData = response.data?.data || response.data || []
         setUsers(userData)

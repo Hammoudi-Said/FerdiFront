@@ -232,9 +232,26 @@ export default function UsersPage() {
     setDeleteDialogOpen(true)
   }
 
-  const handleViewClick = (user) => {
-    setSelectedUser(user)
-    setDetailsModalOpen(true)
+  const handleViewClick = async (user) => {
+    try {
+      if (USE_MOCK_DATA) {
+        setSelectedUser(user)
+        setDetailsModalOpen(true)
+      } else {
+        // ✅ APPEL API BACKEND: GET /api/v1/users/{user_id}
+        const response = await usersAPI.getUserById(user.id)
+        const userData = response.data
+        setSelectedUser(userData)
+        setDetailsModalOpen(true)
+      }
+    } catch (error) {
+      console.error('Failed to load user details:', error)
+      const errorMessage = error.response?.data?.detail || 'Erreur lors du chargement des détails de l\'utilisateur'
+      toast.error(errorMessage)
+      // En cas d'erreur, utiliser les données déjà disponibles
+      setSelectedUser(user)
+      setDetailsModalOpen(true)
+    }
   }
 
   const exportUsers = useCallback(() => {

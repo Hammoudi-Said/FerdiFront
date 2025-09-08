@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 
 const formSchema = z.object({
   first_name: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères'),

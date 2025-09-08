@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { ROLE_DEFINITIONS } from '@/lib/utils/permission-manager'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import {
   User,
   Mail,

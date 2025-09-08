@@ -482,7 +482,7 @@ export default function UsersPage() {
                   onEdit={handleEditClick}
                   onDelete={handleDeleteClick}
                   onView={handleViewClick}
-                  canManage={hasPermission('users_manage')}
+                  canManage={hasPermission('users_write_company') || hasPermission('users_write_all')}
                 />
               )}
             </CardContent>

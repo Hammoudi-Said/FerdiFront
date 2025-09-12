@@ -12,6 +12,7 @@ import requests
 import json
 import time
 import sys
+import os
 from urllib.parse import urljoin
 
 # Configuration

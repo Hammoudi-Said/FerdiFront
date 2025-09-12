@@ -248,7 +248,7 @@ export default function UsersDemoPage() {
 
   const handleViewClick = (user) => {
     setSelectedUser(user)
-    setDetailsModalOpen(true)
+    setEditDetailsModalOpen(true)
   }
 
   const exportUsers = useCallback(() => {

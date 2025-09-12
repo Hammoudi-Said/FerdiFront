@@ -53,7 +53,7 @@ export default function InvitationsPage() {
       setLoading(true)
 
       if (USE_MOCK_DATA) {
-        // Mock invitations data with new status field
+        // Mock invitations data with new status field - INCLUDING DELETED
         const mockInvitations = [
           {
             id: 'inv-1',
@@ -121,6 +121,24 @@ export default function InvitationsPage() {
             accepted_at: null,
             created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
             expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+            invited_by: {
+              id: user.id,
+              full_name: user.full_name,
+              email: user.email
+            }
+          },
+          {
+            id: 'inv-5',
+            email: 'sophie.bernard@example.com',
+            role: 'ADMIN',
+            first_name: 'Sophie',
+            last_name: 'Bernard',
+            mobile: '0612345098',
+            personal_message: 'Une autre invitation annulée',
+            status: UserInvitationStatus.DELETED,
+            accepted_at: null,
+            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            expires_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
             invited_by: {
               id: user.id,
               full_name: user.full_name,

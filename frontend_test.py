@@ -281,7 +281,62 @@ class FerdiFrontendTester:
             )
             return False
     
-    def test_component_structure(self):
+    def test_users_icon_import_fix(self):
+        """Test that the Users icon import fix is properly implemented"""
+        try:
+            # Check the users-table.js file for the Users import
+            users_table_path = "/app/components/users/users-table.js"
+            
+            with open(users_table_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Check if Users is imported from lucide-react
+            if 'Users' in content and 'from \'lucide-react\'' in content:
+                # Check if Users is in the import statement
+                import_lines = [line for line in content.split('\n') if 'from \'lucide-react\'' in line]
+                
+                users_imported = False
+                for line in import_lines:
+                    if 'Users' in line:
+                        users_imported = True
+                        break
+                
+                if users_imported:
+                    self.log_result(
+                        "Users Icon Import Fix",
+                        True,
+                        "Users icon is properly imported from lucide-react in users-table.js"
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "Users Icon Import Fix",
+                        False,
+                        "Users icon found in file but not in import statement"
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Users Icon Import Fix",
+                    False,
+                    "Users icon or lucide-react import not found in users-table.js"
+                )
+                return False
+                
+        except FileNotFoundError:
+            self.log_result(
+                "Users Icon Import Fix",
+                False,
+                "users-table.js file not found"
+            )
+            return False
+        except Exception as e:
+            self.log_result(
+                "Users Icon Import Fix",
+                False,
+                f"Failed to check Users icon import: {str(e)}"
+            )
+            return False
         """Test that key components are properly structured"""
         try:
             # Test users-demo page for component structure

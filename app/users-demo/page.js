@@ -378,28 +378,28 @@ export default function UsersDemoPage() {
           </div>
         </div>
 
-        {/* Clean Stats Cards */}
+        {/* Colorful Stats Cards - Style Invitations */}
         <div className="grid gap-4 md:grid-cols-4">
-          <Card className="border border-gray-200 bg-white">
+          <Card className="border border-blue-200 bg-white hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
+                  <p className="text-2xl font-semibold text-blue-600">{stats.total}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-gray-600" />
+                <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-200 bg-white">
+          <Card className="border border-green-200 bg-white hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.active}</p>
+                  <p className="text-2xl font-semibold text-green-600">{stats.active}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
                   <UserCheck className="h-5 w-5 text-green-600" />
@@ -408,12 +408,12 @@ export default function UsersDemoPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-200 bg-white">
+          <Card className="border border-yellow-200 bg-white hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">En attente</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.pending}</p>
+                  <p className="text-2xl font-semibold text-yellow-600">{stats.pending}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-yellow-50 flex items-center justify-center">
                   <Activity className="h-5 w-5 text-yellow-600" />
@@ -422,12 +422,12 @@ export default function UsersDemoPage() {
             </CardContent>
           </Card>
 
-          <Card className="border border-gray-200 bg-white">
+          <Card className="border border-red-200 bg-white hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Inactifs / Bloqués</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stats.inactive + stats.locked}</p>
+                  <p className="text-2xl font-semibold text-red-600">{stats.inactive + stats.locked}</p>
                 </div>
                 <div className="h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center">
                   <UserX className="h-5 w-5 text-gray-600" />

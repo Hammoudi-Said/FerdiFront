@@ -210,9 +210,10 @@ export function UsersTable({
             <TableRow 
               key={user.id}
               className={`
-                hover:bg-gray-50 transition-colors border-gray-100
+                hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
                 ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
               `}
+              onClick={() => onView && onView(user)}
             >
               {canManage && (
                 <TableCell>

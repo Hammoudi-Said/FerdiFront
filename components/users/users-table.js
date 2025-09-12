@@ -216,7 +216,7 @@ export function UsersTable({
               onClick={() => onView && onView(user)}
             >
               {canManage && (
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox
                     checked={selectedUsers.includes(user.id)}
                     onCheckedChange={(checked) => handleSelectUser(user.id, checked)}

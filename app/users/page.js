@@ -161,9 +161,29 @@ export default function UsersPage() {
       if (USE_MOCK_DATA) {
         setUsers(prev => prev.map(u =>
           u.id === userId
-            ? { ...u, ...userData, full_name: `${userData.first_name} ${userData.last_name}` }
+            ? { 
+                ...u, 
+                ...userData, 
+                full_name: `${userData.first_name} ${userData.last_name}`,
+                // Handle both is_active and status fields
+                is_active: userData.status === 'ACTIVE',
+                status: userData.status
+              }
             : u
         ))
+        // Recalculate stats with updated data
+        const updatedUsers = users.map(u =>
+          u.id === userId
+            ? { 
+                ...u, 
+                ...userData, 
+                full_name: `${userData.first_name} ${userData.last_name}`,
+                is_active: userData.status === 'ACTIVE',
+                status: userData.status
+              }
+            : u
+        )
+        calculateStats(updatedUsers)
         toast.success('Utilisateur modifié avec succès')
       } else {
         // ✅ APPEL API BACKEND: PATCH /api/v1/users/{user_id}

@@ -235,12 +235,13 @@ export default function InvitationsPage() {
     }
   }
 
-  // Reload invitations when status filter changes
-  useEffect(() => {
-    if (!loading) {
-      loadInvitations()
-    }
-  }, [statusFilter])
+  // Remove the useEffect that reloads when status filter changes
+  // We'll filter client-side instead
+  // useEffect(() => {
+  //   if (!loading) {
+  //     loadInvitations()
+  //   }
+  // }, [statusFilter])
 
   // Filter invitations based on search term and status filter
   const filteredInvitations = invitations.filter(invitation => {

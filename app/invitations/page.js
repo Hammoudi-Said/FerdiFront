@@ -250,11 +250,7 @@ export default function InvitationsPage() {
       `${invitation.first_name || ''} ${invitation.last_name || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatusFilter = statusFilter === 'all' || 
-      (invitation.status ? invitation.status === statusFilter : 
-       // Legacy support
-       (statusFilter === UserInvitationStatus.ACCEPTED && invitation.accepted) ||
-       (statusFilter === UserInvitationStatus.DELETED && invitation.is_active === false) ||
-       (statusFilter === UserInvitationStatus.PENDING && !invitation.accepted && invitation.is_active !== false))
+      (invitation.status && invitation.status === statusFilter)
 
     return matchesSearch && matchesStatusFilter
   })

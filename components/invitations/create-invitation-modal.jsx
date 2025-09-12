@@ -118,7 +118,7 @@ export function CreateInvitationModal({ open, onOpenChange, onInvitationCreated 
           last_name: data.last_name,
           mobile: data.mobile,
           personal_message: data.personal_message,
-          is_active: true,
+          status: 'PENDING',
           accepted: false,
           accepted_at: null,
           created_at: new Date().toISOString(),

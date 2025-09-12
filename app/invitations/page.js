@@ -132,13 +132,9 @@ export default function InvitationsPage() {
         setInvitations(mockInvitations)
         calculateStats(mockInvitations)
       } else {
-        // Use status parameter according to OpenAPI spec
-        const params = {}
-        if (statusFilter !== 'all') {
-          params.status = statusFilter
-        }
-        
-        const response = await invitationsAPI.getInvitations(params)
+        // Always get ALL invitations regardless of status filter
+        // The filtering will be done client-side
+        const response = await invitationsAPI.getInvitations()
         setInvitations(response.data || [])
         calculateStats(response.data || [])
       }

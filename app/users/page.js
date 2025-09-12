@@ -16,7 +16,7 @@ import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
 import { BulkActionsModal } from '@/components/users/bulk-actions-modal'
 import { UserEditDetailsModal } from '@/components/users/user-edit-details-modal'
 import { usersAPI } from '@/lib/api-client'
-import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
+import { ROLE_DEFINITIONS, UserRole, UserStatus } from '@/lib/constants/enums'
 import {
   Users,
   Plus,

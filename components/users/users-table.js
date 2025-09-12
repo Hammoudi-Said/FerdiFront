@@ -34,7 +34,8 @@ import {
   Lock,
   Unlock,
   Calendar,
-  Activity
+  Activity,
+  Users
 } from 'lucide-react'
 
 export function UsersTable({ 

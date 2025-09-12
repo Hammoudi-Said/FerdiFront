@@ -160,6 +160,13 @@ invitationsList.forEach(inv => {
 - ✅ Interface utilisateur modernisée
 - ✅ Compatibilité descendante maintenue
 
+### **✅ PROBLÈME INVITATIONS ANNULÉES RÉSOLU**
+- ✅ **Récupération de TOUS les status** : Les invitations avec status `DELETED` sont maintenant visibles
+- ✅ **Filtrage côté client** : Plus de filtrage côté serveur qui cachait les invitations annulées
+- ✅ **Statistiques complètes** : Comptage des invitations annulées dans les stats
+- ✅ **Actions contextuelles** : Les invitations `DELETED` sont affichables mais non modifiables
+- ✅ **Badge visuel** : Status `DELETED` affiché avec badge gris et icône Trash2
+
 ### **✅ Conformité OpenAPI v3.1.0 Enhanced**
 - ✅ Enums exacts selon la spécification
 - ✅ Paramètres API conformes
@@ -168,10 +175,11 @@ invitationsList.forEach(inv => {
 
 ### **✅ Expérience Utilisateur Améliorée**
 - 🎨 Interface moderne avec badges colorés
-- 🔍 Filtrage intuitif par dropdown
-- 📊 Statistiques détaillées en temps réel
+- 🔍 Filtrage intuitif par dropdown (y compris "Annulées")
+- 📊 Statistiques détaillées en temps réel avec compteur DELETED
 - ⚡ Actions contextuelles selon le status
 - 🔄 Migration transparente des données existantes
+- 🗑️ **Visibilité des invitations annulées** selon votre demande
 
 ---
 

@@ -577,7 +577,7 @@ export default function UsersDemoPage() {
       />
 
       {selectedUser && (
-        <UserEditDetailsModal
+        <UserDetailsPerfectModal
           open={editDetailsModalOpen}
           onOpenChange={setEditDetailsModalOpen}
           user={selectedUser}

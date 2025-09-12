@@ -12,7 +12,7 @@ import { EditUserModal } from '@/components/users/edit-user-modal'
 import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
 import { BulkActionsModal } from '@/components/users/bulk-actions-modal'
 import { UserDetailsPerfectModal } from '@/components/users/user-details-modal-perfect'
-import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
+import { ROLE_DEFINITIONS, UserRole, UserStatus } from '@/lib/constants/enums'
 import {
   Users,
   Plus,

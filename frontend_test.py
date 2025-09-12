@@ -292,29 +292,44 @@ class FerdiFrontendTester:
             
             # Check if Users is imported from lucide-react
             if 'Users' in content and 'from \'lucide-react\'' in content:
-                # Check if Users is in the import statement
-                import_lines = [line for line in content.split('\n') if 'from \'lucide-react\'' in line]
+                # For multi-line imports, check if Users appears between import braces and lucide-react
+                import_section = ""
+                lines = content.split('\n')
+                in_lucide_import = False
                 
-                users_imported = False
-                for line in import_lines:
-                    if 'Users' in line:
-                        users_imported = True
+                for line in lines:
+                    if 'from \'lucide-react\'' in line:
+                        # Single line import
+                        if 'Users' in line:
+                            self.log_result(
+                                "Users Icon Import Fix",
+                                True,
+                                "Users icon is properly imported from lucide-react (single line)"
+                            )
+                            return True
                         break
+                    elif '} from \'lucide-react\'' in line:
+                        # End of multi-line import
+                        import_section += line
+                        if 'Users' in import_section:
+                            self.log_result(
+                                "Users Icon Import Fix",
+                                True,
+                                "Users icon is properly imported from lucide-react (multi-line)"
+                            )
+                            return True
+                        break
+                    elif in_lucide_import or ('{' in line and any('from \'lucide-react\'' in future_line for future_line in lines[lines.index(line):])):
+                        # Part of multi-line import
+                        import_section += line
+                        in_lucide_import = True
                 
-                if users_imported:
-                    self.log_result(
-                        "Users Icon Import Fix",
-                        True,
-                        "Users icon is properly imported from lucide-react in users-table.js"
-                    )
-                    return True
-                else:
-                    self.log_result(
-                        "Users Icon Import Fix",
-                        False,
-                        "Users icon found in file but not in import statement"
-                    )
-                    return False
+                self.log_result(
+                    "Users Icon Import Fix",
+                    False,
+                    "Users icon found in file but not in lucide-react import statement"
+                )
+                return False
             else:
                 self.log_result(
                     "Users Icon Import Fix",

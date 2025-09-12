@@ -463,10 +463,10 @@ export default function UsersPage() {
                   className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
                 >
                   <option value="all">Tous les statuts</option>
-                  <option value="active">Actifs ({stats.active})</option>
-                  <option value="inactive">Inactifs ({stats.inactive})</option>
-                  <option value="pending">En attente ({stats.pending})</option>
-                  <option value="locked">Bloqués ({stats.locked})</option>
+                  <option value="ACTIVE">Actifs ({stats.active})</option>
+                  <option value="INACTIVE">Inactifs ({stats.inactive})</option>
+                  <option value="PENDING">En attente ({stats.pending})</option>
+                  <option value="LOCKED">Bloqués ({stats.locked})</option>
                 </select>
               </div>
 

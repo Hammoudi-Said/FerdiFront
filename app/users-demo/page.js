@@ -577,11 +577,11 @@ export default function UsersDemoPage() {
       />
 
       {selectedUser && (
-        <UserDetailsModal
-          open={detailsModalOpen}
-          onOpenChange={setDetailsModalOpen}
+        <UserEditDetailsModal
+          open={editDetailsModalOpen}
+          onOpenChange={setEditDetailsModalOpen}
           user={selectedUser}
-          onEdit={handleEditClick}
+          onSave={(data) => handleEditUser(selectedUser.id, data)}
           onDelete={handleDeleteClick}
           canManage={true}
         />

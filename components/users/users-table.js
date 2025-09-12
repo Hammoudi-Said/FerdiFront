@@ -264,7 +264,7 @@ export function UsersTable({
                 </div>
               </TableCell>
               {canManage && (
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button

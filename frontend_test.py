@@ -406,6 +406,7 @@ class FerdiFrontendTester:
         # Run tests in order
         tests = [
             self.test_application_accessibility,
+            self.test_users_icon_import_fix,
             self.test_users_demo_page,
             self.test_users_page_authentication,
             self.test_static_assets,

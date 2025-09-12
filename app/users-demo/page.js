@@ -429,8 +429,8 @@ export default function UsersDemoPage() {
                   <p className="text-sm font-medium text-gray-600">Inactifs / Bloqués</p>
                   <p className="text-2xl font-semibold text-red-600">{stats.inactive + stats.locked}</p>
                 </div>
-                <div className="h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center">
-                  <UserX className="h-5 w-5 text-gray-600" />
+                <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center">
+                  <UserX className="h-5 w-5 text-red-600" />
                 </div>
               </div>
             </CardContent>

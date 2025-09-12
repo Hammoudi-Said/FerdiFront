@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
+import { UserInvitationStatus, INVITATION_STATUS_DEFINITIONS } from '@/lib/constants/enums'
 import {
   Mail,
   MoreHorizontal,
@@ -53,6 +54,32 @@ export function InvitationsTable({
   }
 
   const getStatusBadge = (invitation) => {
+    // Use status field according to OpenAPI spec
+    const status = invitation.status
+    const statusDef = INVITATION_STATUS_DEFINITIONS[status]
+    
+    if (!statusDef) {
+      // Fallback for old data format
+      return getLegacyStatusBadge(invitation)
+    }
+
+    const IconComponent = {
+      'CheckCircle': CheckCircle,
+      'XCircle': XCircle,
+      'Clock': Clock,
+      'Trash2': Trash2
+    }[statusDef.icon] || Clock
+
+    return (
+      <Badge className={`${statusDef.bgColor} ${statusDef.textColor} ${statusDef.borderColor}`}>
+        <IconComponent className="w-3 h-3 mr-1" />
+        {statusDef.label}
+      </Badge>
+    )
+  }
+
+  // Legacy support for old is_active format
+  const getLegacyStatusBadge = (invitation) => {
     if (invitation.accepted) {
       return (
         <Badge className="bg-green-50 text-green-700 border-green-200">
@@ -74,7 +101,7 @@ export function InvitationsTable({
       )
     }
 
-    if (!invitation.is_active) {
+    if (invitation.is_active === false) {
       return (
         <Badge className="bg-gray-50 text-gray-700 border-gray-200">
           <XCircle className="w-3 h-3 mr-1" />
@@ -104,11 +131,27 @@ export function InvitationsTable({
   }
 
   const canResend = (invitation) => {
-    return canManage && !invitation.accepted && invitation.is_active && !isExpired(invitation)
+    if (!canManage) return false
+    
+    // New status-based logic
+    if (invitation.status) {
+      return invitation.status === UserInvitationStatus.PENDING && !isExpired(invitation)
+    }
+    
+    // Legacy support
+    return !invitation.accepted && invitation.is_active !== false && !isExpired(invitation)
   }
 
   const canCancel = (invitation) => {
-    return canManage && !invitation.accepted && invitation.is_active
+    if (!canManage) return false
+    
+    // New status-based logic
+    if (invitation.status) {
+      return invitation.status === UserInvitationStatus.PENDING
+    }
+    
+    // Legacy support
+    return !invitation.accepted && invitation.is_active !== false
   }
 
   if (loading) {

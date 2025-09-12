@@ -169,11 +169,9 @@ export default function UsersDemoPage() {
 
       const matchesRole = filterRole === 'all' || user.role === filterRole
 
-      const matchesStatus = filterStatus === 'all' ||
-        (filterStatus === 'active' && (user.status === 'ACTIVE' || (user.is_active && !user.status))) ||
-        (filterStatus === 'inactive' && (user.status === 'INACTIVE' || (!user.is_active && !user.status))) ||
-        (filterStatus === 'pending' && user.status === 'PENDING') ||
-        (filterStatus === 'locked' && user.status === 'LOCKED')
+      // Amélioration: utiliser les valeurs d'enum directement
+      const userStatus = user.status || (user.is_active ? 'ACTIVE' : 'INACTIVE')
+      const matchesStatus = filterStatus === 'all' || userStatus === filterStatus
 
       return matchesSearch && matchesRole && matchesStatus
     })

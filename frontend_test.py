@@ -337,6 +337,8 @@ class FerdiFrontendTester:
                 f"Failed to check Users icon import: {str(e)}"
             )
             return False
+    
+    def test_component_structure(self):
         """Test that key components are properly structured"""
         try:
             # Test users-demo page for component structure

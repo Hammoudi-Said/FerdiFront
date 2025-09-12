@@ -562,7 +562,7 @@ export default function UsersPage() {
         />
 
         {selectedUser && (
-          <UserEditDetailsModal
+          <UserDetailsPerfectModal
             open={editDetailsModalOpen}
             onOpenChange={setEditDetailsModalOpen}
             user={selectedUser}

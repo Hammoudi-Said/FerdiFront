@@ -14,7 +14,7 @@ import { CreateUserModal } from '@/components/users/create-user-modal'
 import { EditUserModal } from '@/components/users/edit-user-modal'
 import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
 import { BulkActionsModal } from '@/components/users/bulk-actions-modal'
-import { UserEditDetailsModal } from '@/components/users/user-edit-details-modal'
+import { UserDetailsPerfectModal } from '@/components/users/user-details-modal-perfect'
 import { usersAPI } from '@/lib/api-client'
 import { ROLE_DEFINITIONS, UserRole, UserStatus } from '@/lib/constants/enums'
 import {

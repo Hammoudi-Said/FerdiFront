@@ -236,13 +236,13 @@ export default function UsersPage() {
     try {
       if (USE_MOCK_DATA) {
         setSelectedUser(user)
-        setDetailsModalOpen(true)
+        setEditDetailsModalOpen(true)
       } else {
         // ✅ APPEL API BACKEND: GET /api/v1/users/{user_id}
         const response = await usersAPI.getUserById(user.id)
         const userData = response.data
         setSelectedUser(userData)
-        setDetailsModalOpen(true)
+        setEditDetailsModalOpen(true)
       }
     } catch (error) {
       console.error('Failed to load user details:', error)
@@ -250,7 +250,7 @@ export default function UsersPage() {
       toast.error(errorMessage)
       // En cas d'erreur, utiliser les données déjà disponibles
       setSelectedUser(user)
-      setDetailsModalOpen(true)
+      setEditDetailsModalOpen(true)
     }
   }
 

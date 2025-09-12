@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "FERDI est une application de gestion d'autocars pour les autocaristes. Le système d'acceptation d'invitation ne fonctionne pas, quand l'utilisateur clic sur le mail pour accepter l'invitation il a l'erreur 'Cette invitation n'existe pas ou a déjà été utilisée'. L'utilisateur souhaite corriger l'acceptation en tant que formulaire similaire au formulaire de reset password avec les champs adaptés à l'acceptation d'invitation selon la spécification OpenAPI fournie."
+user_problem_statement: "Ferdi est une application de gestion d'autocars pour les autocaristes de france. En tant que ingénieur logiciel et developpement, l'utilisateur demande d'analyser son application avec reverse engineering puis d'adapter le frontend selon sa spec OpenAPI v3.1.0 Enhanced : migrer tous les appels d'utilisateur is_active vers status, pour les invitations il est possible maintenant de filtrer selon le status de chaque invitation, utiliser les bonnes valeurs des enums, s'occuper uniquement du frontend et pas du backend."
 
   - task: "Nouveau Formulaire d'Acceptation d'Invitation"
     implemented: true

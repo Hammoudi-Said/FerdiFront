@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Ferdi est une application de gestion d'autocars pour les autocaristes de france. En tant que ingénieur logiciel et developpement, l'utilisateur demande d'analyser son application avec reverse engineering puis d'adapter le frontend selon sa spec OpenAPI v3.1.0 Enhanced : migrer tous les appels d'utilisateur is_active vers status, pour les invitations il est possible maintenant de filtrer selon le status de chaque invitation, utiliser les bonnes valeurs des enums, s'occuper uniquement du frontend et pas du backend."
+user_problem_statement: "Ferdi est une application de gestion d'autocars pour les autocaristes de france. En tant que ingénieur logiciel et developpement, Analyse mon application avec de reverse engineering puis: Pour la feature utilisateurs, lors de l'affichage quand je veux que quand je clic sur une ligne un modal s'ouvrira qui récupère toutes les informations d'un utilisateur, puis à partir de modal je peux editer ou supprimer un les données de cet utilisateur. J'ai un problème de filtres sur la feature utilisateurs lors d'un filtre qui est à 0 sur le status ou le role j'ai une erreur d'affichage. Supprimes tous les fichiers non utilisés / inutilisables / générés par erreur (ex: dummy, mock, boilerplate, fichiers temporaires). Tout cela en respectant les bonne pratiques d'ingénieurie logiciel, clean code and architecture, TDD... etc - respecte la spec de mon backend, occupes toi uniquement du frontend"
 
 frontend:
   - task: "Migration is_active vers status selon OpenAPI spec"

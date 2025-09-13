@@ -26,12 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -59,12 +53,10 @@ import {
   X,
   CheckCircle,
   AlertCircle,
-  Info,
-  Settings,
-  History,
+  Crown,
   MapPin,
   Building,
-  Crown
+  Settings
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -85,7 +77,6 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
   const [isEditing, setIsEditing] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [activeTab, setActiveTab] = useState('overview')
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -100,31 +91,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     },
   })
 
-  // 🎯 PERMISSIONS FERDI CUSTOM - Selon les nouvelles spécifications
-  // Modal accessible aux ADMIN et SUPER_ADMIN uniquement
-  // Mais édition permise à TOUS pour leurs propres informations + admins pour tous
-  
-  // Informations personnelles - tous peuvent éditer leur profil
-  const canEditProfile = currentUser?.id === user?.id || 
-                         currentUser?.role === 'SUPER_ADMIN' || 
-                         currentUser?.role === 'ADMIN'
-  
-  // Email - Seuls les propriétaires + admins peuvent modifier
-  const canEditEmail = currentUser?.id === user?.id || 
-                       currentUser?.role === 'SUPER_ADMIN' || 
-                       currentUser?.role === 'ADMIN'
-  
-  // Rôle et statut - Seuls les administrateurs
-  const canEditRole = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
-  const canEditStatus = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
-  
-  // Mot de passe - propriétaire + admins
-  const canChangePassword = currentUser?.id === user?.id || 
-                            currentUser?.role === 'SUPER_ADMIN' || 
-                            currentUser?.role === 'ADMIN'
-  
-  // Suppression - administrateurs uniquement
-  const canDeleteUser = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  // 🎯 PERMISSIONS FERDI CORRECTES - Seuls ADMIN et SUPER_ADMIN peuvent éditer
+  const canEdit = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  const canDelete = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
 
   // Update form when user changes
   useEffect(() => {
@@ -141,7 +110,6 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
       })
       setIsEditing(false)
       setIsChangingPassword(false)
-      setActiveTab('overview')
     }
   }, [user, form])
 
@@ -187,19 +155,19 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     if (!role) return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
 
     const colorMap = {
-      SUPER_ADMIN: 'bg-red-50 text-red-700 border-red-200',
-      ADMIN: 'bg-purple-50 text-purple-700 border-purple-200', 
-      DISPATCH: 'bg-blue-50 text-blue-700 border-blue-200',
-      DRIVER: 'bg-green-50 text-green-700 border-green-200',
-      INTERNAL_SUPPORT: 'bg-orange-50 text-orange-700 border-orange-200',
-      ACCOUNTANT: 'bg-teal-50 text-teal-700 border-teal-200'
+      SUPER_ADMIN: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg',
+      ADMIN: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 shadow-lg', 
+      DISPATCH: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg',
+      DRIVER: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg',
+      INTERNAL_SUPPORT: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg',
+      ACCOUNTANT: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-0 shadow-lg'
     }
 
     const IconComponent = roleId === 'SUPER_ADMIN' ? Crown : Shield
 
     return (
-      <Badge className={`${colorMap[roleId] || 'bg-gray-50 text-gray-700 border-gray-200'} font-medium border`}>
-        <IconComponent className="mr-1 h-3 w-3" />
+      <Badge className={`${colorMap[roleId] || 'bg-gray-100 text-gray-700'} font-semibold px-3 py-1 text-sm`}>
+        <IconComponent className="mr-2 h-4 w-4" />
         {role.label}
       </Badge>
     )
@@ -213,18 +181,31 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
       return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
     }
 
-    const statusIcons = {
-      ACTIVE: CheckCircle,
-      INACTIVE: X,
-      PENDING: Clock,
-      LOCKED: AlertCircle,
+    const statusConfig = {
+      ACTIVE: { 
+        icon: CheckCircle,
+        class: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md'
+      },
+      INACTIVE: { 
+        icon: X,
+        class: 'bg-gradient-to-r from-gray-400 to-gray-500 text-white border-0 shadow-md'
+      },
+      PENDING: { 
+        icon: Clock,
+        class: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-md'
+      },
+      LOCKED: { 
+        icon: AlertCircle,
+        class: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 shadow-md'
+      }
     }
     
-    const StatusIcon = statusIcons[status] || Activity
+    const config = statusConfig[status] || statusConfig.INACTIVE
+    const StatusIcon = config.icon
     
     return (
-      <Badge className={`${statusDef.bgColor} ${statusDef.textColor} ${statusDef.borderColor} font-medium border`}>
-        <StatusIcon className="mr-1 h-3 w-3" />
+      <Badge className={`${config.class} font-semibold px-3 py-1 text-sm`}>
+        <StatusIcon className="mr-2 h-4 w-4" />
         {statusDef.label}
       </Badge>
     )
@@ -290,21 +271,26 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-white">
+        <DialogHeader className="border-b border-gray-100 pb-6">
           <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <User className="h-6 w-6 text-blue-600" />
-              <span className="text-xl font-semibold">Profil utilisateur</span>
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Profil utilisateur</h2>
+                <p className="text-sm text-gray-500 mt-1">Informations détaillées et gestion</p>
+              </div>
             </div>
-            {canEditProfile && (
-              <div className="flex items-center space-x-2">
+            {canEdit && (
+              <div className="flex items-center space-x-3">
                 {!isEditing ? (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={toggleEditMode}
-                    className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                    className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 shadow-sm"
                   >
                     <Edit3 className="mr-2 h-4 w-4" />
                     Modifier
@@ -314,7 +300,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                     variant="outline"
                     size="sm"
                     onClick={toggleEditMode}
-                    className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                    className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm"
                   >
                     <X className="mr-2 h-4 w-4" />
                     Annuler
@@ -323,344 +309,230 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
               </div>
             )}
           </DialogTitle>
-          <DialogDescription>
-            {isEditing ? 'Modifiez les informations de l\'utilisateur' : 'Consultez les informations détaillées de l\'utilisateur'}
+          <DialogDescription className="text-gray-600">
+            {isEditing ? 'Modifiez les informations de l\'utilisateur ci-dessous' : 'Consultez les informations détaillées de l\'utilisateur'}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
             
-            {/* User Profile Header */}
-            <Card className="border-2 border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-6">
-                  <Avatar className="h-20 w-20 ring-4 ring-blue-200 shadow-lg">
-                    <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
-                    <AvatarFallback className="text-xl bg-blue-100 text-blue-700 font-bold">
-                      {getInitials(user.first_name, user.last_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {getUserDisplayName(user)}
-                    </h3>
-                    <p className="text-gray-600 mb-3 flex items-center">
-                      <Mail className="h-4 w-4 mr-2" />
-                      {user.email}
-                    </p>
-                    <div className="flex items-center space-x-3">
-                      {getRoleBadge(user.role)}
-                      {getStatusBadge(user.status || (user.is_active ? UserStatus.ACTIVE : UserStatus.INACTIVE))}
+            {/* 🎨 HEADER UTILISATEUR AVEC DESIGN MODERNE */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl transform rotate-1"></div>
+              <Card className="relative bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-6">
+                  <div className="flex items-start space-x-6">
+                    <div className="relative">
+                      <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                        <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
+                        <AvatarFallback className="text-2xl bg-white text-blue-600 font-bold">
+                          {getInitials(user.first_name, user.last_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-2 -right-2 p-2 bg-white rounded-full shadow-lg">
+                        <User className="h-4 w-4 text-blue-600" />
+                      </div>
+                    </div>
+                    <div className="flex-1 text-white">
+                      <h3 className="text-3xl font-bold mb-2">
+                        {getUserDisplayName(user)}
+                      </h3>
+                      <p className="text-blue-100 mb-4 flex items-center text-lg">
+                        <Mail className="h-5 w-5 mr-3" />
+                        {user.email}
+                      </p>
+                      <div className="flex items-center space-x-4">
+                        {getRoleBadge(user.role)}
+                        {getStatusBadge(user.status || (user.is_active ? UserStatus.ACTIVE : UserStatus.INACTIVE))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </Card>
+            </div>
 
-            {/* Tabs for different sections */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview" className="flex items-center space-x-2">
-                  <Info className="h-4 w-4" />
-                  <span>Vue d'ensemble</span>
-                </TabsTrigger>
-                <TabsTrigger value="details" className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span>Détails</span>
-                </TabsTrigger>
-                <TabsTrigger value="security" className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4" />
-                  <span>Sécurité</span>
-                </TabsTrigger>
-                <TabsTrigger value="activity" className="flex items-center space-x-2">
-                  <Activity className="h-4 w-4" />
-                  <span>Activité</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Overview Tab */}
-              <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Quick Info Cards */}
-                  <Card className="border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Contact
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">{user.email}</p>
-                        {user.mobile && (
-                          <p className="text-sm text-gray-600 flex items-center">
-                            <Phone className="h-3 w-3 mr-2" />
-                            {formatPhoneNumber(user.mobile)}
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Rôle & Permissions
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {getRoleBadge(user.role)}
-                        {ROLE_DEFINITIONS[user.role]?.description && (
-                          <p className="text-xs text-gray-600 mt-2">
-                            {ROLE_DEFINITIONS[user.role].description}
-                          </p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-gray-200">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-gray-600 flex items-center">
-                        <Activity className="h-4 w-4 mr-2" />
-                        Statut & Activité
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {getStatusBadge(user.status || (user.is_active ? UserStatus.ACTIVE : UserStatus.INACTIVE))}
-                        <p className="text-xs text-gray-600 mt-2">
-                          Dernière connexion: {formatDate(user.last_login_at)}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              {/* Details Tab */}
-              <TabsContent value="details" className="space-y-6">
-                {/* Personal Information */}
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <User className="h-5 w-5" />
-                      <span>Informations personnelles</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="first_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Prénom</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Prénom" 
-                                {...field} 
-                                disabled={!isEditing || !canEditProfile}
-                                className={(!isEditing || !canEditProfile) ? 'bg-gray-50' : ''}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="last_name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nom</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Nom" 
-                                {...field} 
-                                disabled={!isEditing || !canEditProfile}
-                                className={(!isEditing || !canEditProfile) ? 'bg-gray-50' : ''}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+            {/* 🏗️ INFORMATIONS PRINCIPALES */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              {/* INFORMATIONS PERSONNELLES */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
+                  <CardTitle className="flex items-center space-x-3 text-gray-800">
+                    <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                      <User className="h-5 w-5 text-white" />
                     </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-lg font-semibold">Informations personnelles</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Prénom</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Prénom" 
+                              {...field} 
+                              disabled={!isEditing || !canEdit}
+                              className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Nom de famille</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Nom de famille" 
+                              {...field} 
+                              disabled={!isEditing || !canEdit}
+                              className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                {/* Contact Information */}
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Mail className="h-5 w-5" />
-                      <span>Informations de contact</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="email"
-                                placeholder="email@example.com" 
-                                {...field} 
-                                disabled={!isEditing || !canEditEmail}
-                                className={(!isEditing || !canEditEmail) ? 'bg-gray-50' : ''}
-                              />
-                            </FormControl>
-                            {!canEditEmail && isEditing && (
-                              <p className="text-xs text-gray-500">Vous pouvez modifier votre propre email</p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="mobile"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Téléphone mobile</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="06 12 34 56 78" 
-                                {...field} 
-                                disabled={!isEditing || !canEditProfile}
-                                className={(!isEditing || !canEditProfile) ? 'bg-gray-50' : ''}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Adresse email</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="email"
+                              placeholder="email@example.com" 
+                              {...field} 
+                              disabled={!isEditing || !canEdit}
+                              className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="mobile"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700 font-medium">Téléphone mobile</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="06 12 34 56 78" 
+                              {...field} 
+                              disabled={!isEditing || !canEdit}
+                              className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* RÔLES ET SÉCURITÉ */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
+                  <CardTitle className="flex items-center space-x-3 text-gray-800">
+                    <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                      <Shield className="h-5 w-5 text-white" />
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Security Tab */}
-              <TabsContent value="security" className="space-y-6">
-                {/* Role and Status */}
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <Shield className="h-5 w-5" />
-                      <span>Rôle et permissions</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Rôle</FormLabel>
-                            {isEditing && canEditRole ? (
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionnez un rôle" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
-                                    <SelectItem key={roleId} value={roleId}>
-                                      <div className="flex items-center space-x-2">
-                                        <div className={`w-3 h-3 rounded-full ${roleData.color}`}></div>
-                                        <span>{roleData.label}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <div className="p-3 bg-gray-50 rounded border">
-                                {getRoleBadge(field.value)}
-                              </div>
-                            )}
-                            {!canEditRole && isEditing && (
-                              <p className="text-xs text-gray-500">Modification du rôle restreinte aux administrateurs</p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
+                    <span className="text-lg font-semibold">Rôle et sécurité</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Rôle</FormLabel>
+                        {isEditing && canEdit ? (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-12 rounded-lg border-gray-300 focus:border-blue-500">
+                                <SelectValue placeholder="Sélectionnez un rôle" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
+                                <SelectItem key={roleId} value={roleId}>
+                                  <div className="flex items-center space-x-3">
+                                    <div className={`w-3 h-3 rounded-full ${roleData.color}`}></div>
+                                    <span>{roleData.label}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            {getRoleBadge(field.value)}
+                          </div>
                         )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="status"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Statut</FormLabel>
-                            {isEditing && canEditStatus ? (
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionnez un statut" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {Object.entries(STATUS_DEFINITIONS).map(([statusId, statusData]) => (
-                                    <SelectItem key={statusId} value={statusId}>
-                                      <div className="flex items-center space-x-2">
-                                        <span>{statusData.label}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <div className="p-3 bg-gray-50 rounded border">
-                                {getStatusBadge(field.value)}
-                              </div>
-                            )}
-                            {!canEditStatus && isEditing && (
-                              <p className="text-xs text-gray-500">Modification du statut restreinte aux administrateurs</p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {ROLE_DEFINITIONS[user.role]?.description && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Description du rôle</label>
-                        <p className="text-sm text-gray-600 p-3 bg-blue-50 border border-blue-200 rounded">
-                          {ROLE_DEFINITIONS[user.role].description}
-                        </p>
-                      </div>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </CardContent>
-                </Card>
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Statut</FormLabel>
+                        {isEditing && canEdit ? (
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="h-12 rounded-lg border-gray-300 focus:border-blue-500">
+                                <SelectValue placeholder="Sélectionnez un statut" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {Object.entries(STATUS_DEFINITIONS).map(([statusId, statusData]) => (
+                                <SelectItem key={statusId} value={statusId}>
+                                  <div className="flex items-center space-x-3">
+                                    <span>{statusData.label}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            {getStatusBadge(field.value)}
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Password Section - Only for editing */}
-                {isEditing && canChangePassword && (
-                  <Card className="border border-red-200">
-                    <CardHeader>
-                      <CardTitle className="flex items-center space-x-2 text-red-700">
-                        <Key className="h-5 w-5" />
-                        <span>Gestion du mot de passe</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center space-x-2">
+                  {/* Changement de mot de passe */}
+                  {isEditing && canEdit && (
+                    <div className="space-y-4 border-t border-gray-200 pt-6">
+                      <div className="flex items-center space-x-3">
                         <Switch
                           checked={isChangingPassword}
                           onCheckedChange={setIsChangingPassword}
+                          className="data-[state=checked]:bg-blue-600"
                         />
                         <label className="text-sm font-medium text-gray-700">
                           Changer le mot de passe
@@ -673,19 +545,20 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                           name="password"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nouveau mot de passe</FormLabel>
+                              <FormLabel className="text-gray-700 font-medium">Nouveau mot de passe</FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <Input
                                     type={showPassword ? 'text' : 'password'}
                                     placeholder="Nouveau mot de passe (8-40 caractères)..."
                                     {...field}
+                                    className="h-12 rounded-lg border-gray-300 focus:border-blue-500 pr-12"
                                   />
                                   <Button
                                     type="button"
                                     variant="ghost"
                                     size="sm"
-                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
                                     onClick={() => setShowPassword(!showPassword)}
                                   >
                                     {showPassword ? (
@@ -704,59 +577,77 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                           )}
                         />
                       )}
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-              {/* Activity Tab */}
-              <TabsContent value="activity" className="space-y-6">
-                <Card className="border border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <History className="h-5 w-5" />
-                      <span>Historique d'activité</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <label className="text-sm font-medium text-gray-700">Date de création</label>
-                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded border">
-                          <Calendar className="h-5 w-5 text-gray-400" />
-                          <div>
-                            <span className="text-sm font-medium">{formatDate(user.created_at)}</span>
-                            <p className="text-xs text-gray-500">Membre depuis</p>
-                          </div>
-                        </div>
+            {/* 📊 INFORMATIONS D'ACTIVITÉ */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
+                <CardTitle className="flex items-center space-x-3 text-gray-800">
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                    <Activity className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-lg font-semibold">Activité et historique</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-gray-700">Date de création</label>
+                    <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                      <div className="p-2 bg-blue-500 rounded-lg">
+                        <Calendar className="h-5 w-5 text-white" />
                       </div>
-                      
-                      <div className="space-y-3">
-                        <label className="text-sm font-medium text-gray-700">Dernière connexion</label>
-                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded border">
-                          <Clock className="h-5 w-5 text-gray-400" />
-                          <div>
-                            <span className="text-sm font-medium">{formatDate(user.last_login_at)}</span>
-                            <p className="text-xs text-gray-500">Dernière activité</p>
-                          </div>
-                        </div>
+                      <div>
+                        <span className="text-sm font-semibold text-gray-900">{formatDate(user.created_at)}</span>
+                        <p className="text-xs text-gray-600">Membre depuis</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-gray-700">Dernière connexion</label>
+                    <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
+                      <div className="p-2 bg-green-500 rounded-lg">
+                        <Clock className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold text-gray-900">{formatDate(user.last_login_at)}</span>
+                        <p className="text-xs text-gray-600">Dernière activité</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Action Buttons */}
-            <Separator />
+                {user.mobile && (
+                  <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-500 rounded-lg">
+                        <Phone className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-700">Téléphone</span>
+                        <p className="text-base font-semibold text-gray-900">{formatPhoneNumber(user.mobile)}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 🎯 BOUTONS D'ACTION */}
+            <Separator className="bg-gray-200" />
             <div className="flex justify-between items-center pt-4">
               <div>
-                {canDeleteUser && onDelete && currentUser?.id !== user?.id && (
+                {canDelete && onDelete && currentUser?.id !== user?.id && (
                   <Button
                     type="button"
                     variant="outline"
                     onClick={handleDelete}
-                    className="text-red-600 border-red-300 hover:bg-red-50"
+                    className="bg-white border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 shadow-sm h-12 px-6"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Supprimer l'utilisateur
@@ -764,13 +655,13 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                 )}
               </div>
               
-              <div className="flex space-x-3">
+              <div className="flex space-x-4">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   disabled={isLoading}
-                  className="min-w-[100px]"
+                  className="bg-white border-gray-200 text-gray-700 hover:bg-gray-50 shadow-sm h-12 px-8"
                 >
                   Fermer
                 </Button>
@@ -778,7 +669,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                   <Button 
                     type="submit" 
                     disabled={isLoading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white min-w-[150px]"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white h-12 px-8 shadow-lg"
                   >
                     {isLoading ? (
                       <>

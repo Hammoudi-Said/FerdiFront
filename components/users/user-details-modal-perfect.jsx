@@ -100,13 +100,22 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     },
   })
 
-  // Enhanced permissions for different actions
-  const canEditProfile = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.id === user?.id
-  const canEditEmail = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN'
-  const canEditRole = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN'
-  const canEditStatus = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN'
-  const canChangePassword = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN'
-  const canDeleteUser = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN'
+  // Enhanced permissions for different actions - FERDI CUSTOM LOGIC
+  // RÈGLE: Modal accessible aux ADMIN/SUPER_ADMIN, mais édition permise à tous pour leurs propres données
+  
+  // Permissions basiques - tous les utilisateurs peuvent éditer leur profil personnel
+  const canEditProfile = currentUser?.id === user?.id || hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  
+  // Email, rôle et statut - restrictions pour les administrateurs uniquement 
+  const canEditEmail = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  const canEditRole = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  const canEditStatus = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  
+  // Mot de passe - utilisateur peut changer le sien, admins peuvent changer tous
+  const canChangePassword = currentUser?.id === user?.id || hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  
+  // Suppression - restriction aux administrateurs uniquement
+  const canDeleteUser = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
 
   // Update form when user changes
   useEffect(() => {

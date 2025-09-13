@@ -100,22 +100,31 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     },
   })
 
-  // Enhanced permissions for different actions - FERDI CUSTOM LOGIC
-  // RÈGLE: Modal accessible aux ADMIN/SUPER_ADMIN, mais édition permise à tous pour leurs propres données
+  // 🎯 PERMISSIONS FERDI CUSTOM - Selon les nouvelles spécifications
+  // Modal accessible aux ADMIN et SUPER_ADMIN uniquement
+  // Mais édition permise à TOUS pour leurs propres informations + admins pour tous
   
-  // Permissions basiques - tous les utilisateurs peuvent éditer leur profil personnel
-  const canEditProfile = currentUser?.id === user?.id || hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  // Informations personnelles - tous peuvent éditer leur profil
+  const canEditProfile = currentUser?.id === user?.id || 
+                         currentUser?.role === 'SUPER_ADMIN' || 
+                         currentUser?.role === 'ADMIN'
   
-  // Email, rôle et statut - restrictions pour les administrateurs uniquement 
-  const canEditEmail = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
-  const canEditRole = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
-  const canEditStatus = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  // Email - Seuls les propriétaires + admins peuvent modifier
+  const canEditEmail = currentUser?.id === user?.id || 
+                       currentUser?.role === 'SUPER_ADMIN' || 
+                       currentUser?.role === 'ADMIN'
   
-  // Mot de passe - utilisateur peut changer le sien, admins peuvent changer tous
-  const canChangePassword = currentUser?.id === user?.id || hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  // Rôle et statut - Seuls les administrateurs
+  const canEditRole = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  const canEditStatus = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
   
-  // Suppression - restriction aux administrateurs uniquement
-  const canDeleteUser = hasPermission('users_manage') || currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  // Mot de passe - propriétaire + admins
+  const canChangePassword = currentUser?.id === user?.id || 
+                            currentUser?.role === 'SUPER_ADMIN' || 
+                            currentUser?.role === 'ADMIN'
+  
+  // Suppression - administrateurs uniquement
+  const canDeleteUser = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
 
   // Update form when user changes
   useEffect(() => {
@@ -511,7 +520,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                               />
                             </FormControl>
                             {!canEditEmail && isEditing && (
-                              <p className="text-xs text-gray-500">Modification restreinte aux administrateurs</p>
+                              <p className="text-xs text-gray-500">Vous pouvez modifier votre propre email</p>
                             )}
                             <FormMessage />
                           </FormItem>
@@ -583,7 +592,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                               </div>
                             )}
                             {!canEditRole && isEditing && (
-                              <p className="text-xs text-gray-500">Modification restreinte aux administrateurs</p>
+                              <p className="text-xs text-gray-500">Modification du rôle restreinte aux administrateurs</p>
                             )}
                             <FormMessage />
                           </FormItem>
@@ -619,7 +628,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                               </div>
                             )}
                             {!canEditStatus && isEditing && (
-                              <p className="text-xs text-gray-500">Modification restreinte aux administrateurs</p>
+                              <p className="text-xs text-gray-500">Modification du statut restreinte aux administrateurs</p>
                             )}
                             <FormMessage />
                           </FormItem>
@@ -742,7 +751,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
             <Separator />
             <div className="flex justify-between items-center pt-4">
               <div>
-                {canDeleteUser && onDelete && (
+                {canDeleteUser && onDelete && currentUser?.id !== user?.id && (
                   <Button
                     type="button"
                     variant="outline"

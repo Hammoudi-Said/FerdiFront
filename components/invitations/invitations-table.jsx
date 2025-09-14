@@ -22,10 +22,10 @@ import {
   AlertTriangle
 } from 'lucide-react'
 
-export function InvitationsTable({ 
-  invitations = [], 
-  onResendInvitation, 
-  onCancelInvitation, 
+export function InvitationsTable({
+  invitations = [],
+  onResendInvitation,
+  onCancelInvitation,
   loading = false,
   canManage = false
 }) {
@@ -33,7 +33,7 @@ export function InvitationsTable({
 
   const handleResend = async (invitation) => {
     if (!canManage) return
-    
+
     setActionLoading(`resend-${invitation.id}`)
     try {
       await onResendInvitation?.(invitation)
@@ -44,7 +44,7 @@ export function InvitationsTable({
 
   const handleCancel = async (invitation) => {
     if (!canManage) return
-    
+
     setActionLoading(`cancel-${invitation.id}`)
     try {
       await onCancelInvitation?.(invitation)
@@ -57,7 +57,7 @@ export function InvitationsTable({
     // Use status field according to OpenAPI spec
     const status = invitation.status
     const statusDef = INVITATION_STATUS_DEFINITIONS[status]
-    
+
     if (!statusDef) {
       // Fallback for old data format
       return getLegacyStatusBadge(invitation)
@@ -91,7 +91,7 @@ export function InvitationsTable({
 
     const now = new Date()
     const expiresAt = new Date(invitation.expires_at)
-    
+
     if (expiresAt < now) {
       return (
         <Badge className="bg-red-50 text-red-700 border-red-200">
@@ -132,24 +132,24 @@ export function InvitationsTable({
 
   const canResend = (invitation) => {
     if (!canManage) return false
-    
+
     // New status-based logic
     if (invitation.status) {
       return invitation.status === UserInvitationStatus.PENDING && !isExpired(invitation)
     }
-    
+
     // Legacy support
     return !invitation.accepted && invitation.is_active !== false && !isExpired(invitation)
   }
 
   const canCancel = (invitation) => {
     if (!canManage) return false
-    
+
     // New status-based logic
     if (invitation.status) {
       return invitation.status === UserInvitationStatus.PENDING
     }
-    
+
     // Legacy support
     return !invitation.accepted && invitation.is_active !== false
   }
@@ -195,7 +195,7 @@ export function InvitationsTable({
           {invitations.map((invitation) => {
             const roleInfo = getRoleInfo(invitation.role)
             const expired = isExpired(invitation)
-            
+
             return (
               <TableRow key={invitation.id}>
                 <TableCell className="font-medium">

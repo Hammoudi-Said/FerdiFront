@@ -92,8 +92,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
   })
 
   // 🎯 PERMISSIONS FERDI CORRECTES - Seuls ADMIN et SUPER_ADMIN peuvent éditer
-  const canEdit = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
-  const canDelete = currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN'
+  const isDeleted = user?.status === 'DELETED'
+  const canEdit = !isDeleted && (currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN')
+  const canDelete = !isDeleted && (currentUser?.role === 'SUPER_ADMIN' || currentUser?.role === 'ADMIN')
 
   // Update form when user changes
   useEffect(() => {
@@ -123,11 +124,11 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Jamais'
-    
+
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return 'Date invalide'
-      
+
       return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
@@ -156,7 +157,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
     const colorMap = {
       SUPER_ADMIN: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg',
-      ADMIN: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 shadow-lg', 
+      ADMIN: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 shadow-lg',
       DISPATCH: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg',
       DRIVER: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg',
       INTERNAL_SUPPORT: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg',
@@ -176,33 +177,33 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
   const getStatusBadge = (userStatus) => {
     const status = userStatus || (user.is_active ? UserStatus.ACTIVE : UserStatus.INACTIVE)
     const statusDef = STATUS_DEFINITIONS[status]
-    
+
     if (!statusDef) {
       return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
     }
 
     const statusConfig = {
-      ACTIVE: { 
+      ACTIVE: {
         icon: CheckCircle,
         class: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md'
       },
-      INACTIVE: { 
+      INACTIVE: {
         icon: X,
         class: 'bg-gradient-to-r from-gray-400 to-gray-500 text-white border-0 shadow-md'
       },
-      PENDING: { 
+      PENDING: {
         icon: Clock,
         class: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-md'
       },
-      LOCKED: { 
+      LOCKED: {
         icon: AlertCircle,
         class: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 shadow-md'
       }
     }
-    
+
     const config = statusConfig[status] || statusConfig.INACTIVE
     const StatusIcon = config.icon
-    
+
     return (
       <Badge className={`${config.class} font-semibold px-3 py-1 text-sm`}>
         <StatusIcon className="mr-2 h-4 w-4" />
@@ -227,12 +228,12 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
       if (!isChangingPassword || !submitData.password) {
         delete submitData.password
       }
-      
+
       // Clean mobile field
       if (submitData.mobile && submitData.mobile.trim() === '') {
         delete submitData.mobile
       }
-      
+
       await onSave(submitData)
       setIsEditing(false)
       setIsChangingPassword(false)
@@ -280,7 +281,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Profil utilisateur</h2>
-                <p className="text-sm text-gray-500 mt-1">Informations détaillées et gestion</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {isDeleted ? 'Utilisateur supprimé - Consultation uniquement' : 'Informations détaillées et gestion'}
+                </p>
               </div>
             </div>
             {canEdit && (
@@ -310,21 +313,26 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
             )}
           </DialogTitle>
           <DialogDescription className="text-gray-600">
-            {isEditing ? 'Modifiez les informations de l\'utilisateur ci-dessous' : 'Consultez les informations détaillées de l\'utilisateur'}
+            {isDeleted
+              ? 'Cet utilisateur a été supprimé. Aucune modification n\'est possible.'
+              : isEditing
+                ? 'Modifiez les informations de l\'utilisateur ci-dessous'
+                : 'Consultez les informations détaillées de l\'utilisateur'
+            }
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 py-6">
-            
+
             {/* 🎨 HEADER UTILISATEUR AVEC DESIGN MODERNE */}
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl transform rotate-1"></div>
+              <div className={`absolute inset-0 ${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} rounded-2xl transform rotate-1`}></div>
               <Card className="relative bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-8 py-6">
+                <div className={`${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'} px-8 py-6`}>
                   <div className="flex items-start space-x-6">
                     <div className="relative">
-                      <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+                      <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ${isDeleted ? 'grayscale' : ''}`}>
                         <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
                         <AvatarFallback className="text-2xl bg-white text-blue-600 font-bold">
                           {getInitials(user.first_name, user.last_name)}
@@ -337,6 +345,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                     <div className="flex-1 text-white">
                       <h3 className="text-3xl font-bold mb-2">
                         {getUserDisplayName(user)}
+                        {isDeleted && <span className="text-xl ml-3 opacity-75">(Supprimé)</span>}
                       </h3>
                       <p className="text-blue-100 mb-4 flex items-center text-lg">
                         <Mail className="h-5 w-5 mr-3" />
@@ -354,7 +363,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
             {/* 🏗️ INFORMATIONS PRINCIPALES */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
+
               {/* INFORMATIONS PERSONNELLES */}
               <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
@@ -374,9 +383,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         <FormItem>
                           <FormLabel className="text-gray-700 font-medium">Prénom</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Prénom" 
-                              {...field} 
+                            <Input
+                              placeholder="Prénom"
+                              {...field}
                               disabled={!isEditing || !canEdit}
                               className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
                             />
@@ -385,7 +394,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="last_name"
@@ -393,9 +402,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         <FormItem>
                           <FormLabel className="text-gray-700 font-medium">Nom de famille</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Nom de famille" 
-                              {...field} 
+                            <Input
+                              placeholder="Nom de famille"
+                              {...field}
                               disabled={!isEditing || !canEdit}
                               className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
                             />
@@ -412,10 +421,10 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         <FormItem>
                           <FormLabel className="text-gray-700 font-medium">Adresse email</FormLabel>
                           <FormControl>
-                            <Input 
+                            <Input
                               type="email"
-                              placeholder="email@example.com" 
-                              {...field} 
+                              placeholder="email@example.com"
+                              {...field}
                               disabled={!isEditing || !canEdit}
                               className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
                             />
@@ -424,7 +433,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="mobile"
@@ -432,9 +441,9 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                         <FormItem>
                           <FormLabel className="text-gray-700 font-medium">Téléphone mobile</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="06 12 34 56 78" 
-                              {...field} 
+                            <Input
+                              placeholder="06 12 34 56 78"
+                              {...field}
                               disabled={!isEditing || !canEdit}
                               className={`transition-all duration-200 ${(!isEditing || !canEdit) ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-200'} rounded-lg h-12`}
                             />
@@ -491,7 +500,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="status"
@@ -538,7 +547,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                           Changer le mot de passe
                         </label>
                       </div>
-                      
+
                       {isChangingPassword && (
                         <FormField
                           control={form.control}
@@ -607,7 +616,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <label className="text-sm font-medium text-gray-700">Dernière connexion</label>
                     <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-100">
@@ -654,7 +663,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                   </Button>
                 )}
               </div>
-              
+
               <div className="flex space-x-4">
                 <Button
                   type="button"
@@ -666,8 +675,8 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
                   Fermer
                 </Button>
                 {isEditing && (
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isLoading}
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white h-12 px-8 shadow-lg"
                   >

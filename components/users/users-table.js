@@ -13,28 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
 import {
-  Edit3,
-  Trash2,
-  Mail,
   Phone,
-  MoreHorizontal,
-  Eye,
-  UserCheck,
-  UserX,
-  Lock,
-  Unlock,
-  Calendar,
-  Activity,
   Users
 } from 'lucide-react'
 
@@ -203,114 +184,74 @@ export function UsersTable({
             <TableHead className="font-medium text-gray-700">
               Dernière connexion
             </TableHead>
-            {canManage && (
-              <TableHead className="w-20 font-medium text-gray-700">
-                Actions
-              </TableHead>
-            )}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
-            <TableRow
-              key={user.id}
-              className={`
-                hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
-                ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
-              `}
-              onClick={() => onView && onView(user)}
-            >
-              {canManage && (
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selectedUsers.includes(user.id)}
-                    onCheckedChange={(checked) => handleSelectUser(user.id, checked)}
-                    className="border-gray-300"
-                  />
-                </TableCell>
-              )}
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
-                    <AvatarFallback className="text-xs bg-gray-100 text-gray-700 font-medium">
-                      {getInitials(user.first_name, user.last_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {getUserDisplayName(user)}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {user.email}
+          {users.map((user) => {
+            const isDeleted = user.status === 'DELETED'
+
+            return (
+              <TableRow
+                key={user.id}
+                className={`
+                  hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
+                  ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
+                  ${isDeleted ? 'opacity-60' : ''}
+                `}
+                onClick={() => onView && onView(user)}
+              >
+                {canManage && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedUsers.includes(user.id)}
+                      onCheckedChange={(checked) => handleSelectUser(user.id, checked)}
+                      className="border-gray-300"
+                      disabled={isDeleted}
+                    />
+                  </TableCell>
+                )}
+                <TableCell>
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
+                      <AvatarFallback className="text-xs bg-gray-100 text-gray-700 font-medium">
+                        {getInitials(user.first_name, user.last_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {getUserDisplayName(user)}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {user.email}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-1">
-                  {user.mobile && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="h-3 w-3 mr-2 text-gray-400" />
-                      <span className="text-xs">{user.mobile}</span>
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                {getRoleBadge(user.role)}
-              </TableCell>
-              <TableCell>
-                {getStatusBadge(user)}
-              </TableCell>
-              <TableCell>
-                <div className="text-sm text-gray-500">
-                  {formatDate(user.last_login_at)}
-                </div>
-              </TableCell>
-              {canManage && (
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-gray-100"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuLabel className="text-xs">Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onEdit(user)}
-                        className="cursor-pointer text-gray-700 hover:bg-gray-50"
-                      >
-                        <Edit3 className="mr-2 h-4 w-4" />
-                        Modifier
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onView && onView(user)}
-                        className="cursor-pointer text-gray-700 hover:bg-gray-50"
-                      >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Voir le profil
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => onDelete(user)}
-                        className="cursor-pointer text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </TableCell>
-              )}
-            </TableRow>
-          ))}
+                <TableCell>
+                  <div className="space-y-1">
+                    {user.mobile && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Phone className="h-3 w-3 mr-2 text-gray-400" />
+                        <span className="text-xs">{user.mobile}</span>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {getRoleBadge(user.role)}
+                </TableCell>
+                <TableCell>
+                  {getStatusBadge(user)}
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-gray-500">
+                    {formatDate(user.last_login_at)}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>

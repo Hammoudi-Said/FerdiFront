@@ -59,6 +59,7 @@ export default function UsersPage() {
     inactive: 0,
     pending: 0,
     locked: 0,
+    deleted: 0,
     byRole: {}
   })
 
@@ -73,6 +74,7 @@ export default function UsersPage() {
     const inactive = usersList.filter(u => u.status === 'INACTIVE' || (!u.is_active && !u.status)).length
     const pending = usersList.filter(u => u.status === 'PENDING').length
     const locked = usersList.filter(u => u.status === 'LOCKED').length
+    const deleted = usersList.filter(u => u.status === 'DELETED').length
 
     const byRole = {}
     usersList.forEach(u => {
@@ -80,7 +82,7 @@ export default function UsersPage() {
       byRole[roleName] = (byRole[roleName] || 0) + 1
     })
 
-    setStats({ total, active, inactive, pending, locked, byRole })
+    setStats({ total, active, inactive, pending, locked, deleted, byRole })
   }, [])
 
   const loadUsers = async () => {
@@ -159,26 +161,26 @@ export default function UsersPage() {
       if (USE_MOCK_DATA) {
         setUsers(prev => prev.map(u =>
           u.id === userId
-            ? { 
-                ...u, 
-                ...userData, 
-                full_name: `${userData.first_name} ${userData.last_name}`,
-                // Handle both is_active and status fields
-                is_active: userData.status === 'ACTIVE',
-                status: userData.status
-              }
+            ? {
+              ...u,
+              ...userData,
+              full_name: `${userData.first_name} ${userData.last_name}`,
+              // Handle both is_active and status fields
+              is_active: userData.status === 'ACTIVE',
+              status: userData.status
+            }
             : u
         ))
         // Recalculate stats with updated data
         const updatedUsers = users.map(u =>
           u.id === userId
-            ? { 
-                ...u, 
-                ...userData, 
-                full_name: `${userData.first_name} ${userData.last_name}`,
-                is_active: userData.status === 'ACTIVE',
-                status: userData.status
-              }
+            ? {
+              ...u,
+              ...userData,
+              full_name: `${userData.first_name} ${userData.last_name}`,
+              is_active: userData.status === 'ACTIVE',
+              status: userData.status
+            }
             : u
         )
         calculateStats(updatedUsers)
@@ -351,7 +353,7 @@ export default function UsersPage() {
                 Export CSV
               </Button>
               {hasPermission('users_manage') && (
-                <Button 
+                <Button
                   onClick={() => window.location.href = '/invitations'}
                   className="bg-gray-900 hover:bg-gray-800 text-white"
                   size="sm"
@@ -363,59 +365,73 @@ export default function UsersPage() {
             </div>
           </div>
 
-          {/* Colorful Stats Cards - Style Invitations */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card className="border border-blue-200 bg-white hover:shadow-md transition-shadow">
+          {/* Colorful Stats Cards - Réorganisées avec 5 couleurs distinctes */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+            <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
-                    <p className="text-2xl font-semibold text-blue-600">{stats.total}</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
                   </div>
-                  <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-600" />
+                  <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                    <Users className="h-6 w-6 text-blue-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-green-200 bg-white hover:shadow-md transition-shadow">
+            <Card className="border border-green-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
-                    <p className="text-2xl font-semibold text-green-600">{stats.active}</p>
+                    <p className="text-2xl font-bold text-green-600">{stats.active}</p>
                   </div>
-                  <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <UserCheck className="h-5 w-5 text-green-600" />
+                  <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
+                    <UserCheck className="h-6 w-6 text-green-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-yellow-200 bg-white hover:shadow-md transition-shadow">
+            <Card className="border border-amber-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">En attente</p>
-                    <p className="text-2xl font-semibold text-yellow-600">{stats.pending}</p>
+                    <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
                   </div>
-                  <div className="h-10 w-10 rounded-lg bg-yellow-50 flex items-center justify-center">
-                    <Activity className="h-5 w-5 text-yellow-600" />
+                  <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                    <Activity className="h-6 w-6 text-amber-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-red-200 bg-white hover:shadow-md transition-shadow">
+            <Card className="border border-orange-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Inactifs</p>
-                    <p className="text-2xl font-semibold text-red-600">{stats.inactive + stats.locked}</p>
+                    <p className="text-2xl font-bold text-orange-600">{stats.inactive + stats.locked}</p>
                   </div>
-                  <div className="h-10 w-10 rounded-lg bg-red-50 flex items-center justify-center">
-                    <UserX className="h-5 w-5 text-red-600" />
+                  <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
+                    <UserX className="h-6 w-6 text-orange-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-red-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Supprimés</p>
+                    <p className="text-2xl font-bold text-red-600">{stats.deleted}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                    <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                 </div>
               </CardContent>
@@ -467,6 +483,7 @@ export default function UsersPage() {
                   <option value={UserStatus.INACTIVE}>Inactifs ({stats.inactive})</option>
                   <option value={UserStatus.PENDING}>En attente ({stats.pending})</option>
                   <option value={UserStatus.LOCKED}>Bloqués ({stats.locked})</option>
+                  <option value={UserStatus.DELETED}>Supprimés ({stats.deleted})</option>
                 </select>
               </div>
 

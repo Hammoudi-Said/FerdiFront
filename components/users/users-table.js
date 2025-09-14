@@ -22,12 +22,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
-import { 
-  Edit3, 
-  Trash2, 
-  Mail, 
-  Phone, 
-  MoreHorizontal, 
+import {
+  Edit3,
+  Trash2,
+  Mail,
+  Phone,
+  MoreHorizontal,
   Eye,
   UserCheck,
   UserX,
@@ -38,14 +38,14 @@ import {
   Users
 } from 'lucide-react'
 
-export function UsersTable({ 
-  users, 
-  selectedUsers = [], 
-  onSelectionChange, 
-  onEdit, 
-  onDelete, 
+export function UsersTable({
+  users,
+  selectedUsers = [],
+  onSelectionChange,
+  onEdit,
+  onDelete,
   onView,
-  canManage 
+  canManage
 }) {
   const [hoveredRow, setHoveredRow] = useState(null)
 
@@ -79,7 +79,7 @@ export function UsersTable({
 
     const colorMap = {
       SUPER_ADMIN: 'bg-red-50 text-red-700 border-red-200',
-      ADMIN: 'bg-purple-50 text-purple-700 border-purple-200', 
+      ADMIN: 'bg-purple-50 text-purple-700 border-purple-200',
       DISPATCH: 'bg-blue-50 text-blue-700 border-blue-200',
       DRIVER: 'bg-green-50 text-green-700 border-green-200',
       INTERNAL_SUPPORT: 'bg-orange-50 text-orange-700 border-orange-200',
@@ -95,26 +95,30 @@ export function UsersTable({
 
   const getStatusBadge = (user) => {
     const status = user.status || (user.is_active ? 'ACTIVE' : 'INACTIVE')
-    
+
     const statusConfig = {
-      ACTIVE: { 
-        color: 'bg-green-50 text-green-700 border-green-200', 
+      ACTIVE: {
+        color: 'bg-green-50 text-green-700 border-green-200',
         label: 'Actif'
       },
-      INACTIVE: { 
-        color: 'bg-gray-50 text-gray-700 border-gray-200', 
+      INACTIVE: {
+        color: 'bg-gray-50 text-gray-700 border-gray-200',
         label: 'Inactif'
       },
-      PENDING: { 
-        color: 'bg-yellow-50 text-yellow-700 border-yellow-200', 
+      PENDING: {
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200',
         label: 'En attente'
       },
-      LOCKED: { 
-        color: 'bg-red-50 text-red-700 border-red-200', 
+      LOCKED: {
+        color: 'bg-red-50 text-red-700 border-red-200',
         label: 'Verrouillé'
       },
+      DELETED: {
+        color: 'bg-red-50 text-red-700 border-red-200',
+        label: 'Supprimés'
+      },
     }
-    
+
     const config = statusConfig[status] || statusConfig.INACTIVE
     return (
       <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${config.color}`}>
@@ -160,7 +164,7 @@ export function UsersTable({
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur trouvé</h3>
         <p className="text-gray-500 text-sm max-w-sm mx-auto">
-          Aucun utilisateur ne correspond à vos critères de recherche. 
+          Aucun utilisateur ne correspond à vos critères de recherche.
           Essayez de modifier les filtres.
         </p>
       </div>
@@ -188,7 +192,7 @@ export function UsersTable({
               Utilisateur
             </TableHead>
             <TableHead className="font-medium text-gray-700">
-              Contact  
+              Contact
             </TableHead>
             <TableHead className="font-medium text-gray-700">
               Rôle
@@ -208,7 +212,7 @@ export function UsersTable({
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <TableRow 
+            <TableRow
               key={user.id}
               className={`
                 hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
@@ -286,7 +290,7 @@ export function UsersTable({
                         <Edit3 className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => onView && onView(user)}
                         className="cursor-pointer text-gray-700 hover:bg-gray-50"
                       >

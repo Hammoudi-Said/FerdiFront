@@ -13,8 +13,10 @@ import { UsersTable } from '@/components/users/users-table'
 import { CreateUserModal } from '@/components/users/create-user-modal'
 import { EditUserModal } from '@/components/users/edit-user-modal'
 import { DeleteUserDialog } from '@/components/users/delete-user-dialog'
+import { BulkActionsModal } from '@/components/users/bulk-actions-modal'
+import { UserDetailsPerfectModal } from '@/components/users/user-details-modal-perfect'
 import { usersAPI } from '@/lib/api-client'
-import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
+import { ROLE_DEFINITIONS, UserRole, UserStatus } from '@/lib/constants/enums'
 import {
   Users,
   Plus,
@@ -23,7 +25,15 @@ import {
   UserCheck,
   UserX,
   Download,
-  Mail
+  Mail,
+  Settings,
+  Eye,
+  Trash2,
+  Edit3,
+  MoreHorizontal,
+  Activity,
+  UserPlus,
+  Zap
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -36,14 +46,20 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [selectedUsers, setSelectedUsers] = useState([])
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [bulkModalOpen, setBulkModalOpen] = useState(false)
+  const [editDetailsModalOpen, setEditDetailsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
     inactive: 0,
+    pending: 0,
+    locked: 0,
+    deleted: 0,
     byRole: {}
   })
 
@@ -51,6 +67,23 @@ export default function UsersPage() {
     updateActivity()
     loadUsers()
   }, [updateActivity])
+
+  const calculateStats = useCallback((usersList) => {
+    const total = usersList.length
+    const active = usersList.filter(u => u.status === 'ACTIVE' || (u.is_active && !u.status)).length
+    const inactive = usersList.filter(u => u.status === 'INACTIVE' || (!u.is_active && !u.status)).length
+    const pending = usersList.filter(u => u.status === 'PENDING').length
+    const locked = usersList.filter(u => u.status === 'LOCKED').length
+    const deleted = usersList.filter(u => u.status === 'DELETED').length
+
+    const byRole = {}
+    usersList.forEach(u => {
+      const roleName = ROLE_DEFINITIONS[u.role]?.name || 'unknown'
+      byRole[roleName] = (byRole[roleName] || 0) + 1
+    })
+
+    setStats({ total, active, inactive, pending, locked, deleted, byRole })
+  }, [])
 
   const loadUsers = async () => {
     try {
@@ -65,9 +98,11 @@ export default function UsersPage() {
           toast.error(result.error)
         }
       } else {
+        // ✅ APPEL API BACKEND SELON OPENAPI SPEC
         const response = await usersAPI.getUsers()
-        setUsers(response.data.data || response.data)
-        calculateStats(response.data.data || response.data)
+        const userData = response.data?.data || response.data || []
+        setUsers(userData)
+        calculateStats(userData)
       }
     } catch (error) {
       console.error('Failed to load users:', error)
@@ -77,24 +112,8 @@ export default function UsersPage() {
     }
   }
 
-  const calculateStats = useCallback((usersList) => {
-    const total = usersList.length
-    const active = usersList.filter(u => u.is_active).length
-    const inactive = total - active
-
-    const byRole = {}
-    usersList.forEach(u => {
-      const roleName = ROLE_DEFINITIONS[u.role]?.name || 'unknown'
-      byRole[roleName] = (byRole[roleName] || 0) + 1
-    })
-
-    setStats({ total, active, inactive, byRole })
-  }, [])
-
-  // 🔧 FIX: Memoize filtered users to prevent recalculation and fix CSV export reference
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      // 🔧 FIX: Safe name comparison with fallback
       const fullName = user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim()
 
       const matchesSearch = !searchTerm ||
@@ -103,9 +122,9 @@ export default function UsersPage() {
 
       const matchesRole = filterRole === 'all' || user.role === filterRole
 
-      const matchesStatus = filterStatus === 'all' ||
-        (filterStatus === 'active' && user.is_active) ||
-        (filterStatus === 'inactive' && !user.is_active)
+      // Amélioration: utiliser les valeurs d'enum directement
+      const userStatus = user.status || (user.is_active ? 'ACTIVE' : 'INACTIVE')
+      const matchesStatus = filterStatus === 'all' || userStatus === filterStatus
 
       return matchesSearch && matchesRole && matchesStatus
     })
@@ -114,7 +133,6 @@ export default function UsersPage() {
   const handleCreateUser = async (userData) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user creation
         const newUser = {
           id: `user-${Date.now()}`,
           ...userData,
@@ -127,8 +145,8 @@ export default function UsersPage() {
         calculateStats([...users, newUser])
         toast.success('Utilisateur créé avec succès')
       } else {
-        const response = await usersAPI.createUser(userData)
-        await loadUsers() // Refresh the list
+        await usersAPI.createUser(userData)
+        await loadUsers()
         toast.success('Utilisateur créé avec succès')
       }
     } catch (error) {
@@ -141,21 +159,42 @@ export default function UsersPage() {
   const handleEditUser = async (userId, userData) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user update
         setUsers(prev => prev.map(u =>
           u.id === userId
-            ? { ...u, ...userData, full_name: `${userData.first_name} ${userData.last_name}` }
+            ? {
+              ...u,
+              ...userData,
+              full_name: `${userData.first_name} ${userData.last_name}`,
+              // Handle both is_active and status fields
+              is_active: userData.status === 'ACTIVE',
+              status: userData.status
+            }
             : u
         ))
+        // Recalculate stats with updated data
+        const updatedUsers = users.map(u =>
+          u.id === userId
+            ? {
+              ...u,
+              ...userData,
+              full_name: `${userData.first_name} ${userData.last_name}`,
+              is_active: userData.status === 'ACTIVE',
+              status: userData.status
+            }
+            : u
+        )
+        calculateStats(updatedUsers)
         toast.success('Utilisateur modifié avec succès')
       } else {
+        // ✅ APPEL API BACKEND: PATCH /api/v1/users/{user_id}
         await usersAPI.updateUser(userId, userData)
-        await loadUsers() // Refresh the list
+        await loadUsers() // Recharger la liste
         toast.success('Utilisateur modifié avec succès')
       }
     } catch (error) {
       console.error('Failed to update user:', error)
-      toast.error('Erreur lors de la modification de l\'utilisateur')
+      const errorMessage = error.response?.data?.detail || 'Erreur lors de la modification de l\'utilisateur'
+      toast.error(errorMessage)
       throw error
     }
   }
@@ -163,19 +202,42 @@ export default function UsersPage() {
   const handleDeleteUser = async (userId) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock user deletion
         const updatedUsers = users.filter(u => u.id !== userId)
         setUsers(updatedUsers)
         calculateStats(updatedUsers)
         toast.success('Utilisateur supprimé avec succès')
       } else {
+        // ✅ APPEL API BACKEND: DELETE /api/v1/users/{user_id}
         await usersAPI.deleteUser(userId)
-        await loadUsers() // Refresh the list
+        await loadUsers() // Recharger la liste
         toast.success('Utilisateur supprimé avec succès')
       }
     } catch (error) {
       console.error('Failed to delete user:', error)
-      toast.error('Erreur lors de la suppression de l\'utilisateur')
+      const errorMessage = error.response?.data?.detail || 'Erreur lors de la suppression de l\'utilisateur'
+      toast.error(errorMessage)
+      throw error
+    }
+  }
+
+  const handleBulkAction = async (action, userIds, reason) => {
+    try {
+      if (USE_MOCK_DATA) {
+        // Mock bulk operations
+        toast.success(`Opération ${action} effectuée sur ${userIds.length} utilisateur(s)`)
+      } else {
+        await usersAPI.bulkUserOperation({
+          user_ids: userIds,
+          operation: action,
+          reason
+        })
+        await loadUsers()
+        toast.success(`Opération ${action} effectuée avec succès`)
+      }
+      setSelectedUsers([])
+    } catch (error) {
+      console.error('Failed to perform bulk action:', error)
+      toast.error('Erreur lors de l\'opération groupée')
       throw error
     }
   }
@@ -190,7 +252,28 @@ export default function UsersPage() {
     setDeleteDialogOpen(true)
   }
 
-  // 🔧 FIX: Enhanced CSV export with better error handling and safer data access
+  const handleViewClick = async (user) => {
+    try {
+      if (USE_MOCK_DATA) {
+        setSelectedUser(user)
+        setEditDetailsModalOpen(true)
+      } else {
+        // ✅ APPEL API BACKEND: GET /api/v1/users/{user_id}
+        const response = await usersAPI.getUserById(user.id)
+        const userData = response.data
+        setSelectedUser(userData)
+        setEditDetailsModalOpen(true)
+      }
+    } catch (error) {
+      console.error('Failed to load user details:', error)
+      const errorMessage = error.response?.data?.detail || 'Erreur lors du chargement des détails de l\'utilisateur'
+      toast.error(errorMessage)
+      // En cas d'erreur, utiliser les données déjà disponibles
+      setSelectedUser(user)
+      setEditDetailsModalOpen(true)
+    }
+  }
+
   const exportUsers = useCallback(() => {
     try {
       if (filteredUsers.length === 0) {
@@ -201,7 +284,7 @@ export default function UsersPage() {
       const csvContent = [
         ['Nom', 'Prénom', 'Email', 'Téléphone', 'Rôle', 'Statut', 'Date de création'].join(','),
         ...filteredUsers.map(user => [
-          (user.last_name || '').replace(/,/g, ';'), // Escape commas
+          (user.last_name || '').replace(/,/g, ';'),
           (user.first_name || '').replace(/,/g, ';'),
           (user.email || '').replace(/,/g, ';'),
           (user.mobile || '').replace(/,/g, ';'),
@@ -211,7 +294,6 @@ export default function UsersPage() {
         ].join(','))
       ].join('\n')
 
-      // Add BOM for proper UTF-8 handling in Excel
       const BOM = '\uFEFF'
       const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' })
       const url = window.URL.createObjectURL(blob)
@@ -238,101 +320,133 @@ export default function UsersPage() {
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-              <p className="text-gray-600">Gérez les membres de votre équipe</p>
+          {/* Clean Header */}
+          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Gestion des utilisateurs
+              </h1>
+              <p className="text-sm text-gray-600">
+                Gérez les membres de votre équipe et leurs permissions
+              </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-wrap gap-2">
+              {selectedUsers.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setBulkModalOpen(true)}
+                  className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                  size="sm"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Actions groupées ({selectedUsers.length})
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={exportUsers}
                 disabled={filteredUsers.length === 0 || loading}
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                size="sm"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Exporter CSV ({filteredUsers.length})
+                Export CSV
               </Button>
-              {(
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.href = '/invitations'}
-                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    Invitations
-                  </Button>
-                  <Button onClick={() => setCreateModalOpen(true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nouvel utilisateur
-                  </Button>
-                </>
+              {hasPermission('users_manage') && (
+                <Button
+                  onClick={() => window.location.href = '/invitations'}
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  size="sm"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Inviter un utilisateur
+                </Button>
               )}
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card>
+          {/* Colorful Stats Cards - Réorganisées avec 5 couleurs distinctes */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+            <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-green-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Actifs</p>
+                    <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
                     <p className="text-2xl font-bold text-green-600">{stats.active}</p>
                   </div>
-                  <UserCheck className="h-8 w-8 text-green-600" />
+                  <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
+                    <UserCheck className="h-6 w-6 text-green-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-amber-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">En attente</p>
+                    <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                    <Activity className="h-6 w-6 text-amber-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-orange-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Inactifs</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.inactive}</p>
+                    <p className="text-2xl font-bold text-orange-600">{stats.inactive + stats.locked}</p>
                   </div>
-                  <UserX className="h-8 w-8 text-red-600" />
+                  <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
+                    <UserX className="h-6 w-6 text-orange-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-red-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Par rôle</p>
-                  <div className="space-y-1">
-                    {Object.entries(stats.byRole).map(([role, count]) => (
-                      <div key={role} className="flex justify-between text-xs">
-                        <span className="capitalize">{role}</span>
-                        <span className="font-medium">{count}</span>
-                      </div>
-                    ))}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Supprimés</p>
+                    <p className="text-2xl font-bold text-red-600">{stats.deleted}</p>
+                  </div>
+                  <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                    <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtres et recherche</CardTitle>
+          {/* Clean Filters */}
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
+              <div className="flex items-center space-x-2">
+                <Search className="h-4 w-4 text-gray-500" />
+                <CardTitle className="text-base font-medium text-gray-900">Recherche et filtres</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -341,7 +455,7 @@ export default function UsersPage() {
                       placeholder="Rechercher par nom ou email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 border-gray-200 focus:border-gray-900 focus:ring-gray-900"
                     />
                   </div>
                 </div>
@@ -349,29 +463,34 @@ export default function UsersPage() {
                 <select
                   value={filterRole}
                   onChange={(e) => setFilterRole(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
                 >
                   <option value="all">Tous les rôles</option>
                   {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
-                    <option key={roleId} value={roleId}>{roleData.label}</option>
+                    <option key={roleId} value={roleId}>
+                      {roleData.label}
+                    </option>
                   ))}
                 </select>
 
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
                 >
                   <option value="all">Tous les statuts</option>
-                  <option value="active">Actif</option>
-                  <option value="inactive">Inactif</option>
+                  <option value={UserStatus.ACTIVE}>Actifs ({stats.active})</option>
+                  <option value={UserStatus.INACTIVE}>Inactifs ({stats.inactive})</option>
+                  <option value={UserStatus.PENDING}>En attente ({stats.pending})</option>
+                  <option value={UserStatus.LOCKED}>Bloqués ({stats.locked})</option>
+                  <option value={UserStatus.DELETED}>Supprimés ({stats.deleted})</option>
                 </select>
               </div>
 
               {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
-                    {filteredUsers.length} utilisateur(s) trouvé(s)
+                <div className="mt-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <span className="text-sm text-gray-700">
+                    {filteredUsers.length} résultat(s) trouvé(s)
                   </span>
                   <Button
                     variant="ghost"
@@ -381,20 +500,33 @@ export default function UsersPage() {
                       setFilterRole('all')
                       setFilterStatus('all')
                     }}
+                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   >
-                    Réinitialiser les filtres
+                    Réinitialiser
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Users Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Utilisateurs ({filteredUsers.length})</CardTitle>
+          {/* Clean Users Table */}
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <CardTitle className="text-base font-medium text-gray-900">
+                    Utilisateurs ({filteredUsers.length})
+                  </CardTitle>
+                </div>
+                {hasPermission('users_manage') && selectedUsers.length > 0 && (
+                  <Badge variant="outline" className="text-gray-700 border-gray-300">
+                    {selectedUsers.length} sélectionné(s)
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
                   <LoadingSpinner size="lg" />
@@ -402,9 +534,12 @@ export default function UsersPage() {
               ) : (
                 <UsersTable
                   users={filteredUsers}
+                  selectedUsers={selectedUsers}
+                  onSelectionChange={setSelectedUsers}
                   onEdit={handleEditClick}
                   onDelete={handleDeleteClick}
-                  canManage={hasPermission('users_manage')}
+                  onView={handleViewClick}
+                  canManage={hasPermission('users_write_company') || hasPermission('users_write_all')}
                 />
               )}
             </CardContent>
@@ -433,6 +568,24 @@ export default function UsersPage() {
             onOpenChange={setDeleteDialogOpen}
             user={selectedUser}
             onConfirm={() => handleDeleteUser(selectedUser.id)}
+          />
+        )}
+
+        <BulkActionsModal
+          open={bulkModalOpen}
+          onOpenChange={setBulkModalOpen}
+          selectedUsers={selectedUsers.map(id => users.find(u => u.id === id)).filter(Boolean)}
+          onConfirm={handleBulkAction}
+        />
+
+        {selectedUser && (
+          <UserDetailsPerfectModal
+            open={editDetailsModalOpen}
+            onOpenChange={setEditDetailsModalOpen}
+            user={selectedUser}
+            onSave={(data) => handleEditUser(selectedUser.id, data)}
+            onDelete={handleDeleteClick}
+            canManage={hasPermission('users_manage')}
           />
         )}
       </DashboardLayout>

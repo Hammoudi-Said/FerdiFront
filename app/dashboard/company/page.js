@@ -96,9 +96,9 @@ export default function CompanyPage() {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800', label: 'Actif' },
-      inactive: { color: 'bg-gray-100 text-gray-800', label: 'Inactif' },
-      suspended: { color: 'bg-red-100 text-red-800', label: 'Suspendu' },
+      ACTIVE: { color: 'bg-green-100 text-green-800', label: 'Actif' },
+      INACTIVE: { color: 'bg-gray-100 text-gray-800', label: 'Inactif' },
+      SUSPENDED: { color: 'bg-red-100 text-red-800', label: 'Suspendu' },
     }
     const config = statusConfig[status] || statusConfig.inactive
     return (

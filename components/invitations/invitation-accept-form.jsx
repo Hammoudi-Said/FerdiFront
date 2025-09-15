@@ -214,7 +214,6 @@ export function InvitationAcceptForm({ token, onSuccess, onError }) {
           mobile: submitData.mobile,
           role: invitation.role, // From invitation, not user input
           status: 'ACTIVE',
-          is_active: true,
           created_at: new Date().toISOString()
         }
         

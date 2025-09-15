@@ -41,9 +41,9 @@ export default function UsersPage() {
   const getRoleBadge = (roleId) => {
     const roleData = ROLE_DEFINITIONS[roleId]
     if (!roleData) return <Badge variant="secondary">Inconnu</Badge>
-    
+
     return (
-      <Badge 
+      <Badge
         className={`${roleData.textColor} ${roleData.bgColor} border-0`}
       >
         {roleData.label}
@@ -131,7 +131,7 @@ export default function UsersPage() {
                             {getRoleBadge(user.role)}
                           </td>
                           <td className="py-3 px-4">
-                            <Badge 
+                            <Badge
                               className={user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
                             >
                               {user.is_active ? 'Actif' : 'Inactif'}

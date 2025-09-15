@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Table,
   TableBody,
@@ -11,25 +13,36 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ROLE_DEFINITIONS } from '@/lib/stores/auth-store'
-import { Edit3, Trash2, Mail, Phone } from 'lucide-react'
+import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
+import {
+  Phone,
+  Users
+} from 'lucide-react'
 
-export function UsersTable({ users, onEdit, onDelete, canManage }) {
-  // 🔧 FIX: Safe helper function to get user initials
+export function UsersTable({
+  users,
+  selectedUsers = [],
+  onSelectionChange,
+  onEdit,
+  onDelete,
+  onView,
+  canManage
+}) {
+  const [hoveredRow, setHoveredRow] = useState(null)
+
   const getInitials = (firstName, lastName) => {
     const first = firstName?.charAt(0)?.toUpperCase() || ''
     const last = lastName?.charAt(0)?.toUpperCase() || ''
     return first + last || '?'
   }
 
-  // 🔧 FIX: Enhanced date formatting with error handling
   const formatDate = (dateString) => {
     if (!dateString) return 'Jamais'
-    
+
     try {
       const date = new Date(dateString)
       if (isNaN(date.getTime())) return 'Date invalide'
-      
+
       return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
@@ -43,134 +56,202 @@ export function UsersTable({ users, onEdit, onDelete, canManage }) {
 
   const getRoleBadge = (roleId) => {
     const role = ROLE_DEFINITIONS[roleId]
-    if (!role) return <Badge variant="secondary">Inconnu</Badge>
-    
+    if (!role) return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
+
+    const colorMap = {
+      SUPER_ADMIN: 'bg-red-50 text-red-700 border-red-200',
+      ADMIN: 'bg-purple-50 text-purple-700 border-purple-200',
+      DISPATCH: 'bg-blue-50 text-blue-700 border-blue-200',
+      DRIVER: 'bg-green-50 text-green-700 border-green-200',
+      INTERNAL_SUPPORT: 'bg-orange-50 text-orange-700 border-orange-200',
+      ACCOUNTANT: 'bg-teal-50 text-teal-700 border-teal-200'
+    }
+
     return (
-      <Badge className={`${role.textColor} ${role.bgColor} hover:${role.bgColor}`}>
+      <Badge className={`${colorMap[roleId] || 'bg-gray-50 text-gray-700 border-gray-200'} font-medium border`}>
         {role.label}
       </Badge>
     )
   }
 
-  const getStatusBadge = (isActive) => {
-    return isActive ? (
-      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-        Actif
-      </Badge>
-    ) : (
-      <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-        Inactif
-      </Badge>
+  const getStatusBadge = (user) => {
+    const status = user.status || (user.is_active ? 'ACTIVE' : 'INACTIVE')
+
+    const statusConfig = {
+      ACTIVE: {
+        color: 'bg-green-50 text-green-700 border-green-200',
+        label: 'Actif'
+      },
+      INACTIVE: {
+        color: 'bg-gray-50 text-gray-700 border-gray-200',
+        label: 'Inactif'
+      },
+      PENDING: {
+        color: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+        label: 'En attente'
+      },
+      LOCKED: {
+        color: 'bg-red-50 text-red-700 border-red-200',
+        label: 'Verrouillé'
+      },
+      DELETED: {
+        color: 'bg-red-50 text-red-700 border-red-200',
+        label: 'Supprimés'
+      },
+    }
+
+    const config = statusConfig[status] || statusConfig.INACTIVE
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium border ${config.color}`}>
+        {config.label}
+      </span>
     )
   }
 
-  // 🔧 FIX: Safe helper function to get user display name
   const getUserDisplayName = (user) => {
     if (user.full_name) return user.full_name
-    
+
     const firstName = user.first_name || ''
     const lastName = user.last_name || ''
     const fullName = `${firstName} ${lastName}`.trim()
-    
+
     return fullName || user.email || 'Utilisateur inconnu'
   }
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      onSelectionChange(users.map(u => u.id))
+    } else {
+      onSelectionChange([])
+    }
+  }
+
+  const handleSelectUser = (userId, checked) => {
+    if (checked) {
+      onSelectionChange([...selectedUsers, userId])
+    } else {
+      onSelectionChange(selectedUsers.filter(id => id !== userId))
+    }
+  }
+
+  const isAllSelected = users.length > 0 && selectedUsers.length === users.length
+  const isPartiallySelected = selectedUsers.length > 0 && selectedUsers.length < users.length
 
   if (users.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-          <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-5.055A2.25 2.25 0 0021 15V6.75A2.25 2.25 0 0018.75 4.5h-2.25A2.25 2.25 0 0014.25 6.75V15A2.25 2.25 0 0016.5 17.25h2.25A2.25 2.25 0 0021 15V6.75z" />
-          </svg>
+        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+          <Users className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur trouvé</h3>
-        <p className="text-gray-500">Aucun utilisateur ne correspond à vos critères de recherche.</p>
+        <p className="text-gray-500 text-sm max-w-sm mx-auto">
+          Aucun utilisateur ne correspond à vos critères de recherche.
+          Essayez de modifier les filtres.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-md border">
+    <div className="overflow-hidden">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Utilisateur</TableHead>
-            <TableHead>Contact</TableHead>
-            <TableHead>Rôle</TableHead>
-            <TableHead>Statut</TableHead>
-            <TableHead>Dernière connexion</TableHead>
-            {canManage && <TableHead className="w-[100px]">Actions</TableHead>}
+        <TableHeader className="bg-gray-50">
+          <TableRow className="hover:bg-gray-50 border-gray-200">
+            {canManage && (
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
+                  className="border-gray-300"
+                  ref={(el) => {
+                    if (el) el.indeterminate = isPartiallySelected
+                  }}
+                />
+              </TableHead>
+            )}
+            <TableHead className="font-medium text-gray-700">
+              Utilisateur
+            </TableHead>
+            <TableHead className="font-medium text-gray-700">
+              Contact
+            </TableHead>
+            <TableHead className="font-medium text-gray-700">
+              Rôle
+            </TableHead>
+            <TableHead className="font-medium text-gray-700">
+              Statut
+            </TableHead>
+            <TableHead className="font-medium text-gray-700">
+              Dernière connexion
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user) => (
-            <TableRow key={user.id}>
-              <TableCell>
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
-                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                      {getInitials(user.first_name, user.last_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {getUserDisplayName(user)}
-                    </div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="space-y-1">
-                  {user.email && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Mail className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span className="truncate">{user.email}</span>
-                    </div>
-                  )}
-                  {user.mobile && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span>{user.mobile}</span>
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                {getRoleBadge(user.role)}
-              </TableCell>
-              <TableCell>
-                {getStatusBadge(user.is_active)}
-              </TableCell>
-              <TableCell className="text-sm text-gray-600">
-                {formatDate(user.last_login_at)}
-              </TableCell>
-              {canManage && (
+          {users.map((user) => {
+            const isDeleted = user.status === 'DELETED'
+
+            return (
+              <TableRow
+                key={user.id}
+                className={`
+                  hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
+                  ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
+                  ${isDeleted ? 'opacity-60' : ''}
+                `}
+                onClick={() => onView && onView(user)}
+              >
+                {canManage && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedUsers.includes(user.id)}
+                      onCheckedChange={(checked) => handleSelectUser(user.id, checked)}
+                      className="border-gray-300"
+                      disabled={isDeleted}
+                    />
+                  </TableCell>
+                )}
                 <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(user)}
-                      title="Modifier l'utilisateur"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(user)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      title="Supprimer l'utilisateur"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatar_url} alt={getUserDisplayName(user)} />
+                      <AvatarFallback className="text-xs bg-gray-100 text-gray-700 font-medium">
+                        {getInitials(user.first_name, user.last_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {getUserDisplayName(user)}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {user.email}
+                      </div>
+                    </div>
                   </div>
                 </TableCell>
-              )}
-            </TableRow>
-          ))}
+                <TableCell>
+                  <div className="space-y-1">
+                    {user.mobile && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Phone className="h-3 w-3 mr-2 text-gray-400" />
+                        <span className="text-xs">{user.mobile}</span>
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {getRoleBadge(user.role)}
+                </TableCell>
+                <TableCell>
+                  {getStatusBadge(user)}
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm text-gray-500">
+                    {formatDate(user.last_login_at)}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
     </div>

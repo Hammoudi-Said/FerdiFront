@@ -42,7 +42,7 @@ Ce document contient un audit technique complet de l'application FERDI. Utilisez
 
 ---
 
-## 🔥 **PROBLÈMES CRITIQUES IDENTIFIÉS PAR L'UTILISATEUR**
+## 🔥 **PROBLÈMES CRITIQUES IDENTIFIÉS - AUDIT FERDI AVANCÉ**
 
 ### **🚨 ANALYSE APPROFONDIE DES DÉFAUTS FERDI**
 
@@ -50,27 +50,34 @@ Ce document contient un audit technique complet de l'application FERDI. Utilisez
 **PROBLÈME CRITIQUE** : Logique répétitive et flux utilisateur confus
 
 ```javascript
-// ❌ ACTUEL: Redirection inutile HomePage → Dashboard
-// /app/page.js - SUPERFLU
+// ❌ PROBLÈME ACTUEL: Redirection inutile HomePage → Dashboard
+// /app/page.js - PAGE INTERMÉDIAIRE SUPERFLUE
 export default function HomePage() {
-  // 500ms delay + redirection = UX dégradée
-  const dashboardPath = getRoleDashboard()
-  setTimeout(() => {
-    router.push(dashboardPath) // Redirection inutile
-  }, 500)
+  useEffect(() => {
+    if (user) {
+      // ❌ Délai artificiel de 500ms = UX dégradée
+      setTimeout(() => {
+        router.push(dashboardPath) // Redirection inutile
+      }, 500)
+    }
+  }, [user, router])
+  
+  // ❌ Écran de chargement redondant avec AuthGuard
+  return <LoadingScreen />
 }
 
-// /app/dashboard/page.js - DESTINATION FINALE
+// /app/dashboard/page.js - DESTINATION FINALE RÉELLE
 export default function DashboardPage() {
   return <DashboardLayout><DashboardRouter /></DashboardLayout>
 }
 ```
 
-**IMPACT** :
-- ⚠️ **UX dégradée** : Double chargement, delais artificiels
-- ⚠️ **Performance** : +500ms de delay inutile  
-- ⚠️ **SEO** : Redirections multiples pénalisent le référencement
-- ⚠️ **Maintenance** : Code dupliqué difficile à maintenir
+**IMPACTS MESURÉS** :
+- ⚠️ **UX dégradée** : Double chargement + écran loading redondant
+- ⚠️ **Performance** : +500ms de delay artificiel injustifié
+- ⚠️ **SEO** : Redirections multiples pénalisent le référencement  
+- ⚠️ **Maintenance** : Logique d'auth dupliquée entre HomePage et AuthGuard
+- ⚠️ **Bundle** : Code JavaScript inutile chargé
 
 #### **2. REDIRECTIONS VERS PAGES OBSOLÈTES**
 **PROBLÈME CRITIQUE** : Liens vers des routes inexistantes

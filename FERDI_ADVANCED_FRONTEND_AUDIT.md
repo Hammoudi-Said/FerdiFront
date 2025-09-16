@@ -167,20 +167,55 @@ export const ROLE_DASHBOARD_PATHS = {
 - 🔴 **Confusion utilisateur** : Learning curve différente entre sections
 - 🔴 **Brand consistency** : Pas de cohérence visuelle globale
 
-#### **4. PROBLÈMES DE LANGUE ET UX**
-**PROBLÈME CRITIQUE** : Mélange français/anglais + UX incohérente
+#### **4. PROBLÈMES DE LANGUE ET LOCALISATION**
+**PROBLÈME CRITIQUE** : Mélange français/anglais + incohérences linguistiques
 
 ```javascript
-// ❌ MÉLANGE DE LANGUES
+// ❌ MÉLANGES DE LANGUES DÉTECTÉS
+// dashboard-header.jsx - Mélange FR/EN
 <span className="sr-only">Ouvrir le menu</span>  // ❌ Français
 <DropdownMenuItem>Aucune action disponible</DropdownMenuItem> // ❌ Français  
-// Mais ailleurs:
+// Mais dans le même fichier:
 <Button>Show details</Button> // ❌ Anglais
 
-// ❌ TEXTES MANQUANTS/GÉNÉRIQUES
-<h1>Dashboard Administrateur</h1> // ❌ Pas spécifique au contexte
-<p>Gérez les membres de votre équipe</p> // ❌ Trop générique
+// users-table.js - Inconsistances
+if (users.length === 0) {
+  return (
+    <div className="text-center py-12">
+      <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun utilisateur trouvé</h3> // ✅ Français
+      <p className="text-gray-500 text-sm max-w-sm mx-auto">
+        Aucun utilisateur ne correspond à vos critères... // ✅ Français
+      </p>
+    </div>
+  )
+}
+
+// ❌ TEXTES GÉNÉRIQUES/PEU SPÉCIFIQUES
+// users/page.js
+<h1>Gestion des utilisateurs</h1> // ❌ Générique
+<p>Gérez les membres de votre équipe et leurs permissions</p> // ❌ Pas spécifique autocars
+
+// invitations/page.js  
+<h1>Invitations</h1> // ❌ Trop simple
+<p>Gérez les invitations des nouveaux utilisateurs</p> // ❌ Pas contextuel FERDI
+
+// ❌ INCONSISTANCES TERMINOLOGIQUES
+// Utilisé parfois: "utilisateurs", parfois: "members", parfois: "équipe"
+// Utilisé parfois: "invitations", parfois: "invites"
+// Mélange: "Se déconnecter" vs "Logout"
 ```
+
+**IMPACTS LINGUISTIQUES** :
+- 🔴 **Cohérence brand** : Pas de ligne directrice linguistique claire
+- 🔴 **UX locale** : Utilisateurs français perturbés par l'anglais
+- 🔴 **Accessibilité** : Screen readers français vs anglais
+- 🔴 **Maintenance** : Deux systèmes de traduction à maintenir
+- 🔴 **SEO français** : Contenu mixte nuit au référencement local
+
+**TERMINOLOGIE FERDI MANQUANTE** :
+- ❌ Pas de références "autocaristes", "flotte", "transport"
+- ❌ Textes génériques au lieu de spécifiques métier
+- ❌ Pas de cohérence avec le domaine transport français
 
 #### **5. ARCHITECTURE FRAGMENTÉE**
 **PROBLÈME CRITIQUE** : Composants dispersés sans logique unifiée

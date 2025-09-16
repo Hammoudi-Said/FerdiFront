@@ -80,26 +80,33 @@ export default function DashboardPage() {
 - ⚠️ **Bundle** : Code JavaScript inutile chargé
 
 #### **2. REDIRECTIONS VERS PAGES OBSOLÈTES**
-**PROBLÈME CRITIQUE** : Liens vers des routes inexistantes
+**PROBLÈME CRITIQUE** : Navigation cassée avec erreurs 404 systématiques
 
 ```javascript
 // ❌ REDIRECTIONS CASSÉES dans /lib/utils/role-redirect.js
 export const ROLE_DASHBOARD_PATHS = {
-  [UserRole.ADMIN]: '/dashboard/company-admin', // ❌ N'EXISTE PAS
-  [UserRole.DISPATCH]: '/dashboard/dispatcher',  // ❌ N'EXISTE PAS  
-  [UserRole.DRIVER]: '/dashboard/driver',        // ❌ N'EXISTE PAS
+  [UserRole.SUPER_ADMIN]: '/dashboard/admin',        // ✅ EXISTE MAINTENANT 
+  [UserRole.ADMIN]: '/dashboard/company-admin',      // ✅ EXISTE MAINTENANT
+  [UserRole.DISPATCH]: '/dashboard/dispatcher',      // ✅ EXISTE MAINTENANT  
+  [UserRole.DRIVER]: '/dashboard/driver',            // ✅ EXISTE MAINTENANT
+  [UserRole.INTERNAL_SUPPORT]: '/dashboard/support', // ✅ EXISTE MAINTENANT
+  [UserRole.ACCOUNTANT]: '/dashboard/accountant',    // ✅ EXISTE MAINTENANT
 }
 
-// ❌ LIENS CASSÉS dans dashboard-header.jsx
-router.push('/dashboard/profile')  // ❌ N'EXISTE PAS
-router.push('/dashboard/company')  // ❌ N'EXISTE PAS
-router.push('/dashboard/settings') // ❌ N'EXISTE PAS
+// ❌ LIENS HEADER CASSÉS dans dashboard-header.jsx
+<DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>  // ✅ EXISTE: /dashboard/profile/
+<DropdownMenuItem onClick={() => router.push('/dashboard/company')}>  // ✅ EXISTE: /dashboard/company/
+<DropdownMenuItem onClick={() => router.push('/dashboard/settings')}> // ❌ N'EXISTE PAS
 ```
 
-**IMPACT** :
-- 🔴 **404 Errors** : Utilisateurs perdus sur pages inexistantes
-- 🔴 **Navigation cassée** : Boutons du header ne fonctionnent pas
-- 🔴 **Role-based routing défaillant** : Utilisateurs mal dirigés
+**IMPACTS MESURÉS** :
+- 🔴 **Navigation fonctionnelle** : Seuls les paramètres (/dashboard/settings) causent 404
+- 🟡 **UX partielle** : Certains boutons du header ne fonctionnent pas  
+- 🔴 **Expérience utilisateur** : Utilisateurs perdus sur liens settings
+
+**STATUS ACTUEL** : 
+- ✅ **RÉSOLU** : La plupart des routes role-based existent maintenant
+- ❌ **RESTE** : Route /dashboard/settings manquante
 
 #### **3. INCOHÉRENCE DESIGN UTILISATEURS ↔ INVITATIONS**
 **PROBLÈME CRITIQUE** : Interfaces complètement différentes pour des données similaires

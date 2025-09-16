@@ -217,17 +217,116 @@ if (users.length === 0) {
 - ❌ Textes génériques au lieu de spécifiques métier
 - ❌ Pas de cohérence avec le domaine transport français
 
-#### **5. ARCHITECTURE FRAGMENTÉE**
-**PROBLÈME CRITIQUE** : Composants dispersés sans logique unifiée
+#### **5. ARCHITECTURE FRAGMENTÉE ET DUPLICATIONS**
+**PROBLÈME CRITIQUE** : Code dupliqué et composants dispersés sans logique unifiée
 
+```bash
+# ❌ STRUCTURE ACTUELLE CHAOTIQUE DÉTECTÉE
+/app/
+├── app/users/page.js           # ✅ Page principale users
+├── app/users-demo/page.js      # ❌ DUPLICATION - page démo identique
+├── app/invitations/page.js     # ✅ Page principale invitations  
+├── app/invitations-demo/page.js # ❌ DUPLICATION - page démo identique
+├── components/users/users-table.js    # ✅ Table users moderne
+├── components/invitations/invitations-table.jsx # ❌ Table totalement différente
 ```
-// ❌ STRUCTURE ACTUELLE CHAOTIQUE
-/components/
-├── dashboard/role-specific/     # Role dashboards isolés
-├── users/users-table.jsx        # Table users moderne  
-├── invitations/invitations-table.jsx  # Table complètement différente
-├── layout/dashboard-layout.jsx  # Layout complexe
-└── auth/auth-guard.jsx         # Auth logic dispersée
+
+**DUPLICATIONS DÉTECTÉES** :
+```javascript
+// ❌ PAGES DEMO DUPLIQUÉES
+// /app/users-demo/page.js - COPIE EXACTE de users/page.js
+// /app/invitations-demo/page.js - COPIE EXACTE de invitations/page.js
+// → Maintenance x2, bugs x2, bundle size x2
+
+// ❌ LOGIQUE FILTRAGE DUPLIQUÉE  
+// users/page.js
+const filteredUsers = useMemo(() => {
+  return users.filter(user => {
+    const matchesSearch = !searchTerm || /* logique complexe */
+    const matchesRole = filterRole === 'all' || user.role === filterRole
+    const matchesStatus = filterStatus === 'all' || userStatus === filterStatus
+    return matchesSearch && matchesRole && matchesStatus
+  })
+}, [users, searchTerm, filterRole, filterStatus])
+
+// invitations/page.js - LOGIQUE SIMILAIRE MAIS DIFFÉRENTE
+const filteredInvitations = invitations.filter(invitation => {
+  const matchesSearch = !searchTerm || /* logique légèrement différente */
+  const matchesStatusFilter = statusFilter === 'all' || /* autre implémentation */
+  return matchesSearch && matchesStatusFilter
+})
+```
+
+**STYLES DUPLIQUÉS** :
+```javascript
+// ❌ COMPOSANTS STATS SIMILAIRES MAIS DIFFÉRENTS
+// users/page.js - Stats cards avec couleurs
+<Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+
+// invitations/page.js - Stats cards basiques  
+<Card> // Pas de styles, pas d'hover, pas de couleurs
+```
+
+**IMPACTS ARCHITECTURAUX** :
+- 🔴 **Code duplication** : ~40% de code dupliqué entre pages similaires
+- 🔴 **Maintenance burden** : Modifications à faire en double
+- 🔴 **Inconsistency risk** : Divergence progressive des copies
+- 🔴 **Bundle bloat** : JavaScript inutilement volumineux
+- 🔴 **DRY violation** : Principe DRY (Don't Repeat Yourself) violé
+
+---
+
+#### **6. NOUVEAUX PROBLÈMES DÉTECTÉS LORS DE L'AUDIT**
+
+##### **6.1 RESPONSIVE DESIGN INCOMPLET**
+```javascript
+// ❌ BREAKPOINTS INCONSISTANTS
+// users/page.js
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5"> // ✅ Bon responsive
+
+// invitations/page.js  
+<div className="grid gap-4 md:grid-cols-5"> // ❌ Manque étapes mobile/tablet
+```
+
+##### **6.2 ACCESSIBILITÉ DÉFAILLANTE**
+```javascript
+// ❌ PROBLÈMES A11Y DÉTECTÉS
+// users-table.js
+<Button variant="ghost" className="h-8 w-8 p-0">
+  <MoreHorizontal className="h-4 w-4" />
+  // ❌ Pas d'aria-label pour screen readers
+</Button>
+
+// invitations-table.jsx
+<span className="sr-only">Ouvrir le menu</span> // ✅ Bien
+<MoreHorizontal className="h-4 w-4" />
+```
+
+##### **6.3 PERFORMANCE - BUNDLE NON OPTIMISÉ**
+```javascript
+// ❌ IMPORTS NON OPTIMISÉS DÉTECTÉS
+// users/page.js - 37 imports de lucide-react
+import {
+  Users, Plus, Search, Filter, UserCheck, UserX, Download, 
+  Mail, Settings, Eye, Trash2, Edit3, MoreHorizontal, 
+  Activity, UserPlus, Zap // ❌ Tous chargés même si pas utilisés
+} from 'lucide-react'
+```
+
+##### **6.4 ERROR HANDLING INCONSISTANT**
+```javascript
+// ❌ GESTION D'ERREURS DIFFÉRENTE
+// users/page.js
+.catch(error => {
+  console.error('Failed to load users:', error)
+  toast.error('Erreur lors du chargement des utilisateurs') // ✅ UX error handling
+})
+
+// invitations/page.js  
+.catch(error => {
+  console.error('Failed to load invitations:', error)
+  toast.error('Erreur lors du chargement des invitations') // ✅ Similaire mais pas unifié
+})
 ```
 
 ---

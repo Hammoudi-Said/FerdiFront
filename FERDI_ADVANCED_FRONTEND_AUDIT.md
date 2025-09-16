@@ -228,6 +228,725 @@ TARGET:  <300kb (-40%)
 
 ---
 
+# **PHASE 0 - REFACTORING ARCHITECTURAL CRITIQUE** 🏗️
+
+## **🎯 OBJECTIF 0.1 - Fusion Homepage ↔ Dashboard**
+
+### **📊 MÉTRIQUES CIBLES**
+- Élimination complète de la redirection HomePage
+- Navigation directe : 0 redirections
+- Performance : -500ms delay artificiel  
+- Bundle size : -15kb (suppression HomePage)
+
+### **🔧 ÉTAPES D'IMPLÉMENTATION**
+
+#### **Étape 0.1.1 - Suppression HomePage Redirection**
+```javascript
+// 📁 Fichier: /app/app/page.js
+// ❌ SUPPRIMER ENTIÈREMENT et remplacer par:
+
+'use client'
+
+import { redirect } from 'next/navigation'
+import { useAuthStore } from '@/lib/stores/auth-store'
+
+export default function RootPage() {
+  // ✅ REDIRECTION IMMÉDIATE CÔTÉ SERVEUR
+  // Plus de composant React inutile
+  redirect('/dashboard')
+}
+```
+
+#### **Étape 0.1.2 - Dashboard as Default Route**
+```javascript
+// 📁 Fichier: /app/app/dashboard/page.js  
+// ✅ DEVIENT LA PAGE PRINCIPALE
+'use client'
+
+import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { RoleGuard } from '@/components/auth/role-guard'  
+import { DashboardRouter } from '@/components/dashboard/dashboard-router'
+import { WelcomeScreen } from '@/components/dashboard/welcome-screen'
+
+export default function DashboardPage() {
+  return (
+    <DashboardLayout>
+      <RoleGuard fallback={<WelcomeScreen />}>
+        <DashboardRouter />
+      </RoleGuard>  
+    </DashboardLayout>
+  )
+}
+```
+
+#### **Étape 0.1.3 - Welcome Screen pour Non-Authentifiés**
+```javascript
+// 📁 Fichier: /components/dashboard/welcome-screen.jsx
+// ✅ NOUVEAU COMPOSANT pour remplacer HomePage
+'use client'
+
+import { FerdiLogoLoading } from '@/components/ui/ferdi-logo'
+import { Button } from '@/components/ui/button'
+import { Bus, Users, Zap, ArrowRight, Shield, BarChart3 } from 'lucide-react'
+import Link from 'next/link'
+
+export function WelcomeScreen() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32">
+            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+              <div className="sm:text-center lg:text-left">
+                <div className="flex justify-center lg:justify-start mb-8">
+                  <FerdiLogoLoading size="2xl" />
+                </div>
+                
+                <h1 className="text-4xl tracking-tight font-bold text-gray-900 sm:text-5xl md:text-6xl">
+                  <span className="block">Gestion de flotte</span>
+                  <span className="block text-blue-600">simplifiée</span>
+                </h1>
+                
+                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                  FERDI révolutionne la gestion d'autocars avec une plateforme moderne, intuitive et performante pour les autocaristes français.
+                </p>
+                
+                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                  <div className="rounded-md shadow">
+                    <Link href="/auth/login">
+                      <Button size="lg" className="w-full flex items-center justify-center px-8 py-3 text-base font-medium">
+                        Se connecter
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="mt-3 sm:mt-0 sm:ml-3">
+                    <Link href="/auth/register">
+                      <Button variant="outline" size="lg" className="w-full flex items-center justify-center px-8 py-3 text-base font-medium">
+                        Créer un compte
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">
+              Fonctionnalités
+            </h2>
+            <p className="mt-2 text-3xl leading-8 font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Tout ce dont vous avez besoin
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
+              <div className="text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-xl bg-blue-100 text-blue-600 mx-auto mb-4">
+                  <Users className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Gestion d'équipe
+                </h3>
+                <p className="mt-2 text-base text-gray-500">
+                  Gérez facilement vos chauffeurs, dispatchers et équipes avec des rôles et permissions avancés.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-xl bg-purple-100 text-purple-600 mx-auto mb-4">
+                  <Bus className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Flotte complète
+                </h3>
+                <p className="mt-2 text-base text-gray-500">
+                  Suivi en temps réel de vos véhicules, maintenance, assurances et documentations légales.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center h-16 w-16 rounded-xl bg-green-100 text-green-600 mx-auto mb-4">
+                  <BarChart3 className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Analytics avancés
+                </h3>
+                <p className="mt-2 text-base text-gray-500">
+                  Tableaux de bord personnalisés, rapports détaillés et insights pour optimiser vos opérations.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Trust Section */}
+      <div className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Sécurisé et conforme
+            </h3>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              FERDI respecte les normes européennes de sécurité et de confidentialité des données. 
+              Vos informations sont protégées avec les plus hauts standards de l'industrie.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+---
+
+## **🎯 OBJECTIF 0.2 - Correction des Redirections Cassées**
+
+### **🔧 ÉTAPES D'IMPLÉMENTATION**
+
+#### **Étape 0.2.1 - Fix Role Dashboard Paths**
+```javascript
+// 📁 Fichier: /lib/utils/role-redirect.js
+// ✅ CORRECTION DES CHEMINS EXISTANTS
+export const ROLE_DASHBOARD_PATHS = {
+  [UserRole.SUPER_ADMIN]: '/dashboard',     // ✅ Page existante
+  [UserRole.ADMIN]: '/dashboard',           // ✅ Page existante
+  [UserRole.DISPATCH]: '/dashboard',        // ✅ Page existante  
+  [UserRole.DRIVER]: '/dashboard',          // ✅ Page existante
+  [UserRole.INTERNAL_SUPPORT]: '/dashboard', // ✅ Page existante
+  [UserRole.ACCOUNTANT]: '/dashboard',      // ✅ Page existante
+}
+
+// ✅ NOUVELLES ROUTES SPÉCIALISÉES (à créer plus tard)
+export const FUTURE_ROLE_PATHS = {
+  [UserRole.SUPER_ADMIN]: '/admin',
+  [UserRole.ADMIN]: '/admin',
+  [UserRole.DISPATCH]: '/dispatch',
+  [UserRole.DRIVER]: '/driver',
+  [UserRole.INTERNAL_SUPPORT]: '/support',
+  [UserRole.ACCOUNTANT]: '/accounting',
+}
+```
+
+#### **Étape 0.2.2 - Fix Header Navigation Links**
+```javascript
+// 📁 Fichier: /components/layout/dashboard-header.jsx
+// ✅ CORRECTION DES LIENS CASSÉS
+
+// ❌ REMPLACER:
+router.push('/dashboard/profile')  // N'existe pas
+router.push('/dashboard/company')  // N'existe pas
+router.push('/dashboard/settings') // N'existe pas
+
+// ✅ PAR:
+router.push('/profile')    // ✅ Route à créer
+router.push('/company')    // ✅ Route à créer  
+router.push('/settings')   // ✅ Route à créer
+
+// OU temporairement:
+router.push('/dashboard')  // ✅ Fallback vers dashboard principal
+```
+
+#### **Étape 0.2.3 - Creation Pages Manquantes**
+```javascript
+// 📁 Fichier: /app/profile/page.js
+// ✅ NOUVELLE PAGE PROFIL
+'use client'
+
+import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { UserProfileForm } from '@/components/profile/user-profile-form'
+
+export default function ProfilePage() {
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Mon Profil</h1>
+          <p className="text-gray-600">Gérez vos informations personnelles</p>
+        </div>
+        <UserProfileForm />
+      </div>
+    </DashboardLayout>
+  )
+}
+```
+
+```javascript
+// 📁 Fichier: /app/company/page.js  
+// ✅ NOUVELLE PAGE ENTREPRISE
+'use client'
+
+import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { CompanyInfoForm } from '@/components/company/company-info-form'
+
+export default function CompanyPage() {
+  return (
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Ma Société</h1>
+          <p className="text-gray-600">Informations et paramètres de l'entreprise</p>
+        </div>
+        <CompanyInfoForm />
+      </div>
+    </DashboardLayout>
+  )
+}
+```
+
+---
+
+## **🎯 OBJECTIF 0.3 - Unification Design Utilisateurs ↔ Invitations**
+
+### **📊 MÉTRIQUES CIBLES**
+- Design consistency score: 40% → 95%
+- Code reuse: +60% (composants partagés)
+- Maintenance effort: -50% (un seul style)
+
+### **🔧 ÉTAPES D'IMPLÉMENTATION**
+
+#### **Étape 0.3.1 - Système de Cards Stats Unifié**
+```javascript
+// 📁 Fichier: /components/ui/stats-card.jsx
+// ✅ COMPOSANT UNIFIÉ pour Users ET Invitations
+'use client'
+
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+
+const STAT_THEMES = {
+  primary: {
+    border: 'border-blue-200',
+    bg: 'bg-blue-100', 
+    text: 'text-blue-600',
+    hover: 'hover:shadow-blue-100'
+  },
+  success: {
+    border: 'border-green-200',
+    bg: 'bg-green-100',
+    text: 'text-green-600', 
+    hover: 'hover:shadow-green-100'
+  },
+  warning: {
+    border: 'border-amber-200',
+    bg: 'bg-amber-100',
+    text: 'text-amber-600',
+    hover: 'hover:shadow-amber-100'
+  },
+  danger: {
+    border: 'border-red-200', 
+    bg: 'bg-red-100',
+    text: 'text-red-600',
+    hover: 'hover:shadow-red-100'
+  },
+  info: {
+    border: 'border-gray-200',
+    bg: 'bg-gray-100', 
+    text: 'text-gray-600',
+    hover: 'hover:shadow-gray-100'
+  }
+}
+
+export function StatsCard({ 
+  title, 
+  value, 
+  icon: Icon,
+  theme = 'primary',
+  subtitle,
+  className,
+  ...props 
+}) {
+  const themeStyles = STAT_THEMES[theme]
+  
+  return (
+    <Card className={cn(
+      'border bg-white transition-all duration-200 hover:scale-105 hover:shadow-lg',
+      themeStyles.border,
+      themeStyles.hover,
+      className
+    )} {...props}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className={cn('text-2xl font-bold', themeStyles.text)}>
+              {value}
+            </p>
+            {subtitle && (
+              <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+            )}
+          </div>
+          <div className={cn(
+            'h-12 w-12 rounded-xl flex items-center justify-center shadow-sm',
+            themeStyles.bg
+          )}>
+            <Icon className={cn('h-6 w-6', themeStyles.text)} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+#### **Étape 0.3.2 - Refactoring Users Page avec Composant Unifié**
+```javascript
+// 📁 Fichier: /app/users/page.js
+// ✅ UTILISATION DU NOUVEAU COMPOSANT UNIFÉ
+import { StatsCard } from '@/components/ui/stats-card'
+import { Users, UserCheck, Activity, UserX, Trash2 } from 'lucide-react'
+
+// Dans le composant UsersPage:
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+  <StatsCard
+    title="Total utilisateurs"
+    value={stats.total}
+    icon={Users}
+    theme="primary"
+  />
+  
+  <StatsCard
+    title="Utilisateurs actifs"
+    value={stats.active}
+    icon={UserCheck}
+    theme="success"
+  />
+  
+  <StatsCard
+    title="En attente"
+    value={stats.pending}
+    icon={Activity}
+    theme="warning"
+  />
+  
+  <StatsCard
+    title="Inactifs"
+    value={stats.inactive + stats.locked}
+    icon={UserX}
+    theme="info"
+  />
+  
+  <StatsCard
+    title="Supprimés"
+    value={stats.deleted}
+    icon={Trash2}
+    theme="danger"
+  />
+</div>
+```
+
+#### **Étape 0.3.3 - Refactoring Invitations Page avec Design Unifié**
+```javascript
+// 📁 Fichier: /app/invitations/page.js
+// ✅ MÊME STYLE QUE USERS PAGE
+import { StatsCard } from '@/components/ui/stats-card'
+import { Users, Clock, CheckCircle, AlertTriangle, Trash2 } from 'lucide-react'
+
+// Remplacer les cards basiques par:
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+  <StatsCard
+    title="Total invitations"
+    value={stats.total}
+    icon={Users}
+    theme="primary"
+  />
+  
+  <StatsCard
+    title="En attente"
+    value={stats.pending}
+    icon={Clock}
+    theme="warning"
+  />
+  
+  <StatsCard
+    title="Acceptées"
+    value={stats.accepted}
+    icon={CheckCircle}
+    theme="success"
+  />
+  
+  <StatsCard
+    title="Expirées"
+    value={stats.expired}
+    icon={AlertTriangle}
+    theme="danger"
+  />
+  
+  <StatsCard
+    title="Annulées"
+    value={stats.deleted}
+    icon={Trash2}
+    theme="info"
+  />
+</div>
+```
+
+#### **Étape 0.3.4 - Système de Filtres Unifié**
+```javascript
+// 📁 Fichier: /components/ui/unified-filters.jsx
+// ✅ COMPOSANT DE FILTRES RÉUTILISABLE
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Search } from 'lucide-react'
+
+export function UnifiedFilters({
+  searchTerm,
+  onSearchChange,
+  filters = [],
+  onFilterChange,
+  activeFilters = {},
+  resultCount,
+  onReset,
+  title = "Recherche et filtres"
+}) {
+  const hasActiveFilters = searchTerm || Object.values(activeFilters).some(val => val !== 'all')
+  
+  return (
+    <Card className="border border-gray-200 bg-white">
+      <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
+        <div className="flex items-center space-x-2">
+          <Search className="h-4 w-4 text-gray-500" />
+          <CardTitle className="text-base font-medium text-gray-900">
+            {title}
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Search Input */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Rechercher par nom ou email..."
+                value={searchTerm}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-10 border-gray-200 focus:border-gray-900 focus:ring-gray-900"
+              />
+            </div>
+          </div>
+
+          {/* Dynamic Filters */}
+          {filters.map((filter) => (
+            <select
+              key={filter.key}
+              value={activeFilters[filter.key] || 'all'}
+              onChange={(e) => onFilterChange(filter.key, e.target.value)}
+              className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
+            >
+              <option value="all">{filter.allLabel}</option>
+              {filter.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          ))}
+        </div>
+
+        {/* Results Summary */}
+        {hasActiveFilters && (
+          <div className="mt-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
+            <span className="text-sm text-gray-700">
+              {resultCount} résultat(s) trouvé(s)
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              Réinitialiser
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+---
+
+## **🎯 OBJECTIF 0.4 - Cohérence Linguistique et UX**
+
+### **🔧 ÉTAPES D'IMPLÉMENTATION**
+
+#### **Étape 0.4.1 - Dictionnaire Linguistique Unifié**
+```javascript
+// 📁 Fichier: /lib/constants/ui-texts.js
+// ✅ CENTRALISATION DE TOUS LES TEXTES
+export const UI_TEXTS = {
+  // Navigation
+  nav: {
+    openMenu: 'Ouvrir le menu de navigation',
+    closeMenu: 'Fermer le menu de navigation', 
+    dashboard: 'Tableau de bord',
+    profile: 'Mon profil',
+    logout: 'Se déconnecter'
+  },
+  
+  // Actions
+  actions: {
+    save: 'Enregistrer',
+    cancel: 'Annuler', 
+    delete: 'Supprimer',
+    edit: 'Modifier',
+    view: 'Afficher',
+    create: 'Créer',
+    search: 'Rechercher',
+    filter: 'Filtrer',
+    export: 'Exporter',
+    import: 'Importer',
+    send: 'Envoyer',
+    resend: 'Renvoyer'
+  },
+  
+  // Status
+  status: {
+    active: 'Actif',
+    inactive: 'Inactif', 
+    pending: 'En attente',
+    expired: 'Expiré',
+    deleted: 'Supprimé',
+    locked: 'Bloqué'
+  },
+  
+  // Messages  
+  messages: {
+    loading: 'Chargement en cours...',
+    noData: 'Aucune donnée disponible',
+    error: 'Une erreur s\'est produite',
+    success: 'Opération réussie',
+    confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet élément ?',
+    noResults: 'Aucun résultat trouvé'
+  },
+  
+  // Placeholders
+  placeholders: {
+    searchByName: 'Rechercher par nom...',
+    searchByEmail: 'Rechercher par email...',
+    searchByNameOrEmail: 'Rechercher par nom ou email...',
+    selectRole: 'Sélectionner un rôle',
+    selectStatus: 'Sélectionner un statut'
+  },
+  
+  // Titles & Headers
+  headers: {
+    users: {
+      title: 'Gestion des utilisateurs',
+      subtitle: 'Gérez les membres de votre équipe et leurs permissions',
+      tableTitle: 'Liste des utilisateurs'
+    },
+    invitations: {
+      title: 'Gestion des invitations', 
+      subtitle: 'Invitez de nouveaux membres à rejoindre votre équipe',
+      tableTitle: 'Liste des invitations'
+    },
+    dashboard: {
+      welcome: (name) => `Bienvenue${name ? `, ${name}` : ''}`,
+      subtitle: (role, company) => `${role}${company ? ` • ${company}` : ''}`
+    }
+  }
+}
+```
+
+#### **Étape 0.4.2 - Hook useTexts pour Cohérence**
+```javascript
+// 📁 Fichier: /lib/hooks/use-texts.js
+// ✅ HOOK POUR ACCÈS UNIFORME AUX TEXTES
+import { UI_TEXTS } from '@/lib/constants/ui-texts'
+
+export function useTexts() {
+  const t = (path) => {
+    const keys = path.split('.')
+    let result = UI_TEXTS
+    
+    for (const key of keys) {
+      result = result?.[key]
+      if (result === undefined) {
+        console.warn(`Missing text for path: ${path}`)
+        return path // Fallback to path itself
+      }
+    }
+    
+    return result
+  }
+  
+  // Helper methods for common patterns
+  return {
+    t,
+    actions: UI_TEXTS.actions,
+    status: UI_TEXTS.status,
+    messages: UI_TEXTS.messages,
+    placeholders: UI_TEXTS.placeholders,
+    headers: UI_TEXTS.headers
+  }
+}
+```
+
+#### **Étape 0.4.3 - Application sur Users Page**
+```javascript
+// 📁 Fichier: /app/users/page.js
+// ✅ UTILISATION DU SYSTÈME DE TEXTES UNIFIÉ
+import { useTexts } from '@/lib/hooks/use-texts'
+
+export default function UsersPage() {
+  const { t, actions, messages, headers, placeholders } = useTexts()
+  
+  return (
+    <div className="space-y-6">
+      {/* Header unifié */}
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {headers.users.title}
+          </h1>
+          <p className="text-sm text-gray-600">
+            {headers.users.subtitle}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            {actions.export}
+          </Button>
+          <Button>
+            <UserPlus className="mr-2 h-4 w-4" />
+            {actions.create}
+          </Button>
+        </div>
+      </div>
+      
+      {/* Filtres avec textes unifiés */}
+      <UnifiedFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        resultCount={filteredUsers.length}
+        title={t('headers.filters')}
+        // ... autres props
+      />
+    </div>
+  )
+}
+```
+
+---
+
 # **PHASE 1 - PERFORMANCE CRITIQUE** ⚡
 
 ## **🎯 OBJECTIF 1.1 - Bundle Size Optimization**

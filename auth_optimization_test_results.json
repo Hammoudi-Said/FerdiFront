@@ -1,0 +1,40 @@
+{
+  "login_flow": {
+    "total_api_calls": 5,
+    "auth_calls": 1,
+    "user_profile_calls": 2,
+    "company_calls": 2,
+    "cached_calls": 0,
+    "cache_hit_rate": 0.0,
+    "total_duration": 28.47435164451599,
+    "average_response_time": 5.674729299545288
+  },
+  "concurrent_protection": {
+    "concurrent_requests": 5,
+    "total_api_calls": 5,
+    "successful_responses": 0,
+    "protection_effective": false,
+    "duration": 0.572106122970581
+  },
+  "cache_efficiency": {
+    "fresh_fetch_calls": 1,
+    "cache_hit_calls": 1,
+    "rapid_requests_calls": 3,
+    "cache_working": false,
+    "rapid_cache_efficiency": 0.0
+  },
+  "mock_performance": {
+    "total_calls": 4,
+    "average_response_time": 0.03914022445678711,
+    "fastest_response": 0.027614831924438477,
+    "slowest_response": 0.06932187080383301,
+    "mock_data_enabled": true
+  },
+  "overall": {
+    "optimization_successful": false,
+    "api_call_reduction": false,
+    "cache_efficiency_good": false,
+    "concurrent_protection_working": false,
+    "test_timestamp": "2025-09-16T18:27:10.269278"
+  }
+}

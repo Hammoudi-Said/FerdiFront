@@ -148,7 +148,7 @@ Ce document contient un audit technique complet de l'application FERDI. Utilisez
 
 ---
 
-## 🔥 **PROBLÈMES CRITIQUES IDENTIFIÉS - AUDIT FERDI AVANCÉ**
+## 🔥 **PROBLÈMES CRITIQUES IDENTIFIÉS - AUDIT FERDI AVANCÉ** 
 
 ### **🚨 ANALYSE APPROFONDIE DES DÉFAUTS FERDI**
 

@@ -109,23 +109,63 @@ export const ROLE_DASHBOARD_PATHS = {
 - ❌ **RESTE** : Route /dashboard/settings manquante
 
 #### **3. INCOHÉRENCE DESIGN UTILISATEURS ↔ INVITATIONS**
-**PROBLÈME CRITIQUE** : Interfaces complètement différentes pour des données similaires
+**PROBLÈME CRITIQUE** : Interfaces complètement différentes pour des fonctionnalités similaires
 
 ```javascript
-// ✅ USERS TABLE - Design moderne avec cards colorées
+// ✅ USERS PAGE - Design moderne avec cards colorées
+// /app/users/page.js - RÉFÉRENCE À CONSERVER
 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
   <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
+          <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+        </div>
+        <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+          <Users className="h-6 w-6 text-blue-600" />
+        </div>
+      </div>
+    </CardContent>
+  </Card>
 
-// ❌ INVITATIONS TABLE - Design basique sans cohérence  
+// ❌ INVITATIONS PAGE - Design basique sans cohérence  
+// /app/invitations/page.js - À HARMONISER
 <div className="grid gap-4 md:grid-cols-5">
-  <Card> {/* Pas de couleurs, pas d'hover effects */}
+  <Card> {/* ❌ Pas de couleurs, pas d'hover effects, pas de bordures colorées */}
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">Total</p>
+          <p className="text-2xl font-bold text-gray-900">{stats.total}</p> {/* ❌ Pas de couleur */}
+        </div>
+        <Users className="h-8 w-8 text-blue-600" /> {/* ❌ Pas de background coloré */}
+      </div>
+    </CardContent>
+  </Card>
 ```
 
-**DIFFÉRENCES CRITIQUES** :
-- 🎨 **Cards Stats** : Utilisateurs (5 couleurs + hover) vs Invitations (basique)
-- 🎨 **Headers** : Utilisateurs (descriptions riches) vs Invitations (minimal)  
-- 🎨 **Filtres** : Utilisateurs (design avancé) vs Invitations (basic)
-- 🎨 **Tables** : Styles complètement différents
+**DIFFÉRENCES CRITIQUES DÉTECTÉES** :
+- 🎨 **Cards Stats** : 
+  - Users: 5 couleurs différentes (bleu, vert, amber, orange, rouge) + hover effects + bordures
+  - Invitations: Gris uniforme + pas d'hover + icônes sans background
+- 🎨 **Layout** : 
+  - Users: grid-cols-5 avec responsive sm:grid-cols-2 lg:grid-cols-5
+  - Invitations: md:grid-cols-5 sans étapes responsive
+- 🎨 **Header Styling** :
+  - Users: Header complet avec descriptions et boutons stylés
+  - Invitations: Header basique minimaliste
+- 🎨 **Filtres** : 
+  - Users: Card dédiée avec icônes Search + design avancé + résultats count
+  - Invitations: Design plus simple
+- 🎨 **Tables** : 
+  - Users: Hover effects, avatars, badges colorés role-specific
+  - Invitations: Style différent sans cohérence
+
+**IMPACT UTILISATEUR** :
+- 🔴 **Inconsistance UX** : Deux interfaces différentes pour même domaine métier
+- 🔴 **Confusion utilisateur** : Learning curve différente entre sections
+- 🔴 **Brand consistency** : Pas de cohérence visuelle globale
 
 #### **4. PROBLÈMES DE LANGUE ET UX**
 **PROBLÈME CRITIQUE** : Mélange français/anglais + UX incohérente

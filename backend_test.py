@@ -295,7 +295,7 @@ class FerdiPhase1Tester:
         """Test 5: Invitations page should have unified design with users page"""
         try:
             url = urljoin(BASE_URL, "/invitations")
-            response = self.session.get(url)
+            response = self.session.get(url, timeout=30)  # Increase timeout
             
             if response.status_code == 200:
                 content = response.text.lower()

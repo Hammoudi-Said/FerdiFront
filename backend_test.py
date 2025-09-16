@@ -188,16 +188,16 @@ class FerdiPhase1Tester:
     def test_invitation_api_endpoints(self):
         """Test 4: Invitation API endpoints should still work (return proper responses)"""
         invitation_endpoints = [
-            ("GET", "/invitations/", "List invitations"),
-            ("POST", "/invitations/", "Create invitation"),
-            ("POST", "/invitations/accept", "Accept invitation"),
-            ("DELETE", "/invitations/test-id", "Cancel invitation"),
-            ("POST", "/invitations/test-id/resend", "Resend invitation")
+            ("GET", "/api/invitations/", "List invitations"),
+            ("POST", "/api/invitations/", "Create invitation"),
+            ("POST", "/api/invitations/accept", "Accept invitation"),
+            ("DELETE", "/api/invitations/test-id", "Cancel invitation"),
+            ("POST", "/api/invitations/test-id/resend", "Resend invitation")
         ]
         
         for method, endpoint, description in invitation_endpoints:
             try:
-                url = urljoin(API_BASE_URL, endpoint)
+                url = urljoin(BASE_URL, endpoint)
                 
                 # Prepare test data for POST requests
                 test_data = {}
@@ -210,7 +210,7 @@ class FerdiPhase1Tester:
                             "mobile": "0123456789",
                             "password": "TestPassword123!"
                         }
-                    elif endpoint == "/invitations/":
+                    elif endpoint == "/api/invitations/":
                         test_data = {
                             "email": "test@example.com",
                             "role": "DRIVER",
@@ -254,18 +254,34 @@ class FerdiPhase1Tester:
                         }
                     )
                 else:
-                    # Unexpected response
-                    self.log_result(
-                        f"API Endpoint - {description}",
-                        False,
-                        f"Unexpected response: {response.status_code}",
-                        {
-                            "method": method,
-                            "endpoint": endpoint,
-                            "status_code": response.status_code,
-                            "url": url
-                        }
-                    )
+                    # Unexpected response (might be frontend page instead of API)
+                    content_type = response.headers.get('content-type', '')
+                    if 'text/html' in content_type:
+                        self.log_result(
+                            f"API Endpoint - {description}",
+                            False,
+                            f"API endpoint returns HTML page instead of API response (routing issue)",
+                            {
+                                "method": method,
+                                "endpoint": endpoint,
+                                "status_code": response.status_code,
+                                "content_type": content_type,
+                                "url": url
+                            }
+                        )
+                    else:
+                        self.log_result(
+                            f"API Endpoint - {description}",
+                            False,
+                            f"Unexpected response: {response.status_code}",
+                            {
+                                "method": method,
+                                "endpoint": endpoint,
+                                "status_code": response.status_code,
+                                "content_type": content_type,
+                                "url": url
+                            }
+                        )
                     
             except Exception as e:
                 self.log_result(

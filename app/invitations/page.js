@@ -22,7 +22,9 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Trash2
+  Trash2,
+  Download,
+  UserPlus
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -33,7 +35,7 @@ export default function InvitationsPage() {
   const [invitations, setInvitations] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all') // New status filter
+  const [statusFilter, setStatusFilter] = useState('all')
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [stats, setStats] = useState({
     total: 0,
@@ -102,7 +104,7 @@ export default function InvitationsPage() {
             status: UserInvitationStatus.EXPIRED,
             accepted_at: null,
             created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-            expires_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Expired
+            expires_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
             invited_by: {
               id: user.id,
               full_name: user.full_name,
@@ -150,8 +152,6 @@ export default function InvitationsPage() {
         setInvitations(mockInvitations)
         calculateStats(mockInvitations)
       } else {
-        // Always get ALL invitations regardless of status filter
-        // The filtering will be done client-side
         const response = await invitationsAPI.getInvitations()
         setInvitations(response.data || [])
         calculateStats(response.data || [])
@@ -169,7 +169,6 @@ export default function InvitationsPage() {
     let pending = 0, accepted = 0, expired = 0, deleted = 0
 
     invitationsList.forEach(inv => {
-      // Use new status field if available
       if (inv.status) {
         switch (inv.status) {
           case UserInvitationStatus.PENDING:
@@ -204,7 +203,6 @@ export default function InvitationsPage() {
   }
 
   const handleCreateInvitation = (newInvitation) => {
-    // Ensure new invitation has status field
     const invitationWithStatus = {
       ...newInvitation,
       status: UserInvitationStatus.PENDING
@@ -218,7 +216,6 @@ export default function InvitationsPage() {
   const handleResendInvitation = async (invitation) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock resend
         await new Promise(resolve => setTimeout(resolve, 1000))
         toast.success(`Invitation renvoyée à ${invitation.email}`)
       } else {
@@ -234,7 +231,6 @@ export default function InvitationsPage() {
   const handleCancelInvitation = async (invitation) => {
     try {
       if (USE_MOCK_DATA) {
-        // Mock cancel - update status to DELETED
         await new Promise(resolve => setTimeout(resolve, 1000))
         setInvitations(prev => prev.map(inv =>
           inv.id === invitation.id
@@ -244,7 +240,7 @@ export default function InvitationsPage() {
         toast.success('Invitation annulée')
       } else {
         await invitationsAPI.cancelInvitation(invitation.id)
-        await loadInvitations() // Refresh the list
+        await loadInvitations()
         toast.success('Invitation annulée')
       }
     } catch (error) {
@@ -252,14 +248,6 @@ export default function InvitationsPage() {
       toast.error('Erreur lors de l\'annulation de l\'invitation')
     }
   }
-
-  // Remove the useEffect that reloads when status filter changes
-  // We'll filter client-side instead
-  // useEffect(() => {
-  //   if (!loading) {
-  //     loadInvitations()
-  //   }
-  // }, [statusFilter])
 
   // Filter invitations based on search term and status filter
   const filteredInvitations = invitations.filter(invitation => {
@@ -279,89 +267,122 @@ export default function InvitationsPage() {
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
         <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
-              <p className="text-gray-600">Gérez les invitations des nouveaux utilisateurs</p>
+          {/* ✅ HEADER UNIFIÉ - Style Users appliqué */}
+          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold text-gray-900">
+                Gestion des invitations
+              </h1>
+              <p className="text-sm text-gray-600">
+                Invitez de nouveaux membres à rejoindre votre équipe d'autocaristes
+              </p>
             </div>
-            {canManage && (
-              <Button onClick={() => setCreateModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle invitation
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {/* Export CSV functionality */}}
+                disabled={filteredInvitations.length === 0 || loading}
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                size="sm"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
               </Button>
-            )}
+              {canManage && (
+                <Button
+                  onClick={() => setCreateModalOpen(true)}
+                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  size="sm"
+                >
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Nouvelle invitation
+                </Button>
+              )}
+            </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-5">
-            <Card>
+          {/* ✅ STATS CARDS UNIFIÉES - Style Users avec 5 couleurs + hover */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+            <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                    <p className="text-sm font-medium text-gray-600">Total invitations</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
                   </div>
-                  <Users className="h-8 w-8 text-blue-600" />
+                  <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-amber-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">En attente</p>
-                    <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                    <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
                   </div>
-                  <Clock className="h-8 w-8 text-yellow-600" />
+                  <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                    <Clock className="h-6 w-6 text-amber-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-green-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Acceptées</p>
                     <p className="text-2xl font-bold text-green-600">{stats.accepted}</p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+                  <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-red-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Expirées</p>
                     <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
                   </div>
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                  <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border border-gray-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Annulées</p>
                     <p className="text-2xl font-bold text-gray-600">{stats.deleted}</p>
                   </div>
-                  <Trash2 className="h-8 w-8 text-gray-600" />
+                  <div className="h-12 w-12 rounded-xl bg-gray-100 flex items-center justify-center shadow-sm">
+                    <Trash2 className="h-6 w-6 text-gray-600" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtres et recherche</CardTitle>
+          {/* ✅ FILTRES UNIFIÉS - Style Users appliqué */}
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
+              <div className="flex items-center space-x-2">
+                <Search className="h-4 w-4 text-gray-500" />
+                <CardTitle className="text-base font-medium text-gray-900">Recherche et filtres</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
@@ -370,37 +391,29 @@ export default function InvitationsPage() {
                       placeholder="Rechercher par email ou nom..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 border-gray-200 focus:border-gray-900 focus:ring-gray-900"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <label htmlFor="statusFilter" className="text-sm text-gray-600 whitespace-nowrap">
-                      Statut :
-                    </label>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Tous les statuts" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tous les statuts</SelectItem>
-                        {Object.entries(INVITATION_STATUS_DEFINITIONS).map(([value, def]) => (
-                          <SelectItem key={value} value={value}>
-                            {def.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
+                >
+                  <option value="all">Tous les statuts</option>
+                  {Object.entries(INVITATION_STATUS_DEFINITIONS).map(([value, def]) => (
+                    <option key={value} value={value}>
+                      {def.label} ({stats[value.toLowerCase()] || 0})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {(searchTerm || statusFilter !== 'all') && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
-                    {filteredInvitations.length} invitation(s) trouvée(s)
+                <div className="mt-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <span className="text-sm text-gray-700">
+                    {filteredInvitations.length} résultat(s) trouvé(s)
                   </span>
                   <Button
                     variant="ghost"
@@ -409,23 +422,31 @@ export default function InvitationsPage() {
                       setSearchTerm('')
                       setStatusFilter('all')
                     }}
+                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   >
-                    Réinitialiser les filtres
+                    Réinitialiser
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Invitations Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Invitations ({filteredInvitations.length})</CardTitle>
+          {/* ✅ TABLE UNIFIÉE - Style Users appliqué */}
+          <Card className="border border-gray-200 bg-white">
+            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <CardTitle className="text-base font-medium text-gray-900">
+                    Invitations ({filteredInvitations.length})
+                  </CardTitle>
+                </div>
+              </div>
               <CardDescription>
                 Les invitations expirent automatiquement après 7 jours
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
                   <LoadingSpinner size="lg" />

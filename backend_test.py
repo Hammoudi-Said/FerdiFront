@@ -16,8 +16,6 @@ OBJECTIVES:
 import requests
 import json
 import time
-import asyncio
-import aiohttp
 import threading
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional

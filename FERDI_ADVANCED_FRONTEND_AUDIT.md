@@ -42,6 +42,107 @@ Ce document contient un audit technique complet de l'application FERDI. Utilisez
 
 ---
 
+## 🔥 **PROBLÈMES CRITIQUES IDENTIFIÉS PAR L'UTILISATEUR**
+
+### **🚨 ANALYSE APPROFONDIE DES DÉFAUTS FERDI**
+
+#### **1. DUPLICATION HOMEPAGE ↔ DASHBOARD** 
+**PROBLÈME CRITIQUE** : Logique répétitive et flux utilisateur confus
+
+```javascript
+// ❌ ACTUEL: Redirection inutile HomePage → Dashboard
+// /app/page.js - SUPERFLU
+export default function HomePage() {
+  // 500ms delay + redirection = UX dégradée
+  const dashboardPath = getRoleDashboard()
+  setTimeout(() => {
+    router.push(dashboardPath) // Redirection inutile
+  }, 500)
+}
+
+// /app/dashboard/page.js - DESTINATION FINALE
+export default function DashboardPage() {
+  return <DashboardLayout><DashboardRouter /></DashboardLayout>
+}
+```
+
+**IMPACT** :
+- ⚠️ **UX dégradée** : Double chargement, delais artificiels
+- ⚠️ **Performance** : +500ms de delay inutile  
+- ⚠️ **SEO** : Redirections multiples pénalisent le référencement
+- ⚠️ **Maintenance** : Code dupliqué difficile à maintenir
+
+#### **2. REDIRECTIONS VERS PAGES OBSOLÈTES**
+**PROBLÈME CRITIQUE** : Liens vers des routes inexistantes
+
+```javascript
+// ❌ REDIRECTIONS CASSÉES dans /lib/utils/role-redirect.js
+export const ROLE_DASHBOARD_PATHS = {
+  [UserRole.ADMIN]: '/dashboard/company-admin', // ❌ N'EXISTE PAS
+  [UserRole.DISPATCH]: '/dashboard/dispatcher',  // ❌ N'EXISTE PAS  
+  [UserRole.DRIVER]: '/dashboard/driver',        // ❌ N'EXISTE PAS
+}
+
+// ❌ LIENS CASSÉS dans dashboard-header.jsx
+router.push('/dashboard/profile')  // ❌ N'EXISTE PAS
+router.push('/dashboard/company')  // ❌ N'EXISTE PAS
+router.push('/dashboard/settings') // ❌ N'EXISTE PAS
+```
+
+**IMPACT** :
+- 🔴 **404 Errors** : Utilisateurs perdus sur pages inexistantes
+- 🔴 **Navigation cassée** : Boutons du header ne fonctionnent pas
+- 🔴 **Role-based routing défaillant** : Utilisateurs mal dirigés
+
+#### **3. INCOHÉRENCE DESIGN UTILISATEURS ↔ INVITATIONS**
+**PROBLÈME CRITIQUE** : Interfaces complètement différentes pour des données similaires
+
+```javascript
+// ✅ USERS TABLE - Design moderne avec cards colorées
+<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+  <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+
+// ❌ INVITATIONS TABLE - Design basique sans cohérence  
+<div className="grid gap-4 md:grid-cols-5">
+  <Card> {/* Pas de couleurs, pas d'hover effects */}
+```
+
+**DIFFÉRENCES CRITIQUES** :
+- 🎨 **Cards Stats** : Utilisateurs (5 couleurs + hover) vs Invitations (basique)
+- 🎨 **Headers** : Utilisateurs (descriptions riches) vs Invitations (minimal)  
+- 🎨 **Filtres** : Utilisateurs (design avancé) vs Invitations (basic)
+- 🎨 **Tables** : Styles complètement différents
+
+#### **4. PROBLÈMES DE LANGUE ET UX**
+**PROBLÈME CRITIQUE** : Mélange français/anglais + UX incohérente
+
+```javascript
+// ❌ MÉLANGE DE LANGUES
+<span className="sr-only">Ouvrir le menu</span>  // ❌ Français
+<DropdownMenuItem>Aucune action disponible</DropdownMenuItem> // ❌ Français  
+// Mais ailleurs:
+<Button>Show details</Button> // ❌ Anglais
+
+// ❌ TEXTES MANQUANTS/GÉNÉRIQUES
+<h1>Dashboard Administrateur</h1> // ❌ Pas spécifique au contexte
+<p>Gérez les membres de votre équipe</p> // ❌ Trop générique
+```
+
+#### **5. ARCHITECTURE FRAGMENTÉE**
+**PROBLÈME CRITIQUE** : Composants dispersés sans logique unifiée
+
+```
+// ❌ STRUCTURE ACTUELLE CHAOTIQUE
+/components/
+├── dashboard/role-specific/     # Role dashboards isolés
+├── users/users-table.jsx        # Table users moderne  
+├── invitations/invitations-table.jsx  # Table complètement différente
+├── layout/dashboard-layout.jsx  # Layout complexe
+└── auth/auth-guard.jsx         # Auth logic dispersée
+```
+
+---
+
 ## 🔍 **ANALYSE TECHNIQUE DÉTAILLÉE**
 
 ### **✅ POINTS FORTS IDENTIFIÉS**

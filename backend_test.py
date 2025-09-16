@@ -23,7 +23,7 @@ import os
 from urllib.parse import urljoin
 
 # Configuration
-BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://bus-manager-app.preview.emergentagent.com')
+BASE_URL = os.getenv('NEXT_PUBLIC_BASE_URL', 'https://bus-dashboard-revamp.preview.emergentagent.com')
 API_BASE_URL = f"{BASE_URL}/api"
 USE_MOCK_DATA = os.getenv('NEXT_PUBLIC_USE_MOCK_DATA', 'true').lower() == 'true'
 

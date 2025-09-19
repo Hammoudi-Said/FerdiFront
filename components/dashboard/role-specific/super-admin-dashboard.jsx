@@ -241,24 +241,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/audit" className="w-full">
+            <Link href="/dashboard/legal-documents" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <FileText className="mr-2 h-4 w-4" />
-                Logs d'audit
+                Documents légaux
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/system" className="w-full">
+            <Link href="/dashboard/fleet" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Database className="mr-2 h-4 w-4" />
-                Système & performance
+                Gestion des flottes
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/analytics" className="w-full">
+            <Link href="/dashboard/quotes" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <BarChart3 className="mr-2 h-4 w-4" />
-                Analytics globales
+                Devis & analytics
               </Button>
             </Link>
           </CardContent>

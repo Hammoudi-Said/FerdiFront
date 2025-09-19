@@ -156,12 +156,12 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     if (!role) return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
 
     const colorMap = {
-      SUPER_ADMIN: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg',
-      ADMIN: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 shadow-lg',
-      DISPATCH: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg',
-      DRIVER: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg',
-      INTERNAL_SUPPORT: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg',
-      ACCOUNTANT: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-0 shadow-lg'
+      SUPER_ADMIN: 'bg-red-500 text-white border border-red-100 shadow-sm',
+      ADMIN: 'bg-purple-500 text-white border border-purple-100 shadow-sm',
+      DISPATCH: 'bg-blue-500 text-white border border-blue-100 shadow-sm',
+      DRIVER: 'bg-green-500 text-white border border-green-100 shadow-sm',
+      INTERNAL_SUPPORT: 'bg-orange-500 text-white border border-orange-100 shadow-sm',
+      ACCOUNTANT: 'bg-teal-500 text-white border border-teal-100 shadow-sm'
     }
 
     const IconComponent = roleId === 'SUPER_ADMIN' ? Crown : Shield

@@ -185,19 +185,19 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     const statusConfig = {
       ACTIVE: {
         icon: CheckCircle,
-        class: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md'
+        class: 'bg-green-500 text-white border border-green-100 shadow-sm'
       },
       INACTIVE: {
         icon: X,
-        class: 'bg-gradient-to-r from-gray-400 to-gray-500 text-white border-0 shadow-md'
+        class: 'bg-gray-400 text-white border border-gray-100 shadow-sm'
       },
       PENDING: {
         icon: Clock,
-        class: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-md'
+        class: 'bg-yellow-500 text-white border border-yellow-100 shadow-sm'
       },
       LOCKED: {
         icon: AlertCircle,
-        class: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 shadow-md'
+        class: 'bg-red-500 text-white border border-red-100 shadow-sm'
       }
     }
 

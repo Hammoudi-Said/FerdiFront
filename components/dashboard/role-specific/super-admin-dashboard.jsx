@@ -173,24 +173,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/companies" className="w-full">
+            <Link href="/dashboard/company" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Globe className="mr-2 h-4 w-4" />
-                Toutes les entreprises
+                Gestion des entreprises
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/companies/create" className="w-full">
+            <Link href="/users" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Building2 className="mr-2 h-4 w-4" />
-                Créer une entreprise
+                Gestion utilisateurs
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/subscriptions" className="w-full">
+            <Link href="/dashboard/settings" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <TrendingUp className="mr-2 h-4 w-4" />
-                Gestion des abonnements
+                Configuration système
               </Button>
             </Link>
           </CardContent>

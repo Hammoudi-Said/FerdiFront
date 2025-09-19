@@ -1,11 +1,17 @@
 'use client'
 
-import { redirect } from 'next/navigation'
+import { DashboardLayout } from '@/components/layout/dashboard-layout'
+import { OverviewDashboard } from '@/components/home/overview-dashboard'
 
-// ✅ CORRECTION CRITIQUE 1.1: Suppression HomePage redondante
-// Redirection immédiate vers dashboard sans délai artificiel
-// GAIN: -500ms + suppression écran loading redondant + logique auth simplifiée
-export default function RootPage() {
-  // ✅ Redirection immédiate côté serveur - plus de delay 500ms
-  redirect('/dashboard')
+/**
+ * 🏠 PAGE D'ACCUEIL FERDI - Vue d'ensemble générale
+ * Design professionnel avec informations contextuelles selon le rôle
+ * Remplace l'ancienne redirection automatique vers /dashboard
+ */
+export default function HomePage() {
+  return (
+    <DashboardLayout>
+      <OverviewDashboard />
+    </DashboardLayout>
+  )
 }

@@ -327,9 +327,8 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
             {/* 🎨 HEADER UTILISATEUR AVEC DESIGN MODERNE */}
             <div className="relative">
-              <div className={`absolute inset-0 ${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} rounded-2xl transform rotate-1`}></div>
-              <Card className="relative bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
-                <div className={`${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'} px-8 py-6`}>
+              <Card className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                <div className={`${isDeleted ? 'bg-gray-400' : 'bg-blue-500'} px-8 py-6`}>
                   <div className="flex items-start space-x-6">
                     <div className="relative">
                       <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ${isDeleted ? 'grayscale' : ''}`}>

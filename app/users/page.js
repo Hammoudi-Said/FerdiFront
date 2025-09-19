@@ -430,7 +430,7 @@ export default function UsersPage() {
                     <p className="text-sm font-medium text-gray-600">Supprimés</p>
                     <p className="text-2xl font-bold text-red-600">{stats.deleted}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
+                  <div className="h-12 w-12 rounded-lg bg-red-50 flex items-center justify-center border border-red-100">
                     <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                 </div>

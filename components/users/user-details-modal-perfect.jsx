@@ -167,7 +167,7 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     const IconComponent = roleId === 'SUPER_ADMIN' ? Crown : Shield
 
     return (
-      <Badge className={`${colorMap[roleId] || 'bg-gray-100 text-gray-700'} font-semibold px-3 py-1 text-sm`}>
+      <Badge className={`${colorMap[roleId] || 'bg-gray-500 text-white border border-gray-100 shadow-sm'} font-semibold px-3 py-1 text-sm`}>
         <IconComponent className="mr-2 h-4 w-4" />
         {role.label}
       </Badge>

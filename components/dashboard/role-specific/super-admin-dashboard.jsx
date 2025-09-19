@@ -207,24 +207,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/users" className="w-full">
+            <Link href="/users" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
                 Tous les utilisateurs
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/roles" className="w-full">
+            <Link href="/invitations" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Shield className="mr-2 h-4 w-4" />
-                Gestion des rôles
+                Gestion des invitations
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/sessions" className="w-full">
+            <Link href="/dashboard/settings" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Activity className="mr-2 h-4 w-4" />
-                Sessions actives
+                Paramètres système
               </Button>
             </Link>
           </CardContent>

@@ -275,7 +275,7 @@ export function DriverDashboard() {
           <CardTitle>Actions rapides</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
-          <Link href="/dashboard/my-schedule" className="w-full">
+          <Link href="/dashboard/planning" className="w-full">
             <Button variant="outline" className="w-full justify-start">
               <Calendar className="mr-2 h-4 w-4" />
               Mon planning complet

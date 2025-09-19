@@ -16,7 +16,7 @@ import sys
 from urllib.parse import urljoin
 
 # Configuration
-BASE_URL = "https://bus-dashboard-revamp.preview.emergentagent.com"
+BASE_URL = "https://ferdi-ux-overhaul.preview.emergentagent.com"
 API_BASE_URL = f"{BASE_URL}/api"
 
 class FerdiPhase1Tester:

@@ -367,7 +367,7 @@ export default function UsersPage() {
 
           {/* Colorful Stats Cards - Réorganisées avec 5 couleurs distinctes */}
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-            <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>

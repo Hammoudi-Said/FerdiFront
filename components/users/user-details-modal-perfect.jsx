@@ -364,10 +364,10 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
               {/* INFORMATIONS PERSONNELLES */}
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
+              <Card className="border border-gray-200 shadow-sm bg-white rounded-lg overflow-hidden">
+                <CardHeader className="bg-gray-50 border-b border-gray-100 px-6 py-4">
                   <CardTitle className="flex items-center space-x-3 text-gray-800">
-                    <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                    <div className="p-2 bg-green-500 rounded-lg border border-green-100">
                       <User className="h-5 w-5 text-white" />
                     </div>
                     <span className="text-lg font-semibold">Informations personnelles</span>

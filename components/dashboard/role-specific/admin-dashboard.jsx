@@ -260,7 +260,7 @@ export function AdminDashboard() {
                     <p className="text-sm font-medium text-yellow-800">
                       {stats.pendingUsers} utilisateur(s) en attente de validation
                     </p>
-                    <Link href="/dashboard/users">
+                    <Link href="/users">
                       <Button variant="link" size="sm" className="p-0 text-yellow-700">
                         Valider maintenant →
                       </Button>

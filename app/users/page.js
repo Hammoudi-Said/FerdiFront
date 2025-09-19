@@ -381,49 +381,49 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card className="border border-green-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
                     <p className="text-2xl font-bold text-green-600">{stats.active}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
+                  <div className="h-12 w-12 rounded-lg bg-green-50 flex items-center justify-center border border-green-100">
                     <UserCheck className="h-6 w-6 text-green-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-amber-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">En attente</p>
                     <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
+                  <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center border border-amber-100">
                     <Activity className="h-6 w-6 text-amber-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-orange-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Inactifs</p>
                     <p className="text-2xl font-bold text-orange-600">{stats.inactive + stats.locked}</p>
                   </div>
-                  <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
+                  <div className="h-12 w-12 rounded-lg bg-orange-50 flex items-center justify-center border border-orange-100">
                     <UserX className="h-6 w-6 text-orange-600" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border border-red-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
+            <Card className="border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>

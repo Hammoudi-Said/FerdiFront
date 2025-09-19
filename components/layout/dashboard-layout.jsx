@@ -164,10 +164,10 @@ export function DashboardLayout({ children }) {
   // Enhanced loading screen
   if (isLoading || isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center space-y-4">
           <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 bg-gray-200 rounded-full animate-pulse"></div>
             <LoadingSpinner size="lg" className="relative z-10" />
           </div>
           <div>

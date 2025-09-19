@@ -99,7 +99,7 @@ export function OverviewDashboard() {
     } else if (user?.role === 'DRIVER') {
       actions.push(
         { title: 'Mes missions', href: '/dashboard/my-routes', icon: Calendar },
-        { title: 'Mon véhicule', href: '/dashboard/my-vehicle', icon: Bus }
+        { title: 'Véhicules', href: '/dashboard/fleet', icon: Bus }
       )
     }
 

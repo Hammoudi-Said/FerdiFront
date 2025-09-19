@@ -272,11 +272,11 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-white">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-white">
         <DialogHeader className="border-b border-gray-100 pb-6">
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <div className="p-3 bg-blue-500 rounded-lg shadow-sm border border-blue-100">
                 <User className="h-6 w-6 text-white" />
               </div>
               <div>

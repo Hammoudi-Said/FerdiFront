@@ -252,16 +252,17 @@ export function DashboardSidebar() {
 
   return (
     <div className={cn(
-      'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm',
+      'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700 transition-all duration-300 flex flex-col h-full shadow-2xl',
       collapsed ? 'w-16' : 'w-72'
     )}>
-      {/* Header avec logo Ferdi */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
+      {/* Header moderne avec logo Ferdi */}
+      <div className="flex h-16 items-center justify-between px-4 border-b border-slate-700/50 bg-slate-900/50">
         {!collapsed && (
           <div className="flex items-center">
             <FerdiLogoSidebar collapsed={collapsed} className="mr-2" />
             <div className="ml-2">
-              <p className="text-xs text-gray-500">Gestion de flotte</p>
+              <h1 className="text-white font-bold text-lg">FERDI</h1>
+              <p className="text-xs text-slate-400">Gestion de flotte</p>
             </div>
           </div>
         )}
@@ -276,7 +277,7 @@ export function DashboardSidebar() {
           variant="ghost"
           size="sm"
           onClick={handleToggleCollapse}
-          className="text-gray-600 hover:bg-gray-100 flex-shrink-0"
+          className="text-slate-400 hover:bg-slate-800 hover:text-white flex-shrink-0 transition-all duration-200"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -286,23 +287,28 @@ export function DashboardSidebar() {
         </Button>
       </div>
 
-      {/* User Role Badge */}
+      {/* Badge rôle utilisateur moderne */}
       {!collapsed && roleData && (
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-slate-700/50">
           <div className={cn(
-            'rounded-lg p-3 border-l-4 bg-gray-50',
-            roleData.color.replace('bg-', 'border-')
+            'rounded-xl p-4 border-l-4 bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm',
+            ROLE_COLORS[user?.role]?.border || 'border-blue-500'
           )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-semibold text-white">
                   {roleData.label}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-slate-300 mt-1">
                   {roleData.description}
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs bg-white text-gray-700 border">
+              <Badge 
+                className={cn(
+                  'text-xs font-medium border-0 shadow-lg',
+                  ROLE_COLORS[user?.role]?.bg || 'bg-blue-600'
+                )}
+              >
                 {user?.role}
               </Badge>
             </div>
@@ -311,37 +317,38 @@ export function DashboardSidebar() {
       )}
 
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-2 px-2">
-          {/* Main Dashboard */}
+        <nav className="space-y-3 px-3">
+          {/* Dashboard principal */}
           {groups.main.length > 0 && renderNavGroup(groups.main)}
           
-          {/* Management Section */}
-          {groups.management.length > 0 && renderNavGroup(groups.management, collapsed ? null : "Gestion")}
+          {/* Section Gestion */}
+          {groups.management.length > 0 && renderNavGroup(groups.management, collapsed ? null : "🔧 GESTION")}
           
-          {/* Operations Section */}
-          {groups.operations.length > 0 && renderNavGroup(groups.operations, collapsed ? null : "Opérations")}
+          {/* Section Opérations */}
+          {groups.operations.length > 0 && renderNavGroup(groups.operations, collapsed ? null : "🚛 OPÉRATIONS")}
           
-          {/* Business Section */}
-          {groups.business.length > 0 && renderNavGroup(groups.business, collapsed ? null : "Business")}
+          {/* Section Business */}
+          {groups.business.length > 0 && renderNavGroup(groups.business, collapsed ? null : "💼 BUSINESS")}
         </nav>
       </ScrollArea>
 
-      {/* 🔧 FIX: Enhanced User Profile Section with better error handling */}
+      {/* Profil utilisateur moderne */}
       {!collapsed && user && (
-        <div className="p-4 border-t border-gray-200 mt-auto">
-          <div className="bg-gray-50 rounded-lg p-3 border">
+        <div className="p-4 border-t border-slate-700/50 mt-auto bg-slate-900/50">
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-700/60 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
             <div className="flex items-center">
               <div className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3',
-                roleData?.color || 'bg-gray-500'
+                'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-3 shadow-lg',
+                ROLE_COLORS[user?.role]?.bg || 'bg-blue-600',
+                'ring-2 ring-slate-500/30'
               )}>
                 {getUserInitials()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-semibold text-white truncate">
                   {getUserDisplayName()}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-slate-300 truncate">
                   {roleData?.label || 'Utilisateur'}
                 </p>
               </div>

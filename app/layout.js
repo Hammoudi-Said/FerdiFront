@@ -3,7 +3,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/sonner'
 import AuthGuard from '@/components/auth/auth-guard'
 import SessionManager from '@/components/auth/session-manager'
-import NavigationWrapper from '@/components/navigation/navigation-wrapper'
 import ErrorBoundary from '@/components/common/error-boundary'
 
 export const metadata = {
@@ -26,14 +25,11 @@ export default function RootLayout({ children }) {
           <ErrorBoundary fallbackMessage="Une erreur s'est produite dans l'application FERDI. L'équipe technique a été notifiée.">
             {/* Authentication Guard - Protects entire app */}
             <AuthGuard>
-              {/* Navigation Wrapper - Enhanced navigation controls */}
-              <NavigationWrapper>
-                {/* Session Manager - Handles session timeouts and warnings */}
-                <SessionManager />
-                
-                {/* Main Content */}
-                {children}
-              </NavigationWrapper>
+              {/* Session Manager - Handles session timeouts and warnings */}
+              <SessionManager />
+              
+              {/* Main Content */}
+              {children}
             </AuthGuard>
           </ErrorBoundary>
           

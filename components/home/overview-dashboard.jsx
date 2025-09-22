@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ROLE_DEFINITIONS } from '@/lib/constants/enums'
+import { DATA_COLORS, FERDI_GRADIENTS, ANIMATIONS } from '@/lib/constants/colors'
 import {
   Users,
   Building2,

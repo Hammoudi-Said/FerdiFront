@@ -192,7 +192,8 @@ export function DashboardSidebar() {
   const renderNavGroup = useCallback((items, title = null) => (
     <div className="space-y-1">
       {title && !collapsed && (
-        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <div className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-600 to-transparent mr-3"></div>
           {title}
         </div>
       )}
@@ -200,24 +201,63 @@ export function DashboardSidebar() {
         const Icon = item.icon
         const isActive = pathname === item.href
 
+        // Couleurs par type d'élément
+        let itemColors = {
+          default: 'text-slate-300 hover:text-white hover:bg-slate-800/50',
+          active: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25',
+          icon: isActive ? 'text-white' : 'text-slate-400'
+        }
+
+        // Couleurs spécifiques selon le type
+        if (item.href.includes('users') || item.href.includes('invitations')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-blue-100 hover:bg-blue-900/30',
+            active: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25',
+            icon: isActive ? 'text-white' : 'text-blue-400'
+          }
+        } else if (item.href.includes('fleet') || item.href.includes('drivers')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-orange-100 hover:bg-orange-900/30',
+            active: 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg shadow-orange-500/25',
+            icon: isActive ? 'text-white' : 'text-orange-400'
+          }
+        } else if (item.href.includes('planning') || item.href.includes('my-routes')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-green-100 hover:bg-green-900/30',
+            active: 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-500/25',
+            icon: isActive ? 'text-white' : 'text-green-400'
+          }
+        } else if (item.href.includes('quotes') || item.href.includes('invoices') || item.href.includes('clients')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-emerald-100 hover:bg-emerald-900/30',
+            active: 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-500/25',
+            icon: isActive ? 'text-white' : 'text-emerald-400'
+          }
+        }
+
         return (
           <Link key={item.href} href={item.href} onClick={updateActivity}>
             <Button
               variant="ghost"
               className={cn(
-                'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
-                isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600 font-medium',
-                collapsed ? 'px-2' : 'px-3'
+                'w-full justify-start transition-all duration-200 hover:scale-105 border-0',
+                isActive ? itemColors.active : itemColors.default,
+                collapsed ? 'px-2' : 'px-3',
+                isActive && 'transform translate-x-1'
               )}
               title={collapsed ? item.title : undefined}
             >
               <Icon className={cn(
-                'h-5 w-5',
+                'h-5 w-5 transition-all duration-200',
                 !collapsed && 'mr-3',
-                isActive ? 'text-blue-600' : 'text-gray-500'
+                itemColors.icon,
+                isActive && 'scale-110'
               )} />
               {!collapsed && (
                 <span className="font-medium">{item.title}</span>
+              )}
+              {!collapsed && isActive && (
+                <div className="ml-auto w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
               )}
             </Button>
           </Link>

@@ -10,6 +10,7 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 import { ROLE_DEFINITIONS, UserRole } from '@/lib/constants/enums'
 import { Badge } from '@/components/ui/badge'
 import { FerdiLogoSidebar } from '@/components/ui/ferdi-logo'
+import { FERDI_GRADIENTS, DATA_COLORS, ROLE_COLORS, ANIMATIONS } from '@/lib/constants/colors'
 import {
   Bus,
   Users,

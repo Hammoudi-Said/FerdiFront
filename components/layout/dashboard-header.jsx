@@ -18,6 +18,7 @@ import { LogOut, Settings, User, Building2, TestTube, Clock, Shield, Activity } 
 import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { ROLE_COLORS } from '@/lib/constants/colors'
 
 const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true'
 

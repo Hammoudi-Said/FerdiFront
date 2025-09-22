@@ -289,6 +289,21 @@ export function DashboardSidebar() {
 
   const groups = groupedItems()
 
+  // Couleurs par rôle simplifiées
+  const getRoleColors = (role) => {
+    const colors = {
+      SUPER_ADMIN: { bg: 'bg-gradient-to-r from-purple-600 to-purple-700', border: 'border-purple-500' },
+      ADMIN: { bg: 'bg-gradient-to-r from-blue-600 to-blue-700', border: 'border-blue-500' },
+      DISPATCH: { bg: 'bg-gradient-to-r from-orange-600 to-orange-700', border: 'border-orange-500' },
+      DRIVER: { bg: 'bg-gradient-to-r from-green-600 to-green-700', border: 'border-green-500' },
+      INTERNAL_SUPPORT: { bg: 'bg-gradient-to-r from-teal-600 to-teal-700', border: 'border-teal-500' },
+      ACCOUNTANT: { bg: 'bg-gradient-to-r from-emerald-600 to-emerald-700', border: 'border-emerald-500' }
+    }
+    return colors[role] || { bg: 'bg-gradient-to-r from-blue-600 to-blue-700', border: 'border-blue-500' }
+  }
+
+  const roleColors = getRoleColors(user?.role)
+
   return (
     <div className={cn(
       'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700 transition-all duration-300 flex flex-col h-full shadow-2xl',
@@ -331,7 +346,7 @@ export function DashboardSidebar() {
         <div className="p-4 border-b border-slate-700/50">
           <div className={cn(
             'rounded-xl p-4 border-l-4 bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm',
-            ROLE_COLORS[user?.role]?.border || 'border-blue-500'
+            roleColors.border
           )}>
             <div className="flex items-center justify-between">
               <div>
@@ -344,8 +359,8 @@ export function DashboardSidebar() {
               </div>
               <Badge 
                 className={cn(
-                  'text-xs font-medium border-0 shadow-lg',
-                  ROLE_COLORS[user?.role]?.bg || 'bg-blue-600'
+                  'text-xs font-medium border-0 shadow-lg text-white',
+                  roleColors.bg
                 )}
               >
                 {user?.role}
@@ -377,9 +392,8 @@ export function DashboardSidebar() {
           <div className="bg-gradient-to-br from-slate-800/80 to-slate-700/60 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
             <div className="flex items-center">
               <div className={cn(
-                'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-3 shadow-lg',
-                ROLE_COLORS[user?.role]?.bg || 'bg-blue-600',
-                'ring-2 ring-slate-500/30'
+                'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-3 shadow-lg ring-2 ring-slate-500/30',
+                roleColors.bg
               )}>
                 {getUserInitials()}
               </div>

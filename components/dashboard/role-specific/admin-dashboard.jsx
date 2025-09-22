@@ -145,14 +145,14 @@ export function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/users" className="w-full">
+            <Link href="/users" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
                 Gérer les utilisateurs
               </Button>
             </Link>
 
-            <Link href="/dashboard/invitations" className="w-full">
+            <Link href="/invitations" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Mail className="mr-2 h-4 w-4" />
                 Inviter des collaborateurs
@@ -260,7 +260,7 @@ export function AdminDashboard() {
                     <p className="text-sm font-medium text-yellow-800">
                       {stats.pendingUsers} utilisateur(s) en attente de validation
                     </p>
-                    <Link href="/dashboard/users">
+                    <Link href="/users">
                       <Button variant="link" size="sm" className="p-0 text-yellow-700">
                         Valider maintenant →
                       </Button>

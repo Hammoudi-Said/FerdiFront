@@ -194,11 +194,11 @@ export function UsersTable({
               <TableRow
                 key={user.id}
                 className={`
-                  hover:bg-blue-50 transition-colors border-gray-100 cursor-pointer
+                  ${!isDeleted ? 'hover:bg-blue-50 cursor-pointer' : 'cursor-not-allowed'} transition-colors border-gray-100
                   ${selectedUsers.includes(user.id) ? 'bg-gray-50' : ''}
                   ${isDeleted ? 'opacity-60' : ''}
                 `}
-                onClick={() => onView && onView(user)}
+                onClick={() => !isDeleted && onView && onView(user)}
               >
                 {canManage && (
                   <TableCell onClick={(e) => e.stopPropagation()}>

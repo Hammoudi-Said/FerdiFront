@@ -191,7 +191,8 @@ export function DashboardSidebar() {
   const renderNavGroup = useCallback((items, title = null) => (
     <div className="space-y-1">
       {title && !collapsed && (
-        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+        <div className="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center">
+          <div className="flex-1 h-px bg-gradient-to-r from-slate-600 to-transparent mr-3"></div>
           {title}
         </div>
       )}
@@ -199,24 +200,63 @@ export function DashboardSidebar() {
         const Icon = item.icon
         const isActive = pathname === item.href
 
+        // Couleurs par type d'élément
+        let itemColors = {
+          default: 'text-slate-300 hover:text-white hover:bg-slate-800/50',
+          active: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25',
+          icon: isActive ? 'text-white' : 'text-slate-400'
+        }
+
+        // Couleurs spécifiques selon le type
+        if (item.href.includes('users') || item.href.includes('invitations')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-blue-100 hover:bg-blue-900/30',
+            active: 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/25',
+            icon: isActive ? 'text-white' : 'text-blue-400'
+          }
+        } else if (item.href.includes('fleet') || item.href.includes('drivers')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-orange-100 hover:bg-orange-900/30',
+            active: 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg shadow-orange-500/25',
+            icon: isActive ? 'text-white' : 'text-orange-400'
+          }
+        } else if (item.href.includes('planning') || item.href.includes('my-routes')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-green-100 hover:bg-green-900/30',
+            active: 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg shadow-green-500/25',
+            icon: isActive ? 'text-white' : 'text-green-400'
+          }
+        } else if (item.href.includes('quotes') || item.href.includes('invoices') || item.href.includes('clients')) {
+          itemColors = {
+            default: 'text-slate-300 hover:text-emerald-100 hover:bg-emerald-900/30',
+            active: 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg shadow-emerald-500/25',
+            icon: isActive ? 'text-white' : 'text-emerald-400'
+          }
+        }
+
         return (
           <Link key={item.href} href={item.href} onClick={updateActivity}>
             <Button
               variant="ghost"
               className={cn(
-                'w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200',
-                isActive && 'bg-blue-50 text-blue-700 border-r-2 border-blue-600 font-medium',
-                collapsed ? 'px-2' : 'px-3'
+                'w-full justify-start transition-all duration-200 hover:scale-105 border-0',
+                isActive ? itemColors.active : itemColors.default,
+                collapsed ? 'px-2' : 'px-3',
+                isActive && 'transform translate-x-1'
               )}
               title={collapsed ? item.title : undefined}
             >
               <Icon className={cn(
-                'h-5 w-5',
+                'h-5 w-5 transition-all duration-200',
                 !collapsed && 'mr-3',
-                isActive ? 'text-blue-600' : 'text-gray-500'
+                itemColors.icon,
+                isActive && 'scale-110'
               )} />
               {!collapsed && (
                 <span className="font-medium">{item.title}</span>
+              )}
+              {!collapsed && isActive && (
+                <div className="ml-auto w-2 h-2 rounded-full bg-white/80 animate-pulse"></div>
               )}
             </Button>
           </Link>
@@ -249,18 +289,34 @@ export function DashboardSidebar() {
 
   const groups = groupedItems()
 
+  // Couleurs par rôle simplifiées
+  const getRoleColors = (role) => {
+    const colors = {
+      SUPER_ADMIN: { bg: 'bg-gradient-to-r from-purple-600 to-purple-700', border: 'border-purple-500' },
+      ADMIN: { bg: 'bg-gradient-to-r from-blue-600 to-blue-700', border: 'border-blue-500' },
+      DISPATCH: { bg: 'bg-gradient-to-r from-orange-600 to-orange-700', border: 'border-orange-500' },
+      DRIVER: { bg: 'bg-gradient-to-r from-green-600 to-green-700', border: 'border-green-500' },
+      INTERNAL_SUPPORT: { bg: 'bg-gradient-to-r from-teal-600 to-teal-700', border: 'border-teal-500' },
+      ACCOUNTANT: { bg: 'bg-gradient-to-r from-emerald-600 to-emerald-700', border: 'border-emerald-500' }
+    }
+    return colors[role] || { bg: 'bg-gradient-to-r from-blue-600 to-blue-700', border: 'border-blue-500' }
+  }
+
+  const roleColors = getRoleColors(user?.role)
+
   return (
     <div className={cn(
-      'bg-white border-r border-gray-200 transition-all duration-300 flex flex-col h-full shadow-sm',
+      'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700 transition-all duration-300 flex flex-col h-full shadow-2xl',
       collapsed ? 'w-16' : 'w-72'
     )}>
-      {/* Header avec logo Ferdi */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
+      {/* Header moderne avec logo Ferdi */}
+      <div className="flex h-16 items-center justify-between px-4 border-b border-slate-700/50 bg-slate-900/50">
         {!collapsed && (
           <div className="flex items-center">
             <FerdiLogoSidebar collapsed={collapsed} className="mr-2" />
             <div className="ml-2">
-              <p className="text-xs text-gray-500">Gestion de flotte</p>
+              <h1 className="text-white font-bold text-lg">FERDI</h1>
+              <p className="text-xs text-slate-400">Gestion de flotte</p>
             </div>
           </div>
         )}
@@ -275,7 +331,7 @@ export function DashboardSidebar() {
           variant="ghost"
           size="sm"
           onClick={handleToggleCollapse}
-          className="text-gray-600 hover:bg-gray-100 flex-shrink-0"
+          className="text-slate-400 hover:bg-slate-800 hover:text-white flex-shrink-0 transition-all duration-200"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -285,23 +341,28 @@ export function DashboardSidebar() {
         </Button>
       </div>
 
-      {/* User Role Badge */}
+      {/* Badge rôle utilisateur moderne */}
       {!collapsed && roleData && (
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-slate-700/50">
           <div className={cn(
-            'rounded-lg p-3 border-l-4 bg-gray-50',
-            roleData.color.replace('bg-', 'border-')
+            'rounded-xl p-4 border-l-4 bg-gradient-to-r from-slate-800/50 to-slate-700/30 backdrop-blur-sm',
+            roleColors.border
           )}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-semibold text-white">
                   {roleData.label}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-slate-300 mt-1">
                   {roleData.description}
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs bg-white text-gray-700 border">
+              <Badge 
+                className={cn(
+                  'text-xs font-medium border-0 shadow-lg text-white',
+                  roleColors.bg
+                )}
+              >
                 {user?.role}
               </Badge>
             </div>
@@ -310,37 +371,37 @@ export function DashboardSidebar() {
       )}
 
       <ScrollArea className="flex-1 py-4">
-        <nav className="space-y-2 px-2">
-          {/* Main Dashboard */}
+        <nav className="space-y-3 px-3">
+          {/* Dashboard principal */}
           {groups.main.length > 0 && renderNavGroup(groups.main)}
           
-          {/* Management Section */}
-          {groups.management.length > 0 && renderNavGroup(groups.management, collapsed ? null : "Gestion")}
+          {/* Section Gestion */}
+          {groups.management.length > 0 && renderNavGroup(groups.management, collapsed ? null : "🔧 GESTION")}
           
-          {/* Operations Section */}
-          {groups.operations.length > 0 && renderNavGroup(groups.operations, collapsed ? null : "Opérations")}
+          {/* Section Opérations */}
+          {groups.operations.length > 0 && renderNavGroup(groups.operations, collapsed ? null : "🚛 OPÉRATIONS")}
           
-          {/* Business Section */}
-          {groups.business.length > 0 && renderNavGroup(groups.business, collapsed ? null : "Business")}
+          {/* Section Business */}
+          {groups.business.length > 0 && renderNavGroup(groups.business, collapsed ? null : "💼 BUSINESS")}
         </nav>
       </ScrollArea>
 
-      {/* 🔧 FIX: Enhanced User Profile Section with better error handling */}
+      {/* Profil utilisateur moderne */}
       {!collapsed && user && (
-        <div className="p-4 border-t border-gray-200 mt-auto">
-          <div className="bg-gray-50 rounded-lg p-3 border">
+        <div className="p-4 border-t border-slate-700/50 mt-auto bg-slate-900/50">
+          <div className="bg-gradient-to-br from-slate-800/80 to-slate-700/60 rounded-xl p-4 border border-slate-600/30 backdrop-blur-sm">
             <div className="flex items-center">
               <div className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-3',
-                roleData?.color || 'bg-gray-500'
+                'w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-3 shadow-lg ring-2 ring-slate-500/30',
+                roleColors.bg
               )}>
                 {getUserInitials()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-semibold text-white truncate">
                   {getUserDisplayName()}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-slate-300 truncate">
                   {roleData?.label || 'Utilisateur'}
                 </p>
               </div>

@@ -156,18 +156,18 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     if (!role) return <Badge variant="secondary" className="text-gray-600">Inconnu</Badge>
 
     const colorMap = {
-      SUPER_ADMIN: 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 shadow-lg',
-      ADMIN: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white border-0 shadow-lg',
-      DISPATCH: 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg',
-      DRIVER: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg',
-      INTERNAL_SUPPORT: 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-lg',
-      ACCOUNTANT: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-0 shadow-lg'
+      SUPER_ADMIN: 'bg-red-500 text-white border border-red-100 shadow-sm',
+      ADMIN: 'bg-purple-500 text-white border border-purple-100 shadow-sm',
+      DISPATCH: 'bg-blue-500 text-white border border-blue-100 shadow-sm',
+      DRIVER: 'bg-green-500 text-white border border-green-100 shadow-sm',
+      INTERNAL_SUPPORT: 'bg-orange-500 text-white border border-orange-100 shadow-sm',
+      ACCOUNTANT: 'bg-teal-500 text-white border border-teal-100 shadow-sm'
     }
 
     const IconComponent = roleId === 'SUPER_ADMIN' ? Crown : Shield
 
     return (
-      <Badge className={`${colorMap[roleId] || 'bg-gray-100 text-gray-700'} font-semibold px-3 py-1 text-sm`}>
+      <Badge className={`${colorMap[roleId] || 'bg-gray-500 text-white border border-gray-100 shadow-sm'} font-semibold px-3 py-1 text-sm`}>
         <IconComponent className="mr-2 h-4 w-4" />
         {role.label}
       </Badge>
@@ -185,19 +185,19 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
     const statusConfig = {
       ACTIVE: {
         icon: CheckCircle,
-        class: 'bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md'
+        class: 'bg-green-500 text-white border border-green-100 shadow-sm'
       },
       INACTIVE: {
         icon: X,
-        class: 'bg-gradient-to-r from-gray-400 to-gray-500 text-white border-0 shadow-md'
+        class: 'bg-gray-400 text-white border border-gray-100 shadow-sm'
       },
       PENDING: {
         icon: Clock,
-        class: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 shadow-md'
+        class: 'bg-yellow-500 text-white border border-yellow-100 shadow-sm'
       },
       LOCKED: {
         icon: AlertCircle,
-        class: 'bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 shadow-md'
+        class: 'bg-red-500 text-white border border-red-100 shadow-sm'
       }
     }
 
@@ -272,11 +272,11 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-gradient-to-br from-slate-50 to-white">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto bg-white">
         <DialogHeader className="border-b border-gray-100 pb-6">
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+              <div className="p-3 bg-blue-500 rounded-lg shadow-sm border border-blue-100">
                 <User className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -327,9 +327,8 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
 
             {/* 🎨 HEADER UTILISATEUR AVEC DESIGN MODERNE */}
             <div className="relative">
-              <div className={`absolute inset-0 ${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} rounded-2xl transform rotate-1`}></div>
-              <Card className="relative bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
-                <div className={`${isDeleted ? 'bg-gradient-to-r from-gray-400 to-gray-500' : 'bg-gradient-to-r from-blue-500 to-indigo-600'} px-8 py-6`}>
+              <Card className="relative bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                <div className={`${isDeleted ? 'bg-gray-400' : 'bg-blue-500'} px-8 py-6`}>
                   <div className="flex items-start space-x-6">
                     <div className="relative">
                       <Avatar className={`h-24 w-24 border-4 border-white shadow-lg ${isDeleted ? 'grayscale' : ''}`}>
@@ -365,10 +364,10 @@ export function UserDetailsPerfectModal({ open, onOpenChange, user, onSave, onDe
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
               {/* INFORMATIONS PERSONNELLES */}
-              <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b border-gray-100 px-6 py-4">
+              <Card className="border border-gray-200 shadow-sm bg-white rounded-lg overflow-hidden">
+                <CardHeader className="bg-gray-50 border-b border-gray-100 px-6 py-4">
                   <CardTitle className="flex items-center space-x-3 text-gray-800">
-                    <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                    <div className="p-2 bg-green-500 rounded-lg border border-green-100">
                       <User className="h-5 w-5 text-white" />
                     </div>
                     <span className="text-lg font-semibold">Informations personnelles</span>

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuthStore } from '@/lib/stores/auth-store'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModernPageLayout, ModernCard, ModernSection, ModernStats } from '@/components/ui/modern-page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -316,37 +316,60 @@ export default function UsersPage() {
     }
   }, [filteredUsers])
 
+  // Préparation des statistiques pour le nouveau composant ModernStats
+  const modernStats = [
+    {
+      label: 'Total utilisateurs',
+      value: stats.total,
+      icon: Users,
+      trend: '+12% ce mois'
+    },
+    {
+      label: 'Utilisateurs actifs',
+      value: stats.active,
+      icon: UserCheck,
+      subtitle: `${Math.round((stats.active/stats.total)*100)}% du total`
+    },
+    {
+      label: 'En attente',
+      value: stats.pending,
+      icon: Activity,
+      subtitle: 'Validation requise'
+    },
+    {
+      label: 'Inactifs',
+      value: stats.inactive + stats.locked,
+      icon: UserX,
+      subtitle: 'Accès suspendu'
+    }
+  ]
+
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
-        <div className="space-y-6">
-          {/* Clean Header */}
-          <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Gestion des utilisateurs
-              </h1>
-              <p className="text-sm text-gray-600">
-                Gérez les membres de votre équipe et leurs permissions
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
+        <ModernPageLayout
+          title="👥 Gestion des utilisateurs"
+          subtitle="Gérez les membres de votre équipe et leurs permissions"
+          icon={Users}
+          headerGradient="from-blue-600 via-blue-700 to-purple-600"
+          actions={
+            <div className="flex items-center space-x-3">
               {selectedUsers.length > 0 && (
                 <Button
                   variant="outline"
                   onClick={() => setBulkModalOpen(true)}
-                  className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                  className="bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
                   size="sm"
                 >
                   <Settings className="mr-2 h-4 w-4" />
-                  Actions groupées ({selectedUsers.length})
+                  Actions ({selectedUsers.length})
                 </Button>
               )}
               <Button
                 variant="outline"
                 onClick={exportUsers}
                 disabled={filteredUsers.length === 0 || loading}
-                className="text-gray-700 border-gray-300 hover:bg-gray-50"
+                className="bg-white/20 border-white/30 text-white hover:bg-white/30 backdrop-blur-sm"
                 size="sm"
               >
                 <Download className="mr-2 h-4 w-4" />
@@ -355,7 +378,7 @@ export default function UsersPage() {
               {hasPermission('users_manage') && (
                 <Button
                   onClick={() => window.location.href = '/invitations'}
-                  className="bg-gray-900 hover:bg-gray-800 text-white"
+                  className="bg-white text-blue-600 hover:bg-white/90 shadow-lg"
                   size="sm"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
@@ -363,175 +386,118 @@ export default function UsersPage() {
                 </Button>
               )}
             </div>
-          </div>
+          }
+        >
+          {/* Statistiques modernes */}
+          <ModernStats stats={modernStats} />
 
-          {/* Colorful Stats Cards - Réorganisées avec 5 couleurs distinctes */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-            <Card className="border border-blue-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total utilisateurs</p>
-                    <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-xl bg-blue-100 flex items-center justify-center shadow-sm">
-                    <Users className="h-6 w-6 text-blue-600" />
-                  </div>
+          {/* Section recherche et filtres */}
+          <ModernSection
+            title="🔍 Recherche et filtres"
+            subtitle="Trouvez rapidement les utilisateurs que vous cherchez"
+            icon={Search}
+            iconColor="text-purple-600"
+          >
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Rechercher par nom ou email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-gray-300 focus:border-purple-500 focus:ring-purple-500/20 bg-white/80 backdrop-blur-sm"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-green-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Utilisateurs actifs</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.active}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-xl bg-green-100 flex items-center justify-center shadow-sm">
-                    <UserCheck className="h-6 w-6 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-amber-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">En attente</p>
-                    <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-xl bg-amber-100 flex items-center justify-center shadow-sm">
-                    <Activity className="h-6 w-6 text-amber-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-orange-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Inactifs</p>
-                    <p className="text-2xl font-bold text-orange-600">{stats.inactive + stats.locked}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-xl bg-orange-100 flex items-center justify-center shadow-sm">
-                    <UserX className="h-6 w-6 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-red-200 bg-white hover:shadow-lg transition-all duration-200 hover:scale-105">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Supprimés</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.deleted}</p>
-                  </div>
-                  <div className="h-12 w-12 rounded-xl bg-red-100 flex items-center justify-center shadow-sm">
-                    <Trash2 className="h-6 w-6 text-red-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Clean Filters */}
-          <Card className="border border-gray-200 bg-white">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
-              <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4 text-gray-500" />
-                <CardTitle className="text-base font-medium text-gray-900">Recherche et filtres</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Rechercher par nom ou email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-gray-200 focus:border-gray-900 focus:ring-gray-900"
-                    />
-                  </div>
-                </div>
-
-                <select
-                  value={filterRole}
-                  onChange={(e) => setFilterRole(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
-                >
-                  <option value="all">Tous les rôles</option>
-                  {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
-                    <option key={roleId} value={roleId}>
-                      {roleData.label}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-3 py-2 border border-gray-200 rounded-md text-sm focus:border-gray-900 focus:ring-gray-900 bg-white text-gray-700"
-                >
-                  <option value="all">Tous les statuts</option>
-                  <option value={UserStatus.ACTIVE}>Actifs ({stats.active})</option>
-                  <option value={UserStatus.INACTIVE}>Inactifs ({stats.inactive})</option>
-                  <option value={UserStatus.PENDING}>En attente ({stats.pending})</option>
-                  <option value={UserStatus.LOCKED}>Bloqués ({stats.locked})</option>
-                  <option value={UserStatus.DELETED}>Supprimés ({stats.deleted})</option>
-                </select>
               </div>
 
-              {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
-                <div className="mt-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                  <span className="text-sm text-gray-700">
-                    {filteredUsers.length} résultat(s) trouvé(s)
+              <select
+                value={filterRole}
+                onChange={(e) => setFilterRole(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-purple-500 focus:ring-purple-500/20 bg-white/80 backdrop-blur-sm text-gray-700"
+              >
+                <option value="all">Tous les rôles</option>
+                {Object.entries(ROLE_DEFINITIONS).map(([roleId, roleData]) => (
+                  <option key={roleId} value={roleId}>
+                    {roleData.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-purple-500 focus:ring-purple-500/20 bg-white/80 backdrop-blur-sm text-gray-700"
+              >
+                <option value="all">Tous les statuts</option>
+                <option value={UserStatus.ACTIVE}>Actifs ({stats.active})</option>
+                <option value={UserStatus.INACTIVE}>Inactifs ({stats.inactive})</option>
+                <option value={UserStatus.PENDING}>En attente ({stats.pending})</option>
+                <option value={UserStatus.LOCKED}>Bloqués ({stats.locked})</option>
+                <option value={UserStatus.DELETED}>Supprimés ({stats.deleted})</option>
+              </select>
+            </div>
+
+            {(searchTerm || filterRole !== 'all' || filterStatus !== 'all') && (
+              <div className="mt-4 flex items-center justify-between bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-200/50">
+                <span className="text-sm font-medium text-purple-700">
+                  ✨ {filteredUsers.length} résultat(s) trouvé(s)
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('')
+                    setFilterRole('all')
+                    setFilterStatus('all')
+                  }}
+                  className="text-purple-600 hover:text-purple-800 hover:bg-purple-100"
+                >
+                  Réinitialiser
+                </Button>
+              </div>
+            )}
+          </ModernSection>
+
+          {/* Table des utilisateurs */}
+          <ModernSection
+            title="👤 Liste des utilisateurs"
+            subtitle={`${filteredUsers.length} utilisateur(s) affiché(s)`}
+            icon={Users}
+            iconColor="text-blue-600"
+            className="p-0"
+          >
+            {/* Header avec sélection */}
+            {hasPermission('users_manage') && selectedUsers.length > 0 && (
+              <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-200/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-700">
+                    {selectedUsers.length} utilisateur(s) sélectionné(s)
                   </span>
                   <Button
-                    variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setSearchTerm('')
-                      setFilterRole('all')
-                      setFilterStatus('all')
-                    }}
-                    className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    onClick={() => setBulkModalOpen(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md"
                   >
-                    Réinitialiser
+                    <Settings className="mr-2 h-4 w-4" />
+                    Actions groupées
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Clean Users Table */}
-          <Card className="border border-gray-200 bg-white">
-            <CardHeader className="border-b border-gray-100 bg-gray-50/50 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <CardTitle className="text-base font-medium text-gray-900">
-                    Utilisateurs ({filteredUsers.length})
-                  </CardTitle>
-                </div>
-                {hasPermission('users_manage') && selectedUsers.length > 0 && (
-                  <Badge variant="outline" className="text-gray-700 border-gray-300">
-                    {selectedUsers.length} sélectionné(s)
-                  </Badge>
-                )}
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <LoadingSpinner size="lg" />
+            )}
+
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center space-y-4">
+                  <div className="relative w-16 h-16 mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+                    <LoadingSpinner size="lg" className="relative z-10" />
+                  </div>
+                  <p className="text-gray-600 font-medium">Chargement des utilisateurs...</p>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="p-0">
                 <UsersTable
                   users={filteredUsers}
                   selectedUsers={selectedUsers}
@@ -541,12 +507,12 @@ export default function UsersPage() {
                   onView={handleViewClick}
                   canManage={hasPermission('users_write_company') || hasPermission('users_write_all')}
                 />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </ModernSection>
+        </ModernPageLayout>
 
-        {/* Modals */}
+        {/* Modals - Gardés inchangés */}
         <CreateUserModal
           open={createModalOpen}
           onOpenChange={setCreateModalOpen}

@@ -173,24 +173,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/companies" className="w-full">
+            <Link href="/dashboard/company" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Globe className="mr-2 h-4 w-4" />
-                Toutes les entreprises
+                Gestion des entreprises
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/companies/create" className="w-full">
+            <Link href="/users" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Building2 className="mr-2 h-4 w-4" />
-                Créer une entreprise
+                Gestion utilisateurs
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/subscriptions" className="w-full">
+            <Link href="/dashboard/settings" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <TrendingUp className="mr-2 h-4 w-4" />
-                Gestion des abonnements
+                Configuration système
               </Button>
             </Link>
           </CardContent>
@@ -207,24 +207,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/users" className="w-full">
+            <Link href="/users" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Users className="mr-2 h-4 w-4" />
                 Tous les utilisateurs
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/roles" className="w-full">
+            <Link href="/invitations" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Shield className="mr-2 h-4 w-4" />
-                Gestion des rôles
+                Gestion des invitations
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/sessions" className="w-full">
+            <Link href="/dashboard/settings" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Activity className="mr-2 h-4 w-4" />
-                Sessions actives
+                Paramètres système
               </Button>
             </Link>
           </CardContent>
@@ -241,24 +241,24 @@ export function SuperAdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <Link href="/dashboard/admin/audit" className="w-full">
+            <Link href="/dashboard/legal-documents" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <FileText className="mr-2 h-4 w-4" />
-                Logs d'audit
+                Documents légaux
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/system" className="w-full">
+            <Link href="/dashboard/fleet" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <Database className="mr-2 h-4 w-4" />
-                Système & performance
+                Gestion des flottes
               </Button>
             </Link>
 
-            <Link href="/dashboard/admin/analytics" className="w-full">
+            <Link href="/dashboard/quotes" className="w-full">
               <Button variant="outline" className="w-full justify-start">
                 <BarChart3 className="mr-2 h-4 w-4" />
-                Analytics globales
+                Devis & analytics
               </Button>
             </Link>
           </CardContent>

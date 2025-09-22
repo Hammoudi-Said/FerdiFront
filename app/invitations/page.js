@@ -5,7 +5,7 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 import { invitationsAPI } from '@/lib/api-client'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { RoleGuard } from '@/components/auth/role-guard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModernPageLayout, ModernStats, ModernSection } from '@/components/ui/modern-page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -22,7 +22,9 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Trash2
+  Trash2,
+  Download,
+  UserPlus
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -33,7 +35,7 @@ export default function InvitationsPage() {
   const [invitations, setInvitations] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all') // New status filter
+  const [statusFilter, setStatusFilter] = useState('all')
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [stats, setStats] = useState({
     total: 0,
@@ -53,7 +55,7 @@ export default function InvitationsPage() {
       setLoading(true)
 
       if (USE_MOCK_DATA) {
-        // Mock invitations data with new status field - INCLUDING DELETED
+        // Mock invitations data
         const mockInvitations = [
           {
             id: 'inv-1',
@@ -90,71 +92,15 @@ export default function InvitationsPage() {
               full_name: user.full_name,
               email: user.email
             }
-          },
-          {
-            id: 'inv-3',
-            email: 'pierre.durand@example.com',
-            role: 'ACCOUNTANT',
-            first_name: 'Pierre',
-            last_name: 'Durand',
-            mobile: null,
-            personal_message: 'Nous avons besoin de vos compétences comptables',
-            status: UserInvitationStatus.EXPIRED,
-            accepted_at: null,
-            created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-            expires_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Expired
-            invited_by: {
-              id: user.id,
-              full_name: user.full_name,
-              email: user.email
-            }
-          },
-          {
-            id: 'inv-4',
-            email: 'alice.durand@example.com',
-            role: 'DRIVER',
-            first_name: 'Alice',
-            last_name: 'Durand',
-            mobile: '0687654329',
-            personal_message: 'Invitation annulée',
-            status: UserInvitationStatus.DELETED,
-            accepted_at: null,
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-            expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-            invited_by: {
-              id: user.id,
-              full_name: user.full_name,
-              email: user.email
-            }
-          },
-          {
-            id: 'inv-5',
-            email: 'sophie.bernard@example.com',
-            role: 'ADMIN',
-            first_name: 'Sophie',
-            last_name: 'Bernard',
-            mobile: '0612345098',
-            personal_message: 'Une autre invitation annulée',
-            status: UserInvitationStatus.DELETED,
-            accepted_at: null,
-            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            expires_at: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-            invited_by: {
-              id: user.id,
-              full_name: user.full_name,
-              email: user.email
-            }
           }
         ]
-
         setInvitations(mockInvitations)
         calculateStats(mockInvitations)
       } else {
-        // Always get ALL invitations regardless of status filter
-        // The filtering will be done client-side
         const response = await invitationsAPI.getInvitations()
-        setInvitations(response.data || [])
-        calculateStats(response.data || [])
+        const invitationsData = response.data?.data || response.data || []
+        setInvitations(invitationsData)
+        calculateStats(invitationsData)
       }
     } catch (error) {
       console.error('Failed to load invitations:', error)
@@ -166,287 +112,211 @@ export default function InvitationsPage() {
 
   const calculateStats = (invitationsList) => {
     const total = invitationsList.length
-    let pending = 0, accepted = 0, expired = 0, deleted = 0
-
-    invitationsList.forEach(inv => {
-      // Use new status field if available
-      if (inv.status) {
-        switch (inv.status) {
-          case UserInvitationStatus.PENDING:
-            pending++
-            break
-          case UserInvitationStatus.ACCEPTED:
-            accepted++
-            break
-          case UserInvitationStatus.EXPIRED:
-            expired++
-            break
-          case UserInvitationStatus.DELETED:
-            deleted++
-            break
-        }
-      } else {
-        // Legacy support for old format
-        const now = new Date()
-        if (inv.accepted) {
-          accepted++
-        } else if (inv.is_active === false) {
-          deleted++
-        } else if (new Date(inv.expires_at) < now) {
-          expired++
-        } else {
-          pending++
-        }
-      }
-    })
+    const pending = invitationsList.filter(inv => inv.status === UserInvitationStatus.PENDING).length
+    const accepted = invitationsList.filter(inv => inv.status === UserInvitationStatus.ACCEPTED).length
+    const expired = invitationsList.filter(inv => inv.status === UserInvitationStatus.EXPIRED).length
+    const deleted = invitationsList.filter(inv => inv.status === UserInvitationStatus.DELETED).length
 
     setStats({ total, pending, accepted, expired, deleted })
   }
 
-  const handleCreateInvitation = (newInvitation) => {
-    // Ensure new invitation has status field
-    const invitationWithStatus = {
-      ...newInvitation,
-      status: UserInvitationStatus.PENDING
+  const modernStats = [
+    {
+      label: 'Total invitations',
+      value: stats.total,
+      icon: Mail,
+      trend: '+3 ce mois'
+    },
+    {
+      label: 'En attente',
+      value: stats.pending,
+      icon: Clock,
+      subtitle: 'Attendent une réponse'
+    },
+    {
+      label: 'Acceptées',
+      value: stats.accepted,
+      icon: CheckCircle,
+      subtitle: 'Utilisateurs créés'
+    },
+    {
+      label: 'Expirées',
+      value: stats.expired,
+      icon: AlertTriangle,
+      subtitle: 'À renvoyer'
     }
-    
-    setInvitations(prev => [invitationWithStatus, ...prev])
-    calculateStats([invitationWithStatus, ...invitations])
-    toast.success('Invitation créée avec succès')
-  }
+  ]
 
-  const handleResendInvitation = async (invitation) => {
-    try {
-      if (USE_MOCK_DATA) {
-        // Mock resend
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        toast.success(`Invitation renvoyée à ${invitation.email}`)
-      } else {
-        await invitationsAPI.resendInvitation(invitation.id)
-        toast.success(`Invitation renvoyée à ${invitation.email}`)
-      }
-    } catch (error) {
-      console.error('Failed to resend invitation:', error)
-      toast.error('Erreur lors du renvoi de l\'invitation')
-    }
-  }
-
-  const handleCancelInvitation = async (invitation) => {
-    try {
-      if (USE_MOCK_DATA) {
-        // Mock cancel - update status to DELETED
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setInvitations(prev => prev.map(inv =>
-          inv.id === invitation.id
-            ? { ...inv, status: UserInvitationStatus.DELETED }
-            : inv
-        ))
-        toast.success('Invitation annulée')
-      } else {
-        await invitationsAPI.cancelInvitation(invitation.id)
-        await loadInvitations() // Refresh the list
-        toast.success('Invitation annulée')
-      }
-    } catch (error) {
-      console.error('Failed to cancel invitation:', error)
-      toast.error('Erreur lors de l\'annulation de l\'invitation')
-    }
-  }
-
-  // Remove the useEffect that reloads when status filter changes
-  // We'll filter client-side instead
-  // useEffect(() => {
-  //   if (!loading) {
-  //     loadInvitations()
-  //   }
-  // }, [statusFilter])
-
-  // Filter invitations based on search term and status filter
   const filteredInvitations = invitations.filter(invitation => {
     const matchesSearch = !searchTerm ||
       invitation.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${invitation.first_name || ''} ${invitation.last_name || ''}`.toLowerCase().includes(searchTerm.toLowerCase())
+      invitation.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invitation.last_name?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesStatusFilter = statusFilter === 'all' || 
-      (invitation.status && invitation.status === statusFilter)
+    const matchesStatus = statusFilter === 'all' || invitation.status === statusFilter
 
-    return matchesSearch && matchesStatusFilter
+    return matchesSearch && matchesStatus
   })
-
-  const canManage = hasPermission('invitations_manage')
 
   return (
     <RoleGuard allowedRoles={[UserRole.SUPER_ADMIN, UserRole.ADMIN]} showUnauthorized={true}>
       <DashboardLayout>
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
-              <p className="text-gray-600">Gérez les invitations des nouveaux utilisateurs</p>
-            </div>
-            {canManage && (
-              <Button onClick={() => setCreateModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle invitation
-              </Button>
-            )}
-          </div>
+        <ModernPageLayout
+          title="📧 Gestion des invitations"
+          subtitle="Invitez de nouveaux collaborateurs à rejoindre votre équipe"
+          icon={Mail}
+          headerGradient="from-pink-600 via-rose-700 to-orange-600"
+          actions={
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="bg-white text-pink-600 hover:bg-white/90 shadow-lg"
+              size="sm"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle invitation
+            </Button>
+          }
+        >
+          <ModernStats stats={modernStats} />
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-5">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Total</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                  </div>
-                  <Users className="h-8 w-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">En attente</p>
-                    <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-                  </div>
-                  <Clock className="h-8 w-8 text-yellow-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Acceptées</p>
-                    <p className="text-2xl font-bold text-green-600">{stats.accepted}</p>
-                  </div>
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Expirées</p>
-                    <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
-                  </div>
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Annulées</p>
-                    <p className="text-2xl font-bold text-gray-600">{stats.deleted}</p>
-                  </div>
-                  <Trash2 className="h-8 w-8 text-gray-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filters */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Filtres et recherche</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Rechercher par email ou nom..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <label htmlFor="statusFilter" className="text-sm text-gray-600 whitespace-nowrap">
-                      Statut :
-                    </label>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Tous les statuts" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tous les statuts</SelectItem>
-                        {Object.entries(INVITATION_STATUS_DEFINITIONS).map(([value, def]) => (
-                          <SelectItem key={value} value={value}>
-                            {def.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          <ModernSection
+            title="🔍 Recherche et filtres"
+            subtitle="Trouvez rapidement les invitations que vous cherchez"
+            icon={Search}
+            iconColor="text-pink-600"
+          >
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Rechercher par email ou nom..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-gray-300 focus:border-pink-500 focus:ring-pink-500/20 bg-white/80 backdrop-blur-sm"
+                  />
                 </div>
               </div>
 
-              {(searchTerm || statusFilter !== 'all') && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
-                    {filteredInvitations.length} invitation(s) trouvée(s)
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSearchTerm('')
-                      setStatusFilter('all')
-                    }}
-                  >
-                    Réinitialiser les filtres
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-pink-500 focus:ring-pink-500/20 bg-white/80 backdrop-blur-sm text-gray-700"
+              >
+                <option value="all">Tous les statuts</option>
+                <option value={UserInvitationStatus.PENDING}>En attente ({stats.pending})</option>
+                <option value={UserInvitationStatus.ACCEPTED}>Acceptées ({stats.accepted})</option>
+                <option value={UserInvitationStatus.EXPIRED}>Expirées ({stats.expired})</option>
+                <option value={UserInvitationStatus.DELETED}>Annulées ({stats.deleted})</option>
+              </select>
+            </div>
 
-          {/* Invitations Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Invitations ({filteredInvitations.length})</CardTitle>
-              <CardDescription>
-                Les invitations expirent automatiquement après 7 jours
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center h-64">
-                  <LoadingSpinner size="lg" />
+            {(searchTerm || statusFilter !== 'all') && (
+              <div className="mt-4 flex items-center justify-between bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl border border-pink-200/50">
+                <span className="text-sm font-medium text-pink-700">
+                  ✨ {filteredInvitations.length} invitation(s) trouvée(s)
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm('')
+                    setStatusFilter('all')
+                  }}
+                  className="text-pink-600 hover:text-pink-800 hover:bg-pink-100"
+                >
+                  Réinitialiser
+                </Button>
+              </div>
+            )}
+          </ModernSection>
+
+          <ModernSection
+            title="📨 Liste des invitations"
+            subtitle={`${filteredInvitations.length} invitation(s) affichée(s)`}
+            icon={UserPlus}
+            iconColor="text-pink-600"
+            className="p-0"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center space-y-4">
+                  <div className="relative w-16 h-16 mx-auto">
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full animate-pulse"></div>
+                    <LoadingSpinner size="lg" className="relative z-10" />
+                  </div>
+                  <p className="text-gray-600 font-medium">Chargement des invitations...</p>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="p-0">
                 <InvitationsTable
                   invitations={filteredInvitations}
-                  onResendInvitation={handleResendInvitation}
-                  onCancelInvitation={handleCancelInvitation}
-                  canManage={canManage}
+                  onResend={async (invitation) => {
+                    try {
+                      if (USE_MOCK_DATA) {
+                        toast.success('Invitation renvoyée avec succès')
+                      } else {
+                        await invitationsAPI.resendInvitation(invitation.id)
+                        toast.success('Invitation renvoyée avec succès')
+                      }
+                    } catch (error) {
+                      toast.error('Erreur lors du renvoi de l\'invitation')
+                    }
+                  }}
+                  onCancel={async (invitation) => {
+                    try {
+                      if (USE_MOCK_DATA) {
+                        setInvitations(prev => prev.filter(inv => inv.id !== invitation.id))
+                        toast.success('Invitation annulée avec succès')
+                      } else {
+                        await invitationsAPI.cancelInvitation(invitation.id)
+                        await loadInvitations()
+                        toast.success('Invitation annulée avec succès')
+                      }
+                    } catch (error) {
+                      toast.error('Erreur lors de l\'annulation de l\'invitation')
+                    }
+                  }}
+                  canManage={hasPermission('invitations_manage')}
                 />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            )}
+          </ModernSection>
+        </ModernPageLayout>
 
-        {/* Create Invitation Modal */}
         <CreateInvitationModal
           open={createModalOpen}
           onOpenChange={setCreateModalOpen}
-          onInvitationCreated={handleCreateInvitation}
+          onSave={async (data) => {
+            try {
+              if (USE_MOCK_DATA) {
+                const newInvitation = {
+                  id: `inv-${Date.now()}`,
+                  ...data,
+                  status: UserInvitationStatus.PENDING,
+                  created_at: new Date().toISOString(),
+                  expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                  invited_by: {
+                    id: user.id,
+                    full_name: user.full_name,
+                    email: user.email
+                  }
+                }
+                setInvitations(prev => [...prev, newInvitation])
+                calculateStats([...invitations, newInvitation])
+                toast.success('Invitation envoyée avec succès')
+              } else {
+                await invitationsAPI.createInvitation(data)
+                await loadInvitations()
+                toast.success('Invitation envoyée avec succès')
+              }
+            } catch (error) {
+              console.error('Failed to create invitation:', error)
+              toast.error('Erreur lors de l\'envoi de l\'invitation')
+              throw error
+            }
+          }}
         />
       </DashboardLayout>
     </RoleGuard>
